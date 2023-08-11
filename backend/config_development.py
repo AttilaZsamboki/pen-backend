@@ -1,0 +1,1 @@
+base_path = 'C:/Users/zsamb/Documents/dev/peneszmentesites'

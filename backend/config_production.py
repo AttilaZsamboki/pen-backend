@@ -1,0 +1,1 @@
+base_path = '/var/app/current'

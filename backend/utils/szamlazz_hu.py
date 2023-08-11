@@ -9,6 +9,7 @@ load_dotenv()
 SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
 API_KEY = os.environ.get("PEN_MINICRM_API_KEY")
 SYSTEM_ID = os.environ.get("PEN_MINICRM_SYSTEM_ID")
+environment = os.environ.get("ENVIRONMENT")
 
 
 def dijbekero():
@@ -118,7 +119,12 @@ def dijbekero():
                 </tetelek>
             </xmlszamla>
             """
-            invoice_path = "./invoice.xml"
+            if environment == 'production':
+                from config_production import base_path
+            else:
+                from config_development import base_path
+
+            invoice_path = f"{base_path}/static/invoice.xml"
             with open(invoice_path, "w", encoding="utf-8") as f:
                 f.write(xml)
                 f.close()
@@ -128,7 +134,7 @@ def dijbekero():
                 url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")})
             os.remove(invoice_path)
             dijbekero_number = response.headers["szlahu_szamlaszam"]
-            pdf_path = os.path.join(os.path.dirname(__file__), '..', '..', 'static', f"{dijbekero_number}.pdf")
+            pdf_path = f"{base_path}/static/{dijbekero_number}.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()

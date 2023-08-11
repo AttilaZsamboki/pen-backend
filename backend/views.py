@@ -73,7 +73,3 @@ class PenGoogleSheetWebhook(APIView):
         data = json.loads(request.body)["data"]
         data = [[j for j in i if j != ""] for i in data]
         return Response("Succesfully received data", status=HTTP_200_OK)
-
-class TemplatesList(generics.ListCreateAPIView):
-    queryset = models.DatauploadTabletemplates.objects.all()
-    serializer_class = serializers.TemplatesSerializer
