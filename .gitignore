@@ -5,3 +5,4 @@
 !.elasticbeanstalk/*.global.yml
 pen-env/
 .credentials
+.env
