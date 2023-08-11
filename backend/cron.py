@@ -1,16 +1,4 @@
-from .utils.logs import log
-from .utils.minicrm import dijbekero
+from .utils.szamlazz_hu import func_dijbekero
 
 def dijbekero():
-    log("Díjbekérők feltöltése", "INFO", script_name="pen_dijbekero")
-    try:
-        dijbekero()
-        log("Díjbekérők feltöltése sikeres",
-            "SUCCESS", script_name="pen_dijbekero")
-    except KeyError as e:
-        log("Nincsenek számlázási adatok", "FAILED",
-            script_name="pen_dijbekero", details=e)
-    except Exception as e:
-        log("Hiba akadt a díjbekérő feltöltésében", "ERROR",
-            script_name="pen_dijbekero", details=e)
-
+    func_dijbekero()
