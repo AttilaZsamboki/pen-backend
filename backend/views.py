@@ -6,9 +6,10 @@ from .utils.google_maps import calculate_distance
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from . import models
+from . import models, serializers
 import json
 from .utils.logs import log
+from rest_framework import generics
 
 # Create your views here.
 class SMUpdateOrderQueue(APIView):
@@ -72,3 +73,7 @@ class PenGoogleSheetWebhook(APIView):
         data = json.loads(request.body)["data"]
         data = [[j for j in i if j != ""] for i in data]
         return Response("Succesfully received data", status=HTTP_200_OK)
+
+class TemplatesList(generics.ListCreateAPIView):
+    queryset = models.DatauploadTabletemplates.objects.all()
+    serializer_class = serializers.TemplatesSerializer

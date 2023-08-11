@@ -133,7 +133,7 @@ def dijbekero():
                 f.write(response.content)
                 f.close()
             update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2": f"https://pen.dataupload.xyz/static/{dijbekero_number}.pdf", "StatusId": "Utalásra vár", "DijbekeroSzama2": dijbekero_number, "KiallitasDatuma": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"), "DijbekeroUzenetek": f"Díjbekéro elkészült {datetime.datetime.now()}"})
+                "DijbekeroPdf2": f"http://pen.dataupload.xyz/static/{dijbekero_number}.pdf", "StatusId": "Utalásra vár", "DijbekeroSzama2": dijbekero_number, "KiallitasDatuma": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"), "DijbekeroUzenetek": f"Díjbekéro elkészült {datetime.datetime.now()}"})
             os.remove(pdf_path)
             log("Díjbekérők feltöltése sikeres",
                 "SUCCESS", script_name="pen_dijbekero")
