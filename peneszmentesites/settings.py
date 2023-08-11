@@ -91,7 +91,7 @@ DATABASES = {
 }
 
 CRONJOBS = [
-    ('* * * * *', 'backend.cron.dijbekero')
+    # ('* * * * *', 'backend.cron.dijbekero')
 ]
 
 # Password validation
