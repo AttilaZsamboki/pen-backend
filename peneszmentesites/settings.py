@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-s1xe1515gsi%7f(1@fvqyjs^b)b&e*pp8i=(2-^2fz_tct6&%d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["peneszmentesites.dataupload.xyz", "127.0.0.1", ".vercel.app"]
+ALLOWED_HOSTS = ["pen-env.eba-nre4zayi.eu-central-1.elasticbeanstalk.com", "127.0.0.1"]
 
 
 # Application definition
