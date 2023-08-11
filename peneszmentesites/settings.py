@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'backend',
-    'rest_framework'
+    'rest_framework',
+    'django_crontab'
 ]
 
 MIDDLEWARE = [
@@ -88,6 +89,10 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', 'not found'),
     }
 }
+
+CRONJOBS = [
+    ('* * * * *', 'backend.cron.dijbekero')
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

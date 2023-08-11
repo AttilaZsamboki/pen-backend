@@ -1,7 +1,7 @@
 from .utils.logs import log
 from .utils.minicrm import dijbekero
 
-def pen_dijbekero():
+def dijbekero():
     log("Díjbekérők feltöltése", "INFO", script_name="pen_dijbekero")
     try:
         dijbekero()
