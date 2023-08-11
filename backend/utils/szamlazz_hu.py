@@ -1,6 +1,5 @@
 from .minicrm import get_all_adatlap, adatlap_details, contact_details, billing_address, update_adatlap_fields
 from .logs import log
-from .minicrm import base_path
 import requests
 import datetime
 import os
@@ -12,7 +11,7 @@ API_KEY = os.environ.get("PEN_MINICRM_API_KEY")
 SYSTEM_ID = os.environ.get("PEN_MINICRM_SYSTEM_ID")
 
 
-def func_dijbekero():
+def dijbekero():
     try:
         adatlapok = get_all_adatlap(23, 3079)
         adatlapok = adatlapok["Results"]
@@ -119,20 +118,22 @@ def func_dijbekero():
                 </tetelek>
             </xmlszamla>
             """
-            with open(f"{base_path}/files/pen/szamla/invoice.xml", "w", encoding="utf-8") as f:
+            invoice_path = "./invoice.xml"
+            with open(invoice_path, "w", encoding="utf-8") as f:
                 f.write(xml)
                 f.close()
 
             url = "https://www.szamlazz.hu/szamla/"
             response = requests.post(
-                url, files={"action-xmlagentxmlfile": open(f"{base_path}/files/pen/szamla/invoice.xml", "rb")})
+                url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")})
+            os.remove(invoice_path)
             dijbekero_number = response.headers["szlahu_szamlaszam"]
-            pdf_path = f"{base_path}/dataupload/static/{dijbekero_number}.pdf"
+            pdf_path = os.path.join(os.path.dirname(__file__), '..', '..', 'static', f"{dijbekero_number}.pdf")
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
             update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2": f"https://www.dataupload.xyz/static/{dijbekero_number}.pdf", "StatusId": "Utalásra vár", "DijbekeroSzama2": dijbekero_number, "KiallitasDatuma": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"), "DijbekeroUzenetek": f"Díjbekéro elkészült {datetime.datetime.now()}"})
+                "DijbekeroPdf2": f"https://pen.dataupload.xyz/static/{dijbekero_number}.pdf", "StatusId": "Utalásra vár", "DijbekeroSzama2": dijbekero_number, "KiallitasDatuma": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"), "DijbekeroUzenetek": f"Díjbekéro elkészült {datetime.datetime.now()}"})
             os.remove(pdf_path)
             log("Díjbekérők feltöltése sikeres",
                 "SUCCESS", script_name="pen_dijbekero")

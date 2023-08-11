@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'backend',
     'rest_framework',
-    'django_crontab'
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -84,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'not found'),
         'USER': os.getenv('DB_USER', 'not found'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'not found'),
+        'PASSWORD': os.getenv('DB_PASS', 'not found'),
         'HOST': os.getenv('DB_HOST', 'not found'),
         'PORT': os.getenv('DB_PORT', 'not found'),
     }
