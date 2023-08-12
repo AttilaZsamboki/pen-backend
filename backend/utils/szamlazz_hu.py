@@ -144,11 +144,12 @@ def dijbekero():
             os.remove(pdf_path)
             log("Díjbekérők feltöltése sikeres",
                 "SUCCESS", script_name="pen_dijbekero")
+            return "Success"
     except KeyError as e:
         log("Nincsenek számlázási adatok", "FAILED",
             script_name="pen_dijbekero", details=e)
+        return "Error"
     except Exception as e:
         log("Hiba akadt a díjbekérő feltöltésében", "ERROR",
             script_name="pen_dijbekero", details=e)
-
-dijbekero()
+        return "Error"

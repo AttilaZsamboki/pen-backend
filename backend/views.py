@@ -1,15 +1,15 @@
 from .utils.google_maps import get_street_view, get_street_view_url
 from .utils.minicrm import update_adatlap_fields
+from .utils.szamlazz_hu import dijbekero
 import math
 import codecs
 from .utils.google_maps import calculate_distance
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from . import models, serializers
+from . import models
 import json
 from .utils.logs import log
-from rest_framework import generics
 
 # Create your views here.
 class SMUpdateOrderQueue(APIView):
@@ -73,3 +73,10 @@ class PenGoogleSheetWebhook(APIView):
         data = json.loads(request.body)["data"]
         data = [[j for j in i if j != ""] for i in data]
         return Response("Succesfully received data", status=HTTP_200_OK)
+
+class CronSzamlazz(APIView):
+    def post(self, request):
+        value = dijbekero()
+        if value == "Error":
+            return Response("Error", status=HTTP_400_BAD_REQUEST)
+        return Response("Success", status=HTTP_200_OK)

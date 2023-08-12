@@ -1,0 +1,5 @@
+version: 1
+cron:
+    - name: "szamlazz_hu"
+      url: "/cron/szamlazz_hu"
+      schedule: "* * * * *"
