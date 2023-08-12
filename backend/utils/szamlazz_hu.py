@@ -120,9 +120,9 @@ def dijbekero():
             </xmlszamla>
             """
             if environment == 'production':
-                from config_production import base_path
+                from ..config_production import base_path
             else:
-                from config_development import base_path
+                from ..config_development import base_path
 
             invoice_path = f"{base_path}/static/invoice.xml"
             with open(invoice_path, "w", encoding="utf-8") as f:
@@ -149,3 +149,5 @@ def dijbekero():
     except Exception as e:
         log("Hiba akadt a díjbekérő feltöltésében", "ERROR",
             script_name="pen_dijbekero", details=e)
+
+dijbekero()
