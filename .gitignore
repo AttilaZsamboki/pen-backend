@@ -7,4 +7,3 @@ pen-env/
 .credentials
 .env
 static/admin
-static/rest_framework
