@@ -1,5 +1,5 @@
 version: 1
 cron:
     - name: "szamlazz"
-      url: "/cron/szamlazz/"
+      url: "/cron/szamlazz"
       schedule: "* * * * *"
