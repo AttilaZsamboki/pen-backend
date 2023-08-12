@@ -13,6 +13,7 @@ environment = os.environ.get("ENVIRONMENT")
 
 
 def dijbekero():
+    log("Díjbekérő futtatása", "INFO", "pen_dijbekero")
     try:
         adatlapok = get_all_adatlap(23, 3079)
         adatlapok = adatlapok["Results"]
