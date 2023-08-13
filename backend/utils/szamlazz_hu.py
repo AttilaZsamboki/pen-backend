@@ -153,3 +153,5 @@ def dijbekero():
         log("Hiba akadt a díjbekérő feltöltésében", "ERROR",
             script_name="pen_dijbekero", details=e)
         return "Error"
+
+dijbekero()
