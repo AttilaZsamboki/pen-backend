@@ -10,7 +10,10 @@ def get_request(endpoint, id=None, query_params=None):
 
     data = requests.get(
         f"https://r3.minicrm.hu/Api/R3/{endpoint}{'/'+str(id) if id else ''}", auth=(system_id, api_key), params=query_params)
-    return data.json()
+    if data.status_code == 200:
+        return data.json()
+    else:
+        return "Error"
 
 
 def update_adatlap_fields(id, fields):
@@ -31,7 +34,7 @@ def get_all_adatlap(category_id, status_id=None):
     return get_request(endpoint="Project", query_params=query_params)
 
 
-def adatlap_details(id):
+def get_adatlap_details(id):
     return get_request(
         endpoint="Project", id=id)
 

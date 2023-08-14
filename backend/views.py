@@ -1,6 +1,6 @@
 from .utils.google_maps import get_street_view, get_street_view_url
 from .utils.minicrm import update_adatlap_fields
-from .utils.szamlazz_hu import dijbekero
+from .cron.szamlazz_hu import dijbekero
 import math
 import codecs
 from .utils.google_maps import calculate_distance

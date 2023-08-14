@@ -1,5 +1,5 @@
-from .minicrm import get_all_adatlap, adatlap_details, contact_details, billing_address, update_adatlap_fields
-from .logs import log
+from ..utils.minicrm import get_all_adatlap, get_adatlap_details, contact_details, billing_address, update_adatlap_fields
+from ..utils.logs import log
 import requests
 import datetime
 import os
@@ -20,7 +20,7 @@ def dijbekero():
         if adatlapok == []:
             return
         for i in adatlapok.keys():
-            adatlap = adatlap_details(adatlapok[i]["Id"])
+            adatlap = get_adatlap_details(adatlapok[i]["Id"])
             if adatlap["FizetesiMod2"] != "Átutalás":
                 return
             contact_id = adatlapok[i]["BusinessId"]
