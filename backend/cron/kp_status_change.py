@@ -5,13 +5,14 @@ def main():
     log("Elkeződött a készpénzes adatlapok ellenőrzése", "INFO", "pen_kp_status_change")
     adatlapok = get_all_adatlap(category_id=23, status_id=3082)
     if adatlapok != "Error":
-        adatlapok = adatlapok["Results"]
-        for adatlap in adatlapok:
+        for adatlap in adatlapok["Results"]:
             adatlap = get_adatlap_details(adatlap)
-            if "FizetesiMod2" not in adatlap.keys():
+            if "FizetesiMod2" not in adatlap.keys() or ("DijbekeroSzama2" in adatlap.keys() and adatlap["DijbekeroSzama2"] != ""):
                 continue
-            if adatlap["FizetesiMod2"] == "Készpénz" and "DijbekeroSzama2" not in adatlap.keys():
+            if adatlap["FizetesiMod2"] == "Készpénz":
                 update_adatlap_fields(adatlap["Id"], {"StatusId": "Felmérésre vár"})
-                return
+                continue
         log("Készpénzes adatlapok átállítva 'Felmérésre vár' státuszra", "INFO", "pen_kp_status_change")
+        return
+    log("Hiba történt a készpénzes adatlapok ellenőrzése közben", "ERROR", "pen_kp_status_change")
 main()
