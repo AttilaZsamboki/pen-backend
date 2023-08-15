@@ -54,7 +54,7 @@ class PenCalculateDistance(APIView):
         try:
             get_street_view(location=address)
         except Exception as e:
-            log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", e)
+            log("Penészmentesítés MiniCRM webhook sikertelen", "FAILED", e)
         street_view_url = get_street_view_url(location=address)
         response = update_adatlap_fields(data["Id"], {
             "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27)})
