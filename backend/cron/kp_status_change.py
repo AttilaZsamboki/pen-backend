@@ -10,7 +10,7 @@ def main():
             adatlap = get_adatlap_details(adatlap)
             if "FizetesiMod2" not in adatlap.keys():
                 continue
-            if adatlap["FizetesiMod2"] == "Készpénz" and "DijbekeroSzama2" not in adatlapok.keys():
+            if adatlap["FizetesiMod2"] == "Készpénz" and "DijbekeroSzama2" not in adatlap.keys():
                 update_adatlap_fields(adatlap["Id"], {"StatusId": "Felmérésre vár"})
                 return
         log("Készpénzes adatlapok átállítva 'Felmérésre vár' státuszra", "INFO", "pen_kp_status_change")

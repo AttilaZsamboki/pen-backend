@@ -7,22 +7,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
-API_KEY = os.environ.get("PEN_MINICRM_API_KEY")
-SYSTEM_ID = os.environ.get("PEN_MINICRM_SYSTEM_ID")
-environment = os.environ.get("ENVIRONMENT")
+ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 
-def dijbekero():
-    log("Díjbekérő futtatása", "INFO", "pen_dijbekero")
-    try:
-        adatlapok = get_all_adatlap(23, 3079)
-        adatlapok = adatlapok["Results"]
-        if adatlapok == []:
-            return
-        for i in adatlapok.keys():
+def invoice_or_proform(is_proform=True):
+    if is_proform:
+        name = "díjbekérő"
+        script_name = "proform"
+    else:
+        name = "számla"
+        script_name = "invoice"
+    log(f"{name.capitalize()} készítésének futtatása", "INFO", f"pen_{script_name}")
+    adatlapok = get_all_adatlap(23, 3079 if is_proform else 3023)
+    adatlapok = adatlapok["Results"] 
+    if adatlapok == []:
+        log(f"Nincs új {name}", "INFO", f"pen_{script_name}")
+        return
+    for i in adatlapok.keys():
+        if adatlapok[i]["Deleted"] == 1:
+            continue
+        try:
             adatlap = get_adatlap_details(adatlapok[i]["Id"])
+            if not is_proform and adatlap["DijbekeroSzama2"] == "":
+                log("Nincs díjbekérő száma", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+                continue
             if adatlap["FizetesiMod2"] != "Átutalás":
-                return
+                log("Nem átutalásos fizetési mód", "INFO", f"pen_{script_name}")
+                continue
             contact_id = adatlapok[i]["BusinessId"]
             contact = contact_details(contact_id)
             address = billing_address(contact_id)
@@ -57,7 +68,7 @@ def dijbekero():
                     <!-- reference to pro forma invoice number -->
                     <vegszamla>false</vegszamla>
                     <!-- invoice (after a deposit invoice) -->
-                    <dijbekero>true</dijbekero>
+                    <dijbekero>{'true' if is_proform else 'false'}</dijbekero>
                     <!-- proform invoice -->
                     <szamlaszamElotag>KLCSR</szamlaszamElotag>
                     <!-- One of the prefixes from the invoice pad menu  -->
@@ -120,7 +131,7 @@ def dijbekero():
                 </tetelek>
             </xmlszamla>
             """
-            if environment == 'production':
+            if ENVIRONMENT == 'production':
                 from ..config_production import base_path
             else:
                 from ..config_development import base_path
@@ -133,25 +144,33 @@ def dijbekero():
             url = "https://www.szamlazz.hu/szamla/"
             response = requests.post(
                 url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")})
+            if response.status_code != 200:
+                update_resp = update_adatlap_fields(adatlap["Id"], {
+                    "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} készítése sikertelen volt: {response.text}"})
+                log(f"{name.capitalize()} készítése sikertelen volt: {response.text}", "ERROR", f"pen_{script_name}", f"adatlap: {adatlap['Id']}, error: {response.text}")
+                continue
             os.remove(invoice_path)
-            dijbekero_number = response.headers["szlahu_szamlaszam"]
-            pdf_path = f"{base_path}/static/{dijbekero_number}.pdf"
+            szamlaszam = response.headers["szlahu_szamlaszam"]
+            pdf_path = f"{base_path}/static/{szamlaszam}.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
-            update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2": f"http://pen.dataupload.xyz/static/{dijbekero_number}.pdf", "StatusId": "Utalásra vár", "DijbekeroSzama2": dijbekero_number, "KiallitasDatuma": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"), "DijbekeroUzenetek": f"Díjbekéro elkészült {datetime.datetime.now()}"})
+            update_resp = update_adatlap_fields(adatlap["Id"], {
+                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"http://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else "Elszámolásra vár", "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
+            if update_resp["code"] == 400:
+                log(f"Hiba akadt a {name} feltöltésében", "ERROR", script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}")
             os.remove(pdf_path)
-            log("Díjbekérők feltöltése sikeres",
-                "SUCCESS", script_name="pen_dijbekero")
-            return "Success"
-    except KeyError as e:
-        log("Nincsenek számlázási adatok", "FAILED",
-            script_name="pen_dijbekero", details=e)
-        return "Error"
-    except Exception as e:
-        log("Hiba akadt a díjbekérő feltöltésében", "ERROR",
-            script_name="pen_dijbekero", details=e)
-        return "Error"
+        except KeyError as e:
+            log("Nincsenek számlázási adatok", "FAILED",
+                script_name=f"pen_{script_name}", details=e)
+            continue
+        except Exception as e:
+            log(f"Hiba akadt a {name} feltöltésében", "ERROR",
+                script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error:{e}")
+            continue
+        log(f"{name.capitalize()}k feltöltése sikeres",
+            "SUCCESS", script_name=f"pen_{script_name}")
+        continue
 
-dijbekero()
+invoice_or_proform(is_proform=False)
+invoice_or_proform(is_proform=True)
