@@ -15,7 +15,6 @@ def get_request(endpoint, id=None, query_params=None):
     else:
         return "Error"
 
-
 def update_adatlap_fields(id, fields):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
@@ -63,3 +62,36 @@ def billing_address(contact_id):
     for address in addresses:
         if address["Type"] == "Számlázási cím":
             return address
+
+def create_to_do(adatlap_id, user, type, comment, deadline):
+    system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
+    api_key = os.environ.get("PEN_MINICRM_API_KEY")
+    data = {
+        "ProjectId": adatlap_id,
+        "UserId": user,
+        "Type": type,
+        "Comment": comment,
+        "Deadline": deadline,
+    }
+
+    return requests.put(
+        f"https://r3.minicrm.hu/Api/R3/ToDo/", auth=(system_id, api_key), params=data)
+
+def get_all_adatlap_details(category_id, status_id=None, criteria=None, deleted=False):
+    adatlapok = get_all_adatlap(category_id=category_id, status_id=status_id)
+    if adatlapok == "Error":
+        return "Error"
+    adatlapok_detailed = []
+    for i in adatlapok["Results"]:
+        if adatlapok["Results"][i]["Deleted"] != deleted:
+            continue
+        adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])
+        if criteria:
+            if criteria(adatlap):
+                adatlapok_detailed.append(adatlap)
+            continue
+        adatlapok_detailed.append(adatlap)
+    return adatlapok_detailed
+
+def list_to_dos(adatlap_id):
+    return get_request(endpoint="ToDoList", id=adatlap_id)
