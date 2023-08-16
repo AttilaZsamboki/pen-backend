@@ -10,7 +10,7 @@ SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
 ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 
-def invoice_or_proform(is_proform=True):
+def create_invoice_or_proform(is_proform=True):
     if is_proform:
         name = "díjbekérő"
         script_name = "proform"
@@ -28,9 +28,21 @@ def invoice_or_proform(is_proform=True):
             continue
         try:
             adatlap = get_adatlap_details(adatlapok[i]["Id"])
-            if not is_proform and adatlap["DijbekeroSzama2"] == "":
+            if adatlap["DijbekeroSzama2"] == "":
                 log("Nincs díjbekérő száma", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
                 continue
+            query_xml = f"""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
+                    <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
+                    <rendelesSzam>41710</rendelesSzam>
+                </xmlszamlaxml>
+            """.strip()
+            query_response = requests.post("https://www.szamlazz.hu/szamla/", files={"action-szamla_agent_xml": ("invoice.xml", query_xml)})
+            if "szlahu_szamlaszam" in query_response.headers.keys():
+                if is_proform or query_response.headers["szlahu_szamlaszam"][0] == "E":
+                    log(f"Már létezik {name}", "INFO", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+                    continue
             if adatlap["FizetesiMod2"] != "Átutalás":
                 log("Nem átutalásos fizetési mód", "INFO", f"pen_{script_name}")
                 continue
@@ -61,7 +73,7 @@ def invoice_or_proform(is_proform=True):
                     <szamlaNyelve>hu</szamlaNyelve>
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                             -->
-                    <megjegyzes>{adatlap["DijbekeroMegjegyzes2"]}</megjegyzes>
+                    <megjegyzes>{adatlap["DijbekeroMegjegyzes2"] if is_proform else adatlap["SzamlaMegjegyzes"]}</megjegyzes>
                     <rendelesSzam>{adatlap["Id"]}</rendelesSzam>
                     <!-- order number -->
                     <dijbekeroSzamlaszam>{adatlap["DijbekeroSzama2"]}</dijbekeroSzamlaszam>
@@ -156,7 +168,7 @@ def invoice_or_proform(is_proform=True):
                 f.write(response.content)
                 f.close()
             update_resp = update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"http://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else "Elszámolásra vár", "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
+                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"http://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"], "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
             if update_resp["code"] == 400:
                 log(f"Hiba akadt a {name} feltöltésében", "ERROR", script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}")
             os.remove(pdf_path)
@@ -172,5 +184,5 @@ def invoice_or_proform(is_proform=True):
             "SUCCESS", script_name=f"pen_{script_name}")
         continue
 
-invoice_or_proform(is_proform=False)
-invoice_or_proform(is_proform=True)
+create_invoice_or_proform(is_proform=False)
+create_invoice_or_proform(is_proform=True)
