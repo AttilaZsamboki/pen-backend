@@ -1,9 +1,11 @@
 from ..utils.minicrm import create_to_do, get_all_adatlap_details, list_to_dos, update_adatlap_fields
+from ..utils.logs import log
 from urllib.parse import urlencode
 import pyshorteners
 
 
 def felmeres_todo():
+    log("Felmérés feladatok készítése elindult", "INFO", script_name="pen_felmeres_todo")
     def criteria(adatlap):
         if adatlap["Felmero2"]:
             return True
@@ -11,7 +13,7 @@ def felmeres_todo():
 
     adatlapok = get_all_adatlap_details(category_id=23, status_id=3023, criteria=criteria, deleted=False)
     if adatlapok == "Error":
-        print("Error getting adatlapok")
+        log("Hiba akadt az adatlapok lekérdezése közben", "ERROR", script_name="pen_felmeres_todo")
         return
     for adatlap in adatlapok:
         urlap_url_base = "https://docs.google.com/forms/d/e/1FAIpQLSec2vWksE0BDpv3jtdjTaZoul4NPIZO45NYlswo5oK-ejRxnw/viewform?"
@@ -27,17 +29,17 @@ def felmeres_todo():
         short_url = s.tinyurl.short(urlap_url)
         urlap = update_adatlap_fields(id=adatlap["Id"], fields={"Urlap": short_url})
         if urlap["code"] == "Error":
-            print("Error updating adatlap")
+            log("Hiba akadt az adatlap Urlap mezőjének frissítése közben", "ERROR", script_name="pen_felmeres_todo")
             continue
         to_dos = list_to_dos(adatlap_id=adatlap["Id"])
         if to_dos != "Error":
             if len([i for i in to_dos["Results"] if i["Type"] == 225]) > 0:
-                print("Felmeres todo already exists")
+                log("A felméréshez már létezik feladat", "INFO", script_name="pen_felmeres_todo")
                 continue
-            todo_comment = f"Új felmérést kaptál\nNév: {adatlap['Name']}\nCím: {adatlap['Telepules']}, {adatlap['Cim2']} {adatlap['Iranyitoszam']}, {adatlap['Orszag']}\nFizetési mód: {adatlap['FizetesiMod2']}\nÖsszeg: {adatlap['FelmeresiDij']} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: {short_url}"
+            todo_comment = f"Új felmérést kaptál\nNév: {adatlap['Name']}\nCím: {adatlap['Telepules']}, {adatlap['Cim2']} {adatlap['Iranyitoszam']}, {adatlap['Orszag']}\nFizetési mód: {adatlap['FizetesiMod2']}\nÖsszeg: {adatlap['FelmeresiDij']} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: {short_url}"
             todo = create_to_do(adatlap_id=adatlap["Id"], user=adatlap["Felmero2"], type=225, comment=todo_comment, deadline=adatlap["FelmeresIdopontja2"])
             if todo.status_code == 200:
                 print(todo.json())
                 continue
-            print("Error creating todo")
+            log("Hiba akadt a feladat létrehozása közben", "ERROR", script_name="pen_felmeres_todo")
 felmeres_todo()

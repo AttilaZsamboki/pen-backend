@@ -95,3 +95,18 @@ def get_all_adatlap_details(category_id, status_id=None, criteria=None, deleted=
 
 def list_to_dos(adatlap_id):
     return get_request(endpoint="ToDoList", id=adatlap_id)
+
+def update_all_status(status, condition, category_id):
+    adatlapok = get_all_adatlap_details(category_id=category_id)
+    updated_adatlapok = []
+    for adatlap in adatlapok:
+        if condition(adatlap):
+            updated_adatlapok.append(update_adatlap_fields(id=adatlap["Id"], fields={"StatusId": status}))
+    return updated_adatlapok
+
+statuses = {
+    "Felmérés": {
+        "Elszámolásra vár": 3084,
+        "Sikeres felmérés": 3086,
+    }
+}
