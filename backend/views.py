@@ -5,32 +5,16 @@ import codecs
 from .utils.google_maps import calculate_distance
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK
 from . import models
 import json
 from .utils.logs import log
+from rest_framework import generics
+from . import serializers
 
 # Create your views here.
-class SMUpdateOrderQueue(APIView):
-    def put(self, request, id):
-        data = json.loads(request.body)
-        try:
-            models.SMOrderQueue.objects.filter(id=id).update(
-                **data
-            )
-        except Exception as e:
-            return Response({'status': 'failed', 'message': e}, status=HTTP_400_BAD_REQUEST)
-        return Response({'status': 'success'}, status=HTTP_200_OK)
 
-    def delete(self, request, id):
-        try:
-            models.SMOrderQueue.objects.filter(id=id).delete()
-        except Exception as e:
-            return Response({'status': 'failed', 'message': e}, status=HTTP_400_BAD_REQUEST)
-        return Response({'status': 'success'}, status=HTTP_200_OK)
-
-
-class PenCalculateDistance(APIView):
+class CalculateDistance(APIView):
     def post(self, request):
         log("Penészmentesítés MiniCRM webhook meghívva",
             "INFO", "pen_calculate_distance")
@@ -67,9 +51,17 @@ class PenCalculateDistance(APIView):
         return Response({'status': 'success'}, status=HTTP_200_OK)
 
 
-class PenGoogleSheetWebhook(APIView):
+class GoogleSheetWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", json.dumps(data, indent=4))
         [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"]["response"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
         return Response("Succesfully received data", status=HTTP_200_OK)
+
+class FelmeresekList(generics.ListCreateAPIView):
+    queryset = models.Felmeresek.objects.all()
+    serializer_class = serializers.FelemeresekSerializer
+
+class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Felmeresek.objects.all()
+    serializer_class = serializers.FelemeresekSerializer
