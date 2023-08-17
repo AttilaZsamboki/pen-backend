@@ -62,6 +62,8 @@ class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelemeresekSerializer
 
-class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Felmeresek.objects.all()
-    serializer_class = serializers.FelemeresekSerializer
+class FelmeresekDetail(APIView):
+    def get(self, request, id):
+        felmeres = models.Felmeresek.objects.filter(adatlap_id=id)
+        serializer = serializers.FelemeresekSerializer(felmeres, many=True)
+        return Response(serializer.data)
