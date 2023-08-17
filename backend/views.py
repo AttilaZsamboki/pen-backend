@@ -71,5 +71,5 @@ class PenGoogleSheetWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", json.dumps(data, indent=4))
-        [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
+        [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"]["response"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
         return Response("Succesfully received data", status=HTTP_200_OK)
