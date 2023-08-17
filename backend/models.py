@@ -17,6 +17,9 @@ class Felmeresek(models.Model):
     id = models.AutoField(primary_key=True)
     field = models.TextField()
     value = models.TextField()
+    adatlap_id = models.TextField()
+    options = models.JSONField()
+    type = models.CharField(max_length=255)
 
     class Meta:
         managed = False
