@@ -1,6 +1,6 @@
 import codecs
 from .minicrm import update_adatlap_fields, get_adatlap_by_id
-from ..utils.google_maps import get_street_view
+from .google.maps import get_street_view
 
 data = get_adatlap_by_id("41587")["data"]
 address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
