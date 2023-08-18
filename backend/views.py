@@ -6,6 +6,7 @@ from .utils.google_maps import calculate_distance
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
+from rest_framework.permissions import AllowAny
 from . import models
 import json
 from .utils.logs import log
@@ -87,9 +88,9 @@ class FelmeresekDetail(APIView):
 class FelmeresekNotesList(generics.ListCreateAPIView):
     queryset = models.FelmeresekNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
-    permission_classes = []
+    permission_classes = [AllowAny]
 
 class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresekNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
-    permission_classes = []
+    permission_classes = [AllowAny]
