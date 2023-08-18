@@ -11,7 +11,7 @@ import json
 from .utils.logs import log
 from rest_framework import generics
 from . import serializers
-from requests import get
+import requests
 
 # Create your views here.
 
@@ -53,11 +53,11 @@ class CalculateDistance(APIView):
 
 
 class GoogleSheetWebhook(APIView):
-    def post(self, request):
-        data = json.loads(request.body)
+    def post(self, req):
+        data = json.loads(req.body)
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", json.dumps(data, indent=4))
         [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"]["response"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
-        get("https://peneszmentesites.dataupload.xyz/api/revalidate?tag=felmeresek")
+        requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresekList(generics.ListCreateAPIView):
