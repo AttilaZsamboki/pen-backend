@@ -87,7 +87,9 @@ class FelmeresekDetail(APIView):
 class FelmeresekNotesList(generics.ListCreateAPIView):
     queryset = models.FelmeresekNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
+    permission_classes = []
 
 class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresekNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
+    permission_classes = []
