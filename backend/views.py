@@ -1,5 +1,5 @@
 from .utils.google_maps import get_street_view, get_street_view_url
-from .utils.minicrm import update_adatlap_fields
+from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details
 import math
 import codecs
 from .utils.google_maps import calculate_distance
@@ -25,6 +25,9 @@ class CalculateDistance(APIView):
         address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
         gmaps_result = calculate_distance(
             start=telephely, end=codecs.unicode_escape_decode(address)[0])
+        if gmaps_result == "Error":
+            log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", "pen_calculate_distance", f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}")
+            return Response({'status': 'error'}, status=HTTP_200_OK)
         duration = gmaps_result["duration"] / 60
         distance = gmaps_result["distance"] // 1000
         formatted_duration = f"{math.floor(duration//60)} óra {math.floor(duration%60)} perc"
@@ -48,17 +51,21 @@ class CalculateDistance(APIView):
                 "SUCCESS", "pen_calculate_distance")
         else:
             log("Penészmentesítés MiniCRM webhook sikertelen",
-                "ERROR", response.reason)
+                "ERROR", "pen_calculate_distance", response.reason)
         return Response({'status': 'success'}, status=HTTP_200_OK)
 
 
 class GoogleSheetWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", data["Adatlap hash (ne módosítsd!!)"]["response"])
-        [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"]["response"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
+        urlap = data["Adatlap hash (ne módosítsd!!)"]["response"]
+        log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", urlap)
+        [models.Felmeresek(field=j, value=k["response"], adatlap_id=urlap, type=k["type"], options=k["options"]).save() for j, k in data.items()]
         requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
         requests.get(f"https://peneszmentesites.dataupload.xyz/api/revaildate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
+        def criteria(adatlap):
+            return adatlap["ProjectHash"] == urlap
+        update_adatlap_fields(get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"], {"Urlap": "https://peneszmentesites.dataupload.xyz/api/felmeresek/"+urlap})
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresekList(generics.ListCreateAPIView):
