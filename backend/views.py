@@ -65,7 +65,7 @@ class GoogleSheetWebhook(APIView):
         requests.get(f"https://peneszmentesites.dataupload.xyz/api/revaildate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         def criteria(adatlap):
             return adatlap["ProjectHash"] == urlap
-        update_adatlap_fields(get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"], {"Urlap": "https://peneszmentesites.dataupload.xyz/api/felmeresek/"+urlap})
+        update_adatlap_fields(get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"], {"Urlap": "https://peneszmentesites.dataupload.xyz/"+urlap})
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresekList(generics.ListCreateAPIView):
