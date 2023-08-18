@@ -97,10 +97,12 @@ def get_all_adatlap_details(category_id, status_id=None, criteria=None, deleted=
     return adatlapok_detailed
 
 def list_to_dos(adatlap_id, criteria=None):
-    adatlap = get_adatlap_details(adatlap_id)
+    todos = get_request(endpoint="ToDoList", id=adatlap_id)
+    if todos == "Error":
+        return 
     if criteria:
-        return [todo for todo in adatlap["ToDoList"] if criteria(todo)]
-    return adatlap
+        return [todo for todo in todos["Results"] if criteria(todo)]
+    return todos
 
 
 def update_all_status(status, condition, category_id):
