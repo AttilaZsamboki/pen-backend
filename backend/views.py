@@ -53,16 +53,19 @@ class CalculateDistance(APIView):
 
 
 class GoogleSheetWebhook(APIView):
-    def post(self, req):
-        data = json.loads(req.body)
-        log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", json.dumps(data, indent=4))
+    def post(self, request):
+        data = json.loads(request.body)
+        log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", data["Adatlap hash (ne módosítsd!!)"]["response"])
         [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"]["response"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
-        requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelemeresekSerializer
+
+    def get_queryset(self):
+        requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
+        return super().get_queryset()
 
 class FelmeresekDetail(APIView):
     def get(self, request, id):
