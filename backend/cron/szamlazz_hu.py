@@ -44,7 +44,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 continue
             if cash and adatlap["DijbekeroSzama2"] != "":
                 continue
-            if not cash and adatlap["DijbekeroSzama2"] == "":
+            if not cash and not is_proform and adatlap["DijbekeroSzama2"] == "":
                 log("Nincs díjbekérő száma", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
                 continue
             query_xml = f"""
