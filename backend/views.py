@@ -41,7 +41,7 @@ class CalculateDistance(APIView):
             log("Penészmentesítés MiniCRM webhook sikertelen", "FAILED", e)
         street_view_url = get_street_view_url(location=address)
         response = update_adatlap_fields(data["Id"], {
-            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27)})
+                        "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=M%C3%A1tra+u.+17,+Budapest,+1224&destination={codecs.decode(address, 'unicode_escape')}&travelmode=driving"})
         if response.code == 200:
             log("Penészmentesítés MiniCRM webhook sikeresen lefutott",
                 "SUCCESS", "pen_calculate_distance")
