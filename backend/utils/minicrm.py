@@ -117,7 +117,7 @@ statuses = {
         "Sikeres felmérés": 3086,
     },
     "ToDo": {
-        "Felmérés": 84
+        "Felmérés": 225
     }
 }
 
