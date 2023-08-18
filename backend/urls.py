@@ -7,5 +7,5 @@ urlpatterns = [
     path('felmeresek', views.FelmeresekList.as_view()),
     path('felmeresek/<id>/', views.FelmeresekDetail.as_view()),
     path('felmeresek_notes', views.FelmeresekNotesList.as_view()),
-    path('felmeresek_notes/<pk:id>/', views.FelmeresekNotesDetail.as_view()),
+    path('felmeresek_notes/<int:pk>/', views.FelmeresekNotesDetail.as_view()),
 ]

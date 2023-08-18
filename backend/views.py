@@ -79,7 +79,7 @@ class FelmeresekList(generics.ListCreateAPIView):
 
 
 class FelmeresekDetail(APIView):
-    def get(self, request, id):
+    def get(self, request):
         felmeres = models.Felmeresek.objects.filter(adatlap_id=id)
         serializer = serializers.FelemeresekSerializer(felmeres, many=True)
         return Response(serializer.data)
