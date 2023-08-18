@@ -58,6 +58,7 @@ class GoogleSheetWebhook(APIView):
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", data["Adatlap hash (ne módosítsd!!)"]["response"])
         [models.Felmeresek(field=j, value=k["response"], adatlap_id=data["Adatlap hash (ne módosítsd!!)"]["response"], type=k["type"], options=k["options"]).save() for j, k in data.items()]
         requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
+        requests.get(f"https://peneszmentesites.dataupload.xyz/api/revaildate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresekList(generics.ListCreateAPIView):
