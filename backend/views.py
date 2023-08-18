@@ -83,3 +83,11 @@ class FelmeresekDetail(APIView):
         felmeres = models.Felmeresek.objects.filter(adatlap_id=id)
         serializer = serializers.FelemeresekSerializer(felmeres, many=True)
         return Response(serializer.data)
+
+class FelmeresekNotesList(generics.ListCreateAPIView):
+    queryset = models.FelmeresekNotes.objects.all()
+    serializer_class = serializers.FelmeresekNotesSerializer
+
+class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.FelmeresekNotes.objects.all()
+    serializer_class = serializers.FelmeresekNotesSerializer

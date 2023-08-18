@@ -24,3 +24,14 @@ class Felmeresek(models.Model):
     class Meta:
         managed = False
         db_table = "pen_felmeresek"
+
+class FelmeresekNotes(models.Model):
+    id = models.AutoField(primary_key=True)
+    value = models.TextField()
+    type = models.CharField(max_length=255)
+    created_at = models.DateTimeField()
+    adatlap_id = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = "pen_felmeresek_notes"

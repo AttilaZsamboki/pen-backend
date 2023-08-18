@@ -5,3 +5,8 @@ class FelemeresekSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Felmeresek
         fields = "__all__"
+
+class FelmeresekNotesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FelmeresekNotes
+        fields = "__all__"
