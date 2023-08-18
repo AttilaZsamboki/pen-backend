@@ -1,5 +1,5 @@
 from .utils.google_maps import get_street_view, get_street_view_url
-from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details
+from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, list_to_dos, update_todo
 import math
 import codecs
 from .utils.google_maps import calculate_distance
@@ -65,7 +65,12 @@ class GoogleSheetWebhook(APIView):
         requests.get(f"https://peneszmentesites.dataupload.xyz/api/revaildate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         def criteria(adatlap):
             return adatlap["ProjectHash"] == urlap
-        update_adatlap_fields(get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"], {"Urlap": "https://peneszmentesites.dataupload.xyz/"+urlap})
+        adatlap_id = get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"]
+        update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://peneszmentesites.dataupload.xyz/"+urlap, "StatusId": "Elszámolásra vár"})
+        def todo_criteria(todo):
+            return todo["Type"] == "Felmérés" and todo["Status"] == "Open"
+        todo_id = list_to_dos(adatlap_id, todo_criteria)[0]["Id"]
+        update_todo(todo_id, {"Status": "Closed"})
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresekList(generics.ListCreateAPIView):

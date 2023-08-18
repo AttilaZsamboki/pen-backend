@@ -15,12 +15,15 @@ def get_request(endpoint, id=None, query_params=None):
     else:
         return "Error"
 
-def update_adatlap_fields(id, fields):
+def update_request(id, fields, endpoint):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
-    adatlap = requests.put(
-        f'https://r3.minicrm.hu/Api/R3/Project/{id}', auth=(system_id, api_key), json=fields)
+    return requests.put(
+        f'https://r3.minicrm.hu/Api/R3/{endpoint}/{id}', auth=(system_id, api_key), json=fields)
+
+def update_adatlap_fields(id, fields):
+    adatlap = update_request(id=id, fields=fields, endpoint="Project")
     if adatlap.status_code == 200:
         return {"code": 200, "data": adatlap.json()}
     else:
@@ -93,8 +96,12 @@ def get_all_adatlap_details(category_id, status_id=None, criteria=None, deleted=
         adatlapok_detailed.append(adatlap)
     return adatlapok_detailed
 
-def list_to_dos(adatlap_id):
-    return get_request(endpoint="ToDoList", id=adatlap_id)
+def list_to_dos(adatlap_id, criteria=None):
+    adatlap = get_adatlap_details(adatlap_id)
+    if criteria:
+        return [todo for todo in adatlap["ToDoList"] if criteria(todo)]
+    return adatlap
+
 
 def update_all_status(status, condition, category_id):
     adatlapok = get_all_adatlap_details(category_id=category_id)
@@ -110,3 +117,6 @@ statuses = {
         "Sikeres felmérés": 3086,
     }
 }
+
+def update_todo(id, fields):
+    update_request(id=id, fields=fields, endpoint="ToDo")
