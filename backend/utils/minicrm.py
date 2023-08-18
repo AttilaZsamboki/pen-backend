@@ -115,6 +115,9 @@ statuses = {
     "Felmérés": {
         "Elszámolásra vár": 3084,
         "Sikeres felmérés": 3086,
+    },
+    "ToDo": {
+        "Felmérés": 84
     }
 }
 
