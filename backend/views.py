@@ -68,7 +68,7 @@ class GoogleSheetWebhook(APIView):
         adatlap_id = get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"]
         update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://peneszmentesites.dataupload.xyz/"+urlap, "StatusId": "Elszámolásra vár"})
         def todo_criteria(todo):
-            return todo["Type"] == "Felmérés" and todo["Status"] == "Open"
+            return todo["Type"] == 203 and todo["Status"] == "Open"
         todo_id = list_to_dos(adatlap_id, todo_criteria)[0]["Id"]
         update_todo(todo_id, {"Status": "Closed"})
         return Response("Succesfully received data", status=HTTP_200_OK)
