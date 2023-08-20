@@ -8,5 +8,4 @@ urlpatterns = [
     path('felmeresek/<id>/', views.FelmeresekDetail.as_view()),
     path('felmeresek_notes', views.FelmeresekNotesList.as_view()),
     path('felmeresek_notes/<int:pk>/', views.FelmeresekNotesDetail.as_view()),
-    path('download_image/', views.DownloadImage.as_view())
 ]
