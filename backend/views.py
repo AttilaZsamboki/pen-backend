@@ -13,6 +13,7 @@ from .utils.logs import log
 from rest_framework import generics
 from . import serializers
 import requests
+from PIL import Image
 
 # Create your views here.
 
@@ -94,3 +95,13 @@ class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresekNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
     permission_classes = [AllowAny]
+
+class DownloadImage(APIView):
+    def post(self, request):
+        data = json.loads(request.body)
+        print(data)
+        with open("value.txt", "w") as f:
+            f.write(str(data))
+            f.close
+        # Image.open(data["files"][0]).save("static/images/notes/"+data["name"]+".jpg")
+        return Response("Succesfully received data", status=HTTP_200_OK)
