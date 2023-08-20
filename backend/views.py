@@ -1,19 +1,22 @@
 from .utils.google_maps import get_street_view, get_street_view_url
 from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, list_to_dos, update_todo, statuses
-import math
-import codecs
+from .utils.logs import log
+from .utils.utils import delete_s3_file
 from .utils.google_maps import calculate_distance
+
+from . import models
+from . import serializers
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 from rest_framework.permissions import AllowAny
-from . import models
-import json
-from .utils.logs import log
 from rest_framework import generics
-from . import serializers
+
+import json
 import requests
-from PIL import Image
+import math
+import codecs
 
 # Create your views here.
 
@@ -95,3 +98,12 @@ class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresekNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
     permission_classes = [AllowAny]
+
+    def delete(self, request, pk):
+        note = models.FelmeresekNotes.objects.get(pk=pk)
+        if note:
+            delete_s3_file(note.value)
+            note.delete()
+            return Response(status=HTTP_200_OK)
+        else:
+            return Response(status=HTTP_404_NOT_FOUND)
