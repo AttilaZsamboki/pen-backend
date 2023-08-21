@@ -107,3 +107,8 @@ class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
             return Response(status=HTTP_200_OK)
         else:
             return Response(status=HTTP_404_NOT_FOUND)
+
+class OrderWebhook(APIView):
+    def post(self, request):
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", request.body)
+        return Response("Succesfully received data", status=HTTP_200_OK)
