@@ -88,7 +88,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.FelemeresekSerializer
 
     def get(self, request, pk):
-        felmeres = models.Felmeresek.objects.filter(adatlap_id=id)
+        felmeres = models.Felmeresek.objects.filter(adatlap_id=pk)
         serializer = serializers.FelemeresekSerializer(felmeres, many=True)
         return Response(serializer.data)
 
