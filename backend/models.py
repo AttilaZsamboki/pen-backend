@@ -20,6 +20,7 @@ class Felmeresek(models.Model):
     adatlap_id = models.TextField()
     options = models.JSONField()
     type = models.CharField(max_length=255)
+    section = models.TextField()
 
     class Meta:
         managed = False

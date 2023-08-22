@@ -65,7 +65,7 @@ class GoogleSheetWebhook(APIView):
         data = json.loads(request.body)
         urlap = data["Adatlap hash (ne módosítsd!!)"]["response"]
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", urlap)
-        [models.Felmeresek(field=j, value=k["response"], adatlap_id=urlap, type=k["type"], options=k["options"]).save() for j, k in data.items()]
+        [models.Felmeresek(field=j, value=k["response"], adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
         requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
         requests.get(f"https://peneszmentesites.dataupload.xyz/api/revaildate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         def criteria(adatlap):
