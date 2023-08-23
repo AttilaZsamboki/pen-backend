@@ -16,7 +16,7 @@ class Logs(models.Model):
 class Felmeresek(models.Model):
     id = models.AutoField(primary_key=True)
     field = models.TextField()
-    value = models.TextField(null=True)
+    value = models.TextField(blank=True)
     adatlap_id = models.TextField()
     options = models.JSONField()
     type = models.CharField(max_length=255)
