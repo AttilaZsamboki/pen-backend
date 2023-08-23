@@ -31,7 +31,8 @@ class CalculateDistance(APIView):
         gmaps_result = calculate_distance(
             start=telephely, end=codecs.unicode_escape_decode(address)[0])
         if gmaps_result == "Error":
-            log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", "pen_calculate_distance", f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}")
+            log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", "pen_calculate_distance",
+                f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}")
             return Response({'status': 'error'}, status=HTTP_200_OK)
         duration = gmaps_result["duration"] / 60
         distance = gmaps_result["distance"] // 1000
@@ -45,12 +46,13 @@ class CalculateDistance(APIView):
         fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
 
         try:
-            get_street_view(location=address)
+            get_street_view(location=codecs.unicode_escape_decode(address)[0])
         except Exception as e:
             log("Penészmentesítés MiniCRM webhook sikertelen", "FAILED", e)
-        street_view_url = get_street_view_url(location=address)
+        street_view_url = get_street_view_url(
+            location=codecs.unicode_escape_decode(address)[0])
         response = update_adatlap_fields(data["Id"], {
-                        "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=M%C3%A1tra+u.+17,+Budapest,+1224&destination={codecs.decode(address, 'unicode_escape')}&travelmode=driving"})
+            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=M%C3%A1tra+u.+17,+Budapest,+1224&destination={codecs.decode(address, 'unicode_escape')}&travelmode=driving"})
         if response.code == 200:
             log("Penészmentesítés MiniCRM webhook sikeresen lefutott",
                 "SUCCESS", "pen_calculate_distance")
@@ -59,15 +61,14 @@ class CalculateDistance(APIView):
                 "ERROR", "pen_calculate_distance", response.reason)
         return Response({'status': 'success'}, status=HTTP_200_OK)
 
-
 class GoogleSheetWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
         urlap = data["Adatlap hash (ne módosítsd!!)"]["response"]
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", urlap)
-        [models.Felmeresek(field=j, value=k["response"], adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
-        requests.get("https://peneszmentesites.dataupload.xyz/api/revaildate?tag=felmeresek")
-        requests.get(f"https://peneszmentesites.dataupload.xyz/api/revaildate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
+        [models.Felmeresek(field=j, value=k["response"] if k["type"] not in ["GRID", "CHECKBOX_GRID", "FILE_UPLOAD", "CHECKBOX"] else json.dumps(k["response"], ensure_ascii=False), adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
+        requests.get("https://peneszmentesites.dataupload.xyz/api/revalidate?tag=felmeresek")
+        requests.get(f"https://peneszmentesites.dataupload.xyz/api/revalidate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         def criteria(adatlap):
             return adatlap["ProjectHash"] == urlap
         adatlap_id = get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"]
