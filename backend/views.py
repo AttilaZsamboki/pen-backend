@@ -72,7 +72,7 @@ class GoogleSheetWebhook(APIView):
         def criteria(adatlap):
             return adatlap["ProjectHash"] == urlap
         adatlap_id = get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"]
-        update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://peneszmentesites.dataupload.xyz/"+urlap, "StatusId": "Elszámolásra vár"})
+        update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://peneszmentesites.dataupload.xyz/felmeresek/"+urlap, "StatusId": "Elszámolásra vár"})
         def todo_criteria(todo):
             return todo["Type"] == statuses["ToDo"]["Felmérés"] and todo["Status"] == "Open"
         todo_id = list_to_dos(adatlap_id, todo_criteria)[0]["Id"]
@@ -116,3 +116,13 @@ class OrderWebhook(APIView):
     def post(self, request):
         log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", request.body)
         return Response("Succesfully received data", status=HTTP_200_OK)
+
+class ProductsList(generics.ListCreateAPIView):
+    queryset = models.Products.objects.all()
+    serializer_class = serializers.ProductsSerializer
+    permission_classes = [AllowAny]
+
+class ProductsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Products.objects.all()
+    serializer_class = serializers.ProductsSerializer
+    permission_classes = [AllowAny]

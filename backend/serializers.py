@@ -10,3 +10,8 @@ class FelmeresekNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresekNotes
         fields = "__all__"
+
+class ProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Products
+        fields = "__all__"
