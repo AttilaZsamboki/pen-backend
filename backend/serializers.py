@@ -20,3 +20,8 @@ class ProductAttributesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductAttributes
         fields = "__all__"
+
+class FiltersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Filters
+        fields = "__all__"

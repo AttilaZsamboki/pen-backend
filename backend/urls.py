@@ -13,4 +13,6 @@ urlpatterns = [
     path('products/<int:pk>/', views.ProductsDetail.as_view()),
     path('product_attributes', views.ProductAttributesList.as_view()),
     path('product_attributes/<int:pk>/', views.ProductAttributesDetail.as_view()),
+    path('filters', views.FiltersList.as_view()),
+    path('filters/<int:pk>/', views.FiltersDetail.as_view()),
 ]

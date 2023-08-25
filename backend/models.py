@@ -117,3 +117,12 @@ class ProductAttributes(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_product_attributes'
+
+class Filters(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.TextField(blank=True, null=True)
+    value = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_filters'
