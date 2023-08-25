@@ -182,6 +182,7 @@ class ProductTemplateSerializerList(generics.ListCreateAPIView):
     serializer_class = serializers.ProductTemplateSerializer
     permission_classes = [AllowAny]
 
+
 class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.ProductTemplate.objects.all()
     serializer_class = serializers.ProductTemplateSerializer
