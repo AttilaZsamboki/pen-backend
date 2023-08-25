@@ -182,6 +182,17 @@ class ProductTemplateSerializerList(generics.ListCreateAPIView):
     serializer_class = serializers.ProductTemplateSerializer
     permission_classes = [AllowAny]
 
+    def post(self, request):
+        template_id = request.data["template_id"]
+        product_id = request.data["product_id"]
+        template_instance = models.Templates.objects.get(id=template_id)
+        product_instance = models.Products.objects.get(id=product_id)
+
+        new_product_template = models.ProductTemplate(template=template_instance, product=product_instance)
+        new_product_template.save()
+        return Response(status=HTTP_200_OK)
+
+
 
 class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.ProductTemplate.objects.all()
