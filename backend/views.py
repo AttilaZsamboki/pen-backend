@@ -198,3 +198,8 @@ class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.ProductTemplate.objects.all()
     serializer_class = serializers.ProductTemplateSerializer
     permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        product_templates = models.ProductTemplate.objects.filter(template=pk)
+        serializer = serializers.ProductTemplateSerializer(product_templates, many=True)
+        return Response(serializer.data)
