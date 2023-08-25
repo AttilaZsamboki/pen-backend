@@ -145,6 +145,7 @@ class Templates(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
