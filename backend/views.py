@@ -147,6 +147,11 @@ class FiltersList(generics.ListCreateAPIView):
     serializer_class = serializers.FiltersSerializer
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        if self.request.query_params.get('type'):
+            return models.Filters.objects.filter(type=self.request.query_params.get('type'))
+        return super().get_queryset()
+
 class FiltersDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Filters.objects.all()
     serializer_class = serializers.FiltersSerializer
