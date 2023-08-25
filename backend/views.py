@@ -136,3 +136,8 @@ class ProductAttributesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.ProductAttributes.objects.all()
     serializer_class = serializers.ProductAttributesSerializer
     permission_classes = [AllowAny]
+    
+    def get(self, request, pk):
+        product_attributes = models.ProductAttributes.objects.filter(product_id=pk)
+        serializer = serializers.ProductAttributesSerializer(product_attributes, many=True)
+        return Response(serializer.data)
