@@ -126,3 +126,13 @@ class ProductsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Products.objects.all()
     serializer_class = serializers.ProductsSerializer
     permission_classes = [AllowAny]
+
+class ProductAttributesList(generics.ListCreateAPIView):
+    queryset = models.ProductAttributes.objects.all()
+    serializer_class = serializers.ProductAttributesSerializer
+    permission_classes = [AllowAny]
+
+class ProductAttributesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.ProductAttributes.objects.all()
+    serializer_class = serializers.ProductAttributesSerializer
+    permission_classes = [AllowAny]

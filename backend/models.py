@@ -107,3 +107,13 @@ class Products(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_products'
+
+class ProductAttributes(models.Model):
+    id = models.AutoField(primary_key=True)
+    product = models.ForeignKey('Products', models.DO_NOTHING)
+    place = models.BooleanField(blank=True, null=True)
+    place_options = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_product_attributes'
