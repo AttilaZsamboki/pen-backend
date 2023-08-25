@@ -46,7 +46,7 @@ class Products(models.Model):
     alternative_sku = models.FloatField(db_column='Alternative_SKU', blank=True, null=True)  # Field name made lowercase.
     minimum_stock_quantity = models.FloatField(db_column='Minimum_Stock_Quantity', blank=True, null=True)  # Field name made lowercase.
     optimal_stock_quantity = models.FloatField(db_column='Optimal_Stock_Quantity', blank=True, null=True)  # Field name made lowercase.
-    category = models.FloatField(db_column='Category', blank=True, null=True)  # Field name made lowercase.
+    category = models.TextField(db_column='Category', blank=True, null=True)  # Field name made lowercase.
     parent_id = models.FloatField(db_column='Parent_ID', blank=True, null=True)  # Field name made lowercase.
     parent_sku = models.FloatField(db_column='Parent_SKU', blank=True, null=True)  # Field name made lowercase.
     bundles_sku = models.FloatField(db_column='Bundles_SKU', blank=True, null=True)  # Field name made lowercase.
