@@ -132,9 +132,10 @@ class Filters(models.Model):
 class Questions(models.Model):
     id = models.AutoField(primary_key=True)
     question = models.TextField(blank=True, null=True)
-    type = models.CharField(max_length=255, blank=True, null=True)
+    type = models.TextField(blank=True, null=True)
     product = models.ForeignKey('Products', models.DO_NOTHING, blank=True, null=True)
-    options = models.TextField(blank=True, null=True)
+    connection = models.CharField(max_length=255, blank=True, null=True)
+    options = models.JSONField(blank=True, null=True)
 
     class Meta:
         managed = False
