@@ -30,3 +30,13 @@ class QuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Questions
         fields = "__all__"
+
+class ProductTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductTemplate
+        fields = "__all__"
+
+class TemplatesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Templates
+        fields = "__all__"

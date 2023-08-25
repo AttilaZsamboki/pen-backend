@@ -166,3 +166,23 @@ class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Questions.objects.all()
     serializer_class = serializers.QuestionsSerializer
     permission_classes = [AllowAny]
+
+class TemplateSerializerList(generics.ListCreateAPIView):
+    queryset = models.Templates.objects.all()
+    serializer_class = serializers.TemplatesSerializer
+    permission_classes = [AllowAny]
+
+class TemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Templates.objects.all()
+    serializer_class = serializers.TemplatesSerializer
+    permission_classes = [AllowAny]
+
+class ProductTemplateSerializerList(generics.ListCreateAPIView):
+    queryset = models.ProductTemplate.objects.all()
+    serializer_class = serializers.ProductTemplateSerializer
+    permission_classes = [AllowAny]
+
+class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.ProductTemplate.objects.all()
+    serializer_class = serializers.ProductTemplateSerializer
+    permission_classes = [AllowAny]

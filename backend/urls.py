@@ -17,4 +17,8 @@ urlpatterns = [
     path('filters/<int:pk>/', views.FiltersDetail.as_view()),
     path('questions/', views.QuestionsList.as_view()),
     path('questions/<int:pk>/', views.QuestionsDetail.as_view()),
+    path('templates/', views.TemplateSerializerList.as_view()),
+    path('templates/<int:pk>/', views.TemplateSerializerDetail.as_view()),
+    path('product_templates/', views.ProductTemplateSerializerList.as_view()),
+    path('product_templates/<int:pk>/', views.ProductTemplateSerializerDetail.as_view()),
 ]
