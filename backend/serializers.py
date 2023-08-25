@@ -25,3 +25,8 @@ class FiltersSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Filters
         fields = "__all__"
+
+class QuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Questions
+        fields = "__all__"

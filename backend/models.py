@@ -126,3 +126,15 @@ class Filters(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_filters'
+
+
+class Questions(models.Model):
+    question = models.TextField(blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    options = models.JSONField(blank=True, null=True)
+    connection = models.CharField(max_length=255, blank=True, null=True)
+    product = models.ForeignKey('Products', models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_questions'

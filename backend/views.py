@@ -151,3 +151,13 @@ class FiltersDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Filters.objects.all()
     serializer_class = serializers.FiltersSerializer
     permission_classes = [AllowAny]
+
+class QuestionsList(generics.ListCreateAPIView):
+    queryset = models.Questions.objects.all()
+    serializer_class = serializers.QuestionsSerializer
+    permission_classes = [AllowAny]
+
+class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Questions.objects.all()
+    serializer_class = serializers.QuestionsSerializer
+    permission_classes = [AllowAny]
