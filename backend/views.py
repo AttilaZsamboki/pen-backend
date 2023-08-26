@@ -162,6 +162,11 @@ class QuestionsList(generics.ListCreateAPIView):
     serializer_class = serializers.QuestionsSerializer
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        if self.request.query_params.get('product'):
+            return models.Questions.objects.filter(product=self.request.query_params.get('product'))
+        return super().get_queryset()
+
 class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Questions.objects.all()
     serializer_class = serializers.QuestionsSerializer
