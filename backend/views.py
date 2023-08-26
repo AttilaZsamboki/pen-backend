@@ -66,7 +66,7 @@ class GoogleSheetWebhook(APIView):
         data = json.loads(request.body)
         urlap = data["Adatlap hash (ne módosítsd!!)"]["response"]
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", urlap)
-        [models.Felmeresek(field=j, value=k["response"] if k["type"] not in ["GRID", "CHECKBOX_GRID", "FILE_UPLOAD", "CHECKBOX"] else json.dumps(k["response"], ensure_ascii=False), adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
+        [models.FelmeresNotes(field=j, value=k["response"] if k["type"] not in ["GRID", "CHECKBOX_GRID", "FILE_UPLOAD", "CHECKBOX"] else json.dumps(k["response"], ensure_ascii=False), adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
         requests.get("https://peneszmentesites.dataupload.xyz/api/revalidate?tag=felmeresek")
         requests.get(f"https://peneszmentesites.dataupload.xyz/api/revalidate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         def criteria(adatlap):
@@ -79,32 +79,32 @@ class GoogleSheetWebhook(APIView):
         update_todo(todo_id, {"Status": "Closed"})
         return Response("Succesfully received data", status=HTTP_200_OK)
 
-class FelmeresekList(generics.ListCreateAPIView):
-    queryset = models.Felmeresek.objects.all()
-    serializer_class = serializers.FelemeresekSerializer
+class FelmeresQuestionsList(generics.ListCreateAPIView):
+    queryset = models.FelmeresNotes.objects.all()
+    serializer_class = serializers.FelmeresQuestionsSerializer
 
 
-class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Felmeresek.objects.all()
-    serializer_class = serializers.FelemeresekSerializer
+class FelmeresQuestionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.FelmeresNotes.objects.all()
+    serializer_class = serializers.FelmeresQuestionsSerializer
 
     def get(self, request, pk):
-        felmeres = models.Felmeresek.objects.filter(adatlap_id=pk)
-        serializer = serializers.FelemeresekSerializer(felmeres, many=True)
+        felmeres = models.FelmeresNotes.objects.filter(adatlap_id=pk)
+        serializer = serializers.FelmeresQuestionsSerializer(felmeres, many=True)
         return Response(serializer.data)
 
 class FelmeresekNotesList(generics.ListCreateAPIView):
-    queryset = models.FelmeresekNotes.objects.all()
+    queryset = models.FelmeresNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
     permission_classes = [AllowAny]
 
 class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.FelmeresekNotes.objects.all()
+    queryset = models.FelmeresNotes.objects.all()
     serializer_class = serializers.FelmeresekNotesSerializer
     permission_classes = [AllowAny]
 
     def delete(self, request, pk):
-        note = models.FelmeresekNotes.objects.get(pk=pk)
+        note = models.FelmeresNotes.objects.get(pk=pk)
         if note:
             delete_s3_file(note.value)
             note.delete()
@@ -203,3 +203,23 @@ class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
         product_templates = models.ProductTemplate.objects.filter(template=pk)
         serializer = serializers.ProductTemplateSerializer(product_templates, many=True)
         return Response(serializer.data)
+
+class FelmeresekList(generics.ListCreateAPIView):
+    queryset = models.Felmeresek.objects.all()
+    serializer_class = serializers.FelmeresekSerializer
+    permission_classes = [AllowAny]
+
+class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Felmeresek.objects.all()
+    serializer_class = serializers.FelmeresekSerializer
+    permission_classes = [AllowAny]
+
+class FelmereskItemsList(generics.ListCreateAPIView):
+    queryset = models.FelmeresItems.objects.all()
+    serializer_class = serializers.FelmeresItemsSerializer
+    permission_classes = [AllowAny]
+
+class FelmereskItemsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.FelmeresItems.objects.all()
+    serializer_class = serializers.FelmeresItemsSerializer
+    permission_classes = [AllowAny]

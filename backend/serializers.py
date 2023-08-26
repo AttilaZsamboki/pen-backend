@@ -1,14 +1,14 @@
 from . import models
 from rest_framework import serializers
 
-class FelemeresekSerializer(serializers.ModelSerializer):
+class FelmeresQuestionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Felmeresek
+        model = models.FelmeresQuestions
         fields = "__all__"
 
 class FelmeresekNotesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.FelmeresekNotes
+        model = models.FelmeresNotes
         fields = "__all__"
 
 class ProductsSerializer(serializers.ModelSerializer):
@@ -39,4 +39,14 @@ class ProductTemplateSerializer(serializers.ModelSerializer):
 class TemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Templates
+        fields = "__all__"
+
+class FelmeresekSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Felmeresek
+        fields = "__all__"
+
+class FelmeresItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FelmeresItems
         fields = "__all__"

@@ -13,7 +13,7 @@ class Logs(models.Model):
         managed = False
         db_table = "logs"
 
-class Felmeresek(models.Model):
+class FelmeresQuestions(models.Model):
     id = models.AutoField(primary_key=True)
     field = models.TextField()
     value = models.TextField(blank=True)
@@ -24,9 +24,9 @@ class Felmeresek(models.Model):
 
     class Meta:
         managed = False
-        db_table = "pen_felmeresek"
+        db_table = "pen_felmeres_questions"
 
-class FelmeresekNotes(models.Model):
+class FelmeresNotes(models.Model):
     id = models.AutoField(primary_key=True)
     value = models.TextField()
     type = models.CharField(max_length=255)
@@ -159,3 +159,26 @@ class ProductTemplate(models.Model):
         managed = False
         db_table = 'pen_product_template'
         unique_together = (('product', 'template'),)
+
+
+class Felmeresek(models.Model):
+    adatlap_id = models.IntegerField(primary_key=True)
+    template = models.IntegerField(blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_felmeresek'
+
+class FelmeresItems(models.Model):
+    name = models.TextField(blank=True, null=True)
+    place = models.BooleanField(blank=True, null=True)
+    placeOptions = models.TextField(blank=True, null=True)  # This field type is a guess.
+    productId = models.IntegerField()
+    inputValues = models.JSONField(blank=True, null=True)
+    netPrice = models.IntegerField(blank=True, null=True)
+    adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_felmeres_items'
