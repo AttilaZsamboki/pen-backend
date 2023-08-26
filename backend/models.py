@@ -13,7 +13,7 @@ class Logs(models.Model):
         managed = False
         db_table = "logs"
 
-class PenFelmeresQuestions(models.Model):
+class FelmeresQuestions(models.Model):
     id = models.AutoField(primary_key=True)
     question = models.ForeignKey('PenQuestions', models.DO_NOTHING, db_column='question')
     value = models.TextField(blank=True, null=True)
