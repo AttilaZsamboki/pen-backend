@@ -80,9 +80,9 @@ class GoogleSheetWebhook(APIView):
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class FelmeresQuestionsList(generics.ListCreateAPIView):
-    queryset = models.FelmeresNotes.objects.all()
+    queryset = models.FelmeresQuestions.objects.all()
     serializer_class = serializers.FelmeresQuestionsSerializer
-
+    permission_classes = [AllowAny]
 
 class FelmeresQuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresNotes.objects.all()

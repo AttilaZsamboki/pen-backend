@@ -14,7 +14,6 @@ class Logs(models.Model):
         db_table = "logs"
 
 class FelmeresQuestions(models.Model):
-    id = models.AutoField(primary_key=True)
     question = models.ForeignKey('Questions', models.DO_NOTHING, db_column='question')
     value = models.TextField(blank=True, null=True)
     adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, blank=True, null=True)
