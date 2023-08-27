@@ -165,6 +165,8 @@ class QuestionsList(generics.ListCreateAPIView):
     def get_queryset(self):
         if self.request.query_params.get('product'):
             return models.Questions.objects.filter(product=self.request.query_params.get('product'))
+        elif self.request.query_params.get("connection"):
+            return models.Questions.objects.filter(connection=self.request.query_params.get('connection'))
         return super().get_queryset()
 
 class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
