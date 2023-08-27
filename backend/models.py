@@ -171,7 +171,7 @@ class Felmeresek(models.Model):
 class FelmeresItems(models.Model):
     name = models.TextField(blank=True, null=True)
     place = models.BooleanField(blank=True, null=True)
-    placeOptions = models.TextField(blank=True, null=True)  # This field type is a guess.
+    placeOptions = models.JSONField(blank=True, null=True)  # This field type is a guess.
     productId = models.IntegerField()
     inputValues = models.JSONField(blank=True, null=True)
     netPrice = models.IntegerField(blank=True, null=True)

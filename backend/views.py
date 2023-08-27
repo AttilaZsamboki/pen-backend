@@ -9,7 +9,7 @@ from . import serializers
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from rest_framework.permissions import AllowAny
 from rest_framework import generics
 
@@ -225,6 +225,13 @@ class FelmeresItemsList(generics.ListCreateAPIView):
     queryset = models.FelmeresItems.objects.all()
     serializer_class = serializers.FelmeresItemsSerializer
     permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=HTTP_201_CREATED, headers=headers)
 
 class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresItems.objects.all()
