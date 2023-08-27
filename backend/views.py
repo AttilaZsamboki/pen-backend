@@ -232,6 +232,13 @@ class FelmeresItemsList(generics.ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=HTTP_201_CREATED, headers=headers)
+    
+    def get(self, request):
+        if request.query_params.get("adatlap_id"):
+            felmeres_items = models.FelmeresItems.objects.filter(adatlap_id=request.query_params.get("adatlap_id"))
+            serializer = serializers.FelmeresItemsSerializer(felmeres_items, many=True)
+            return Response(serializer.data)
+        return super().get(request)
 
 class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresItems.objects.all()
