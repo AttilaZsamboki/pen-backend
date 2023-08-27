@@ -85,7 +85,7 @@ class FelmeresQuestionsList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
 class FelmeresQuestionDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.FelmeresNotes.objects.all()
+    queryset = models.FelmeresQuestions.objects.all()
     serializer_class = serializers.FelmeresQuestionsSerializer
 
     def get(self, request, pk):
