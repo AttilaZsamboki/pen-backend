@@ -23,4 +23,6 @@ urlpatterns = [
     path('product_templates/<int:pk>/', views.ProductTemplateSerializerDetail.as_view()),
     path('felmeresek/', views.FelmeresekList.as_view()),
     path('felmeresek/<int:pk>/', views.FelmeresekDetail.as_view()),
+    path('felmeres_items/', views.FelmeresItemsDetail.as_view()),
+    path('felmeres_items/<int:pk>/', views.FelmeresItemsDetail.as_view()),
 ]

@@ -221,12 +221,12 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.FelmeresekSerializer
     permission_classes = [AllowAny]
 
-class FelmereskItemsList(generics.ListCreateAPIView):
+class FelmeresItemsList(generics.ListCreateAPIView):
     queryset = models.FelmeresItems.objects.all()
     serializer_class = serializers.FelmeresItemsSerializer
     permission_classes = [AllowAny]
 
-class FelmereskItemsDetail(generics.RetrieveUpdateDestroyAPIView):
+class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresItems.objects.all()
     serializer_class = serializers.FelmeresItemsSerializer
     permission_classes = [AllowAny]
