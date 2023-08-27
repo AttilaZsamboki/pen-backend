@@ -15,9 +15,9 @@ class Logs(models.Model):
 
 class FelmeresQuestions(models.Model):
     id = models.AutoField(primary_key=True)
-    question = models.ForeignKey('PenQuestions', models.DO_NOTHING, db_column='question')
+    question = models.ForeignKey('Questions', models.DO_NOTHING, db_column='question')
     value = models.TextField(blank=True, null=True)
-    adatlap = models.ForeignKey('PenFelmeresek', models.DO_NOTHING, blank=True, null=True)
+    adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, blank=True, null=True)
     section = models.TextField(blank=True, null=True)
 
     class Meta:
