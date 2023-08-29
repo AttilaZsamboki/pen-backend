@@ -199,6 +199,12 @@ class ProductTemplateSerializerList(generics.ListCreateAPIView):
         new_product_template.save()
         return Response(status=HTTP_200_OK)
 
+    def put(self, request):
+        template_id = self.request.query_params.get("template_id")
+        products = models.ProductTemplate.objects.filter(template=template_id)
+        products.delete()
+        models.ProductTemplate.objects.bulk_create([models.ProductTemplate(template=models.Templates.objects.get(id=template_id), product=models.Products.objects.get(id=i)) for i in request.data])
+        return Response(status=HTTP_200_OK)
 
 
 class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
