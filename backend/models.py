@@ -133,6 +133,7 @@ class Questions(models.Model):
     product = models.ForeignKey(Products, models.DO_NOTHING, blank=True, null=True)
     connection = models.CharField(max_length=255, blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
+    mandatory = models.BooleanField()
 
     class Meta:
         managed = False
