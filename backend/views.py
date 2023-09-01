@@ -251,3 +251,8 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresItems.objects.all()
     serializer_class = serializers.FelmeresItemsSerializer
     permission_classes = [AllowAny]
+
+class OfferWebhook(APIView):
+    def post(self, request):
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", request.body)
+        return Response("Succesfully received data", status=HTTP_200_OK)
