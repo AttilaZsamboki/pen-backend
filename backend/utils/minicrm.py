@@ -1,15 +1,16 @@
 import os
 import requests
+import random
 from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_request(endpoint, id=None, query_params=None):
+def get_request(endpoint, id=None, query_params=None, isR3=True):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
     data = requests.get(
-        f"https://r3.minicrm.hu/Api/R3/{endpoint}{'/'+str(id) if id else ''}", auth=(system_id, api_key), params=query_params)
+        f"https://r3.minicrm.hu/Api/{'R3/' if isR3 else ''}{endpoint}{'/'+str(id) if id else ''}", auth=(system_id, api_key), params=query_params)
     if data.status_code == 200:
         return data.json()
     else:
@@ -125,3 +126,91 @@ statuses = {
 
 def update_todo(id, fields):
     update_request(id=id, fields=fields, endpoint="ToDo")
+
+def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None):
+    adatlap = get_adatlap_details(id=adatlap_id)
+    contactData = contact_details(contact_id=contact_id)
+    offerData = get_offer(offer_id)
+    if offerData == "Error":
+        return "Error"
+    randomId = random.randint(100000, 999999)
+    products = '\n'.join([
+        f'''<Product Id="{item['productId']}">
+        <!-- Name of product [required int] -->
+        <Name>{item['name']}</Name>
+        <!-- SKU code of product [optional string]-->
+        <SKU>{item['sku']}</SKU>
+        <!-- Nett price of product [required int] -->
+        <PriceNet>{item['netPrice']}</PriceNet>
+        <!-- Quantity of product [required int] -->
+        <Quantity>{sum(value['ammount'] for value in item['inputValues'])}</Quantity>
+        <!-- Unit of product [required string] -->
+        <Unit>darab</Unit>
+        <!-- VAT of product [required int] -->
+        <VAT>27%</VAT>
+        <!-- Folder of product in MiniCRM. If it does not exist, then it is created automaticly [required string] -->
+        <FolderName>Default products</FolderName>
+    </Product>''' for item in items
+    ])
+    xml_string = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Projects>
+    <Project Id="{randomId}">
+        <StatusId>3099</StatusId>
+        <Name>{adatlap["Name"]}</Name>
+        <ContactId>{contact_id}</ContactId>
+        <UserId>{adatlap["UserId"]}</UserId>
+        <CategoryId>32</CategoryId>
+        <Contacts>
+            <Contact Id="{randomId}">
+                <FirstName>{contactData["FirstName"]}</FirstName>
+                <LastName>{contactData["LastName"]}</LastName>
+                <Type>{contactData["Type"]}</Type>
+                <Email>{contactData["Email"]}</Email>
+                <Phone>{contactData["Phone"]}</Phone>
+            </Contact>
+        </Contacts>
+        <Orders>
+            <Order Id="{randomId}">
+                <Number>{adatlap["Name"]}</Number>
+                <CurrencyCode>HUF</CurrencyCode>
+                <!-- Performace date of order [required date] -->
+                <Performance>2015-09-22 12:15:13</Performance>
+                <Status>Draft</Status>
+                <!-- Data of Customer -->
+                <Customer>
+                    <!-- Name of Customer [required string] -->
+                    <Name>{contactData["LastName"]} {contactData["FirstName"]}</Name>
+                    <!-- Country of customer [required string] -->
+                    <CountryId>Magyarország</CountryId>
+                    <!-- Postalcode of customer [required string] -->
+                    <PostalCode>{offerData["Customer"]["PostalCode"]}</PostalCode>
+                    <!-- City of customer [required string] -->
+                    <City>{offerData["Customer"]["City"]}</City>
+                    <!-- Address of customer [required string] -->
+                    <Address>{offerData["Customer"]["Address"]}</Address>
+                </Customer>
+                <!-- Data of product -->
+                <Products>
+                    <!-- Id = External id of product [required int] -->
+                    {products}
+                </Products>
+                <Project>
+                    <Enum1951>{adatlap_status if adatlap_status else ''}</Enum1951>
+                </Project>
+            </Order>
+        </Orders>
+    </Project>
+</Projects>"""
+
+    system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
+    api_key = os.environ.get("PEN_MINICRM_API_KEY")
+
+    data = requests.post(
+        f"https://r3.minicrm.hu/Api/SyncFeed/119/Upload", auth=(system_id, api_key), data=xml_string.encode("utf-8"))
+    if data.status_code == 200:
+        return data.json()
+    else:
+        return "Error"
+
+def get_offer(offer_id):
+    return get_request(endpoint="Offer", id=offer_id, isR3=False)
