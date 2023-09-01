@@ -180,3 +180,12 @@ class FelmeresItems(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_felmeres_items'
+
+class Counties(models.Model):
+    telepules = models.TextField(db_column='Telepules', blank=True, null=True)  # Field name made lowercase.
+    jogallasa = models.TextField(blank=True, null=True)
+    megye = models.TextField(db_column='Megye_megnevezese_', blank=True, null=True)  # Field name made lowercase. Field renamed because it ended with '_'.
+
+    class Meta:
+        managed = False
+        db_table = 'counties'
