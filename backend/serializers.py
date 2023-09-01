@@ -50,3 +50,8 @@ class FelmeresItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresItems
         fields = "__all__"
+
+class OffersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Offers
+        fields = "__all__"

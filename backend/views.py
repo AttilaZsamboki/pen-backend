@@ -255,4 +255,10 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
 class OfferWebhook(APIView):
     def post(self, request):
         log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", request.body)
+        data = json.loads(request.body)
+        try:
+            models.Offers(adatlap_id=data["Id"], offer_id=data["Head"]["Id"]).save()
+            log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
+        except Exception as e:
+            log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
         return Response("Succesfully received data", status=HTTP_200_OK)

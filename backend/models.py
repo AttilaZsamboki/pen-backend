@@ -189,3 +189,12 @@ class Counties(models.Model):
     class Meta:
         managed = False
         db_table = 'counties'
+
+class Offers(models.Model):
+    id = models.AutoField(primary_key=True)
+    offer_id = models.IntegerField(blank=True, null=True)
+    adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_offers'
