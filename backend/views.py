@@ -22,9 +22,9 @@ import codecs
 
 class CalculateDistance(APIView):
     def post(self, request):
-        log("Penészmentesítés MiniCRM webhook meghívva",
-            "INFO", "pen_calculate_distance")
         data = json.loads(str(request.body)[2:-1])["Data"]
+        log("Penészmentesítés MiniCRM webhook meghívva",
+            "INFO", "pen_calculate_distance", json.dumps(data, indent=4))
         telephely = "Budapest, Nagytétényi út 218, 1225"
 
         address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
