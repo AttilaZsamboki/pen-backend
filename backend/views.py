@@ -25,7 +25,7 @@ class CalculateDistance(APIView):
         log("Penészmentesítés MiniCRM webhook meghívva",
             "INFO", "pen_calculate_distance")
         data = json.loads(str(request.body)[2:-1])["Data"]
-        telephely = "Budapest, Nagytétényi út 218, 1225"
+        telephely = "Budapest, Nagytétényi út 218-220, 1225"
 
         address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
         gmaps_result = calculate_distance(
@@ -53,7 +53,7 @@ class CalculateDistance(APIView):
             location=codecs.unicode_escape_decode(address)[0])
         county = models.Counties.objects.get(telepules=data["Telepules"]).megye
         response = update_adatlap_fields(data["Id"], {
-            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=M%C3%A1tra+u.+17,+Budapest,+1224&destination={codecs.decode(address, 'unicode_escape')}&travelmode=driving", "Megye": county})
+            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={codecs.decode(address, 'unicode_escape')}&travelmode=driving", "Megye": county})
         if response["code"] == 200:
             log("Penészmentesítés MiniCRM webhook sikeresen lefutott",
                 "SUCCESS", "pen_calculate_distance")
