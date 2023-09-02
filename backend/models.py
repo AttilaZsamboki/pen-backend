@@ -150,8 +150,8 @@ class Templates(models.Model):
         db_table = 'pen_templates'
 
 class ProductTemplate(models.Model):
-    product = models.ForeignKey('Products', models.DO_NOTHING)  # The composite primary key (product_id, template_id) found, that is not supported. The first column is selected.
     template = models.ForeignKey('Templates', models.CASCADE, primary_key=True)
+    product = models.ForeignKey('Products', models.DO_NOTHING)  # The composite primary key (product_id, template_id) found, that is not supported. The first column is selected.
 
     class Meta:
         managed = False

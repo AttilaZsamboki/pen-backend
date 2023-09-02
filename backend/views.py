@@ -175,29 +175,27 @@ class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.QuestionsSerializer
     permission_classes = [AllowAny]
 
-class TemplateSerializerList(generics.ListCreateAPIView):
+class TemplateList(generics.ListCreateAPIView):
     queryset = models.Templates.objects.all()
     serializer_class = serializers.TemplatesSerializer
     permission_classes = [AllowAny]
 
-class TemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
+class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Templates.objects.all()
     serializer_class = serializers.TemplatesSerializer
     permission_classes = [AllowAny]
 
-class ProductTemplateSerializerList(generics.ListCreateAPIView):
+class ProductTemplatesList(generics.ListCreateAPIView):
     queryset = models.ProductTemplate.objects.all()
     serializer_class = serializers.ProductTemplateSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
-        template_id = request.data["template_id"]
-        product_id = request.data["product_id"]
-        template_instance = models.Templates.objects.get(id=template_id)
-        product_instance = models.Products.objects.get(id=product_id)
+        data = json.loads(request.body)
+        template_instance = models.Templates.objects.get(id=data["template_id"])
+        product_instance = models.Products.objects.get(id=data["product_id"])
 
-        new_product_template = models.ProductTemplate(template=template_instance, product=product_instance)
-        new_product_template.save()
+        models.ProductTemplate.objects.create(template=template_instance, product=product_instance)
         return Response(status=HTTP_200_OK)
 
     def put(self, request):
@@ -208,7 +206,7 @@ class ProductTemplateSerializerList(generics.ListCreateAPIView):
         return Response(status=HTTP_200_OK)
 
 
-class ProductTemplateSerializerDetail(generics.RetrieveUpdateDestroyAPIView):
+class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.ProductTemplate.objects.all()
     serializer_class = serializers.ProductTemplateSerializer
     permission_classes = [AllowAny]
