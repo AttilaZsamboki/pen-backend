@@ -120,11 +120,26 @@ class OrderWebhook(APIView):
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 
+from django.db.models import Q
+
 class ProductsList(generics.ListCreateAPIView):
-    queryset = models.Products.objects.all()
     serializer_class = serializers.ProductsSerializer
     permission_classes = [AllowAny]
     pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        queryset = models.Products.objects.all()
+        filter = self.request.query_params.get('filter', None)
+        if filter is not None:
+            queryset = queryset.filter(
+                Q(id__icontains=filter) |
+                Q(name__icontains=filter) |
+                Q(sku__icontains=filter) |
+                Q(type__icontains=filter) |
+                Q(price_list_alapertelmezett_net_price_huf__icontains=filter)
+                # Add more Q objects for each column you want to search
+            )
+        return queryset
 
 class ProductsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Products.objects.all()
