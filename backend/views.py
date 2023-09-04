@@ -131,14 +131,21 @@ class ProductsList(generics.ListCreateAPIView):
         queryset = models.Products.objects.all()
         filter = self.request.query_params.get('filter', None)
         if filter is not None:
-            queryset = queryset.filter(
-                Q(id__icontains=filter) |
-                Q(name__icontains=filter) |
-                Q(sku__icontains=filter) |
-                Q(type__icontains=filter) |
-                Q(price_list_alapertelmezett_net_price_huf__icontains=filter)
-                # Add more Q objects for each column you want to search
-            )
+            filter_words = filter.split(" ")
+            q_objects = Q()
+    
+            for word in filter_words:
+                q_objects &= (
+                    Q(id__icontains=word) |
+                    Q(name__icontains=word) |
+                    Q(sku__icontains=word) |
+                    Q(type__icontains=word) |
+                    Q(price_list_alapertelmezett_net_price_huf__icontains=word)
+                    # Add more Q objects for each column you want to search
+                )
+    
+            queryset = queryset.filter(q_objects)
+    
         return queryset
 
 class ProductsDetail(generics.RetrieveUpdateDestroyAPIView):
