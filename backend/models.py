@@ -134,6 +134,7 @@ class Questions(models.Model):
     connection = models.CharField(max_length=255, blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
     mandatory = models.BooleanField()
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
