@@ -55,3 +55,8 @@ class OffersSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Offers
         fields = "__all__"
+
+class QuestionProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.QuestionProducts
+        fields = "__all__"

@@ -283,5 +283,37 @@ class OfferWebhook(APIView):
             models.Offers(adatlap_id=data["Id"], offer_id=data["Head"]["Id"]).save()
             log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
         except Exception as e:
-            log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
+           log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
         return Response("Succesfully received data", status=HTTP_200_OK)
+
+class QuestionProductsList(generics.ListCreateAPIView):
+    queryset = models.QuestionProducts.objects.all()
+    serializer_class = serializers.QuestionProductsSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = json.loads(request.body)
+        print(data)
+        question_instance = models.Questions.objects.get(id=data["question_id"])
+        product_instance = models.Products.objects.get(id=data["product_id"])
+
+        models.QuestionProducts.objects.create(question=question_instance, product=product_instance)
+        return Response(status=HTTP_200_OK)
+
+    def put(self, request):
+        question_id = self.request.query_params.get("question_id")
+        products = models.QuestionProducts.objects.filter(question=question_id)
+        products.delete()
+        models.QuestionProducts.objects.bulk_create([models.QuestionProducts(question=models.Questions.objects.get(id=question_id), product=models.Products.objects.get(id=i)) for i in request.data])
+        return Response(status=HTTP_200_OK)
+
+
+class QuestionProductsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.QuestionProducts.objects.all()
+    serializer_class = serializers.QuestionProductsSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        question_products = models.QuestionProducts.objects.filter(question=pk)
+        serializer = serializers.QuestionProductsSerializer(question_products, many=True)
+        return Response(serializer.data)

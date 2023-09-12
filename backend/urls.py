@@ -26,4 +26,6 @@ urlpatterns = [
     path('felmeres_items/', views.FelmeresItemsList.as_view()),
     path('felmeres_items/<int:pk>/', views.FelmeresItemsDetail.as_view()),
     path('offer_webhook/', views.OfferWebhook.as_view()),
+    path('question_products/', views.QuestionProductsList.as_view()),
+    path('question_products/<int:pk>/', views.QuestionProductsDetail.as_view()),
 ]

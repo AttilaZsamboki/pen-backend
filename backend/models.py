@@ -199,3 +199,12 @@ class Offers(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_offers'
+
+class QuestionProducts(models.Model):
+    product = models.ForeignKey('Products', models.DO_NOTHING)  # The composite primary key (product_id, question_id) found, that is not supported. The first column is selected.
+    question = models.ForeignKey('Questions', models.DO_NOTHING, primary_key=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_question_products'
+        unique_together = (('product', 'question'),)
