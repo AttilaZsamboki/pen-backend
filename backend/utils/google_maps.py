@@ -10,7 +10,7 @@ def calculate_distance(start, end, mode="driving"):
     try:
         direction_result = gmaps.directions(
             start, end, mode=mode)
-    except googlemaps.exceptions.ApiError as e:
+    except (googlemaps.exceptions.ApiError, googlemaps.exceptions.HTTPError) as e:
         log("Hiba a Google Maps API-al való kommunikáció során",
             status="ERROR", script_name="pen_calculate_distance", details=e)
         return "Error"
