@@ -291,6 +291,11 @@ class QuestionProductsList(generics.ListCreateAPIView):
     serializer_class = serializers.QuestionProductsSerializer
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        if self.request.query_params.get('product'):
+            return models.QuestionProducts.objects.filter(product=self.request.query_params.get('product'))
+        return super().get_queryset()
+
     def post(self, request):
         data = json.loads(request.body)
         print(data)
@@ -306,7 +311,6 @@ class QuestionProductsList(generics.ListCreateAPIView):
         products.delete()
         models.QuestionProducts.objects.bulk_create([models.QuestionProducts(question=models.Questions.objects.get(id=question_id), product=models.Products.objects.get(id=i)) for i in request.data])
         return Response(status=HTTP_200_OK)
-
 
 class QuestionProductsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.QuestionProducts.objects.all()
