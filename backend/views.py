@@ -307,10 +307,17 @@ class QuestionProductsList(generics.ListCreateAPIView):
 
     def put(self, request):
         question_id = self.request.query_params.get("question_id")
-        products = models.QuestionProducts.objects.filter(question=question_id)
-        products.delete()
-        models.QuestionProducts.objects.bulk_create([models.QuestionProducts(question=models.Questions.objects.get(id=question_id), product=models.Products.objects.get(id=i)) for i in request.data])
-        return Response(status=HTTP_200_OK)
+        product_id = self.request.query_params.get("product")
+        if question_id:
+            products = models.QuestionProducts.objects.filter(question=question_id)
+            products.delete()
+            models.QuestionProducts.objects.bulk_create([models.QuestionProducts(question=models.Questions.objects.get(id=question_id), product=models.Products.objects.get(id=i)) for i in request.data])
+            return Response(status=HTTP_200_OK)
+        if product_id:
+            questions = models.QuestionProducts.objects.filter(product=product_id)
+            questions.delete()
+            models.QuestionProducts.objects.bulk_create([models.QuestionProducts(question=models.Questions.objects.get(id=i), product=models.Products.objects.get(id=product_id)) for i in request.data])
+            return Response(status=HTTP_200_OK)
 
 class QuestionProductsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.QuestionProducts.objects.all()
