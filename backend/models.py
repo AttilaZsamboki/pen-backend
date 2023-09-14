@@ -164,6 +164,7 @@ class Felmeresek(models.Model):
     adatlap_id = models.IntegerField(primary_key=True)
     template = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
 
     class Meta:
         managed = False
@@ -177,7 +178,6 @@ class FelmeresItems(models.Model):
     inputValues = models.JSONField(db_column="input_values",blank=True, null=True)
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
     adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, db_column="adatlap_id")
-    status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
 
     class Meta:
         managed = False
