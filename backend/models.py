@@ -161,7 +161,8 @@ class ProductTemplate(models.Model):
 
 
 class Felmeresek(models.Model):
-    adatlap_id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+    adatlap_id = models.IntegerField()
     template = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
