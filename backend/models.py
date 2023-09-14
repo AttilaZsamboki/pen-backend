@@ -130,7 +130,7 @@ class Questions(models.Model):
     id = models.AutoField(primary_key=True)
     question = models.TextField(blank=True, null=True)
     type = models.TextField(blank=True, null=True)
-    product = models.ForeignKey(Products, models.DO_NOTHING, blank=True, null=True)
+    product = models.JSONField(db_column="product_id" ,blank=True, null=True)
     connection = models.CharField(max_length=255, blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
     mandatory = models.BooleanField()
@@ -204,7 +204,7 @@ class Offers(models.Model):
 
 class QuestionProducts(models.Model):
     product = models.ForeignKey('Products', models.DO_NOTHING)  # The composite primary key (product_id, question_id) found, that is not supported. The first column is selected.
-    question = models.ForeignKey('Questions', models.DO_NOTHING, primary_key=True)
+    question = models.ForeignKey('Questions', models.CASCADE, primary_key=True)
 
     class Meta:
         managed = False
