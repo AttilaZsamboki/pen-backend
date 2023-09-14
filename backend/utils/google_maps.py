@@ -18,7 +18,6 @@ def calculate_distance(start, end, mode="driving"):
     duration = direction_result[0]['legs'][0]['duration']['value']
     return {"distance": distance, "duration": duration}
 
-
 def get_street_view(location):
     size = "1920x1080"
     api_key = os.environ.get("GOOGLE_MAPS_API_KEY")

@@ -24,7 +24,7 @@ import codecs
 class CalculateDistance(APIView):
     def post(self, request):
         log("Penészmentesítés MiniCRM webhook meghívva",
-            "INFO", "pen_calculate_distance")
+            "INFO", "pen_calculate_distance", request.body)
         data = json.loads(request.body)["Data"]
         telephely = "Budapest, Nagytétényi út 218-220, 1225"
 
@@ -49,7 +49,7 @@ class CalculateDistance(APIView):
         try:
             get_street_view(location=codecs.unicode_escape_decode(address)[0])
         except Exception as e:
-            log("Penészmentesítés MiniCRM webhook sikertelen", "FAILED", e)
+            log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
         street_view_url = get_street_view_url(
             location=codecs.unicode_escape_decode(address)[0])
         try:
