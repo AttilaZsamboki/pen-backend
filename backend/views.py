@@ -17,7 +17,6 @@ from rest_framework import generics
 import json
 import requests
 import math
-import codecs
 
 # Create your views here.
 
@@ -28,7 +27,7 @@ class CalculateDistance(APIView):
         data = json.loads(request.body.decode("utf-8"))["Data"]
         telephely = "Budapest, Nagytétényi út 218-220, 1225"
 
-        address = codecs.unicode_escape_decode(f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}")[0]
+        address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
         gmaps_result = calculate_distance(
             start=telephely, end=address)
         if gmaps_result == "Error":
@@ -47,18 +46,18 @@ class CalculateDistance(APIView):
         fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
 
         try:
-            get_street_view(location=codecs.unicode_escape_decode(address)[0])
+            get_street_view(location=address[0])
         except Exception as e:
             log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
         street_view_url = get_street_view_url(
-            location=codecs.unicode_escape_decode(address)[0])
+            location=address)
         try:
             county = models.Counties.objects.get(telepules=data["Telepules"]).megye
         except:
             county = ""
             log(log_value="Penészmentesítés MiniCRM webhook sikertelen", status="FAILED", script_name="pen_calculate_distance", details=f"Nem található megye a településhez: {data['Telepules']}")
         response = update_adatlap_fields(data["Id"], {
-            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={codecs.decode(address, 'unicode_escape')}&travelmode=driving", "Megye": county})
+            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={address}&travelmode=driving", "Megye": county})
         if response["code"] == 200:
             log("Penészmentesítés MiniCRM webhook sikeresen lefutott",
                 "SUCCESS", "pen_calculate_distance")
