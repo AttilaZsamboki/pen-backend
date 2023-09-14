@@ -26,6 +26,16 @@ class CalculateDistance(APIView):
         log("Penészmentesítés MiniCRM webhook meghívva",
             "INFO", "pen_calculate_distance", request.body.decode("utf-8"))
         data = json.loads(request.body.decode("utf-8"))["Data"]
+
+        def decode_unicode_strings(data):
+            for key, value in data.items():
+                if isinstance(value, str):
+                    data[key] = value.encode().decode('unicode_escape')
+                elif isinstance(value, dict):
+                    data[key] = decode_unicode_strings(value)
+            return data
+
+        data = decode_unicode_strings(data)
         telephely = "Budapest, Nagytétényi út 218-220, 1225"
 
         address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
