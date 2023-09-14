@@ -39,6 +39,7 @@ class CalculateDistance(APIView):
         telephely = "Budapest, Nagytétényi út 218-220, 1225"
 
         address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
+        address = codecs.unicode_escape_decode(address)[0]
         gmaps_result = calculate_distance(
             start=telephely, end=address)
         if gmaps_result == "Error":
