@@ -30,7 +30,7 @@ class CalculateDistance(APIView):
 
         address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
         gmaps_result = calculate_distance(
-            start=telephely, end=codecs.unicode_escape_decode(address)[0])
+            start=telephely, end=address)
         if gmaps_result == "Error":
             log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", "pen_calculate_distance",
                 f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}")
