@@ -28,5 +28,5 @@ urlpatterns = [
     path('offer_webhook/', views.OfferWebhook.as_view()),
     path('question_products/', views.QuestionProductsList.as_view()),
     path('question_products/<int:pk>/', views.QuestionProductsDetail.as_view()),
-    path('erp_sync/', views.ErpSync.as_view()),
+    path('erp_sync/login', views.UnasLogin.as_view(), name="unas_login"),
 ]

@@ -90,6 +90,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASS', 'not found'),
         'HOST': os.getenv('DB_HOST', 'not found'),
         'PORT': os.getenv('DB_PORT', 'not found'),
+        'TEST': {
+            'NAME': 'mytestdatabase',
+        },
     }
 }
 

@@ -9,7 +9,7 @@ from . import serializers
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import generics
@@ -17,6 +17,9 @@ from rest_framework import generics
 import json
 import requests
 import math
+import os
+
+import xml.etree.ElementTree as ET
 
 # Create your views here.
 
@@ -332,7 +335,41 @@ class QuestionProductsDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = serializers.QuestionProductsSerializer(question_products, many=True)
         return Response(serializer.data)
 
-class ErpSync(APIView):
-    def get(self, request):
-        log("Penészmentesítés ERP szinkronizáció meghívva", "INFO", "pen_erp_sync", request.body)
-        return Response("Succesfully received data", status=HTTP_200_OK)
+import datetime
+from xml.etree.ElementTree import Element, SubElement, tostring, ElementTree
+from django.http import HttpResponse
+
+class UnasLogin(APIView):
+    def post(self, request):
+        response = request.body.decode("utf-8")
+        root = ET.fromstring(response)
+        for element in root.iter('ApiKey'):
+            api_key = element.text
+            if api_key == os.environ.get("CLOUD_API_KEY"):
+                # Generate XML response
+                Login = Element('Login')
+                Token = SubElement(Login, 'Token')
+                Token.text = "7c00bf375001ab9933e136fe0711491e359d80a3"
+                
+                Expire = SubElement(Login, 'Expire')
+                Expire.text = (datetime.datetime.now() + datetime.timedelta(days=365*2)).strftime("%Y.%m.%d %H:%M:%S")
+                
+                ShopId = SubElement(Login, 'ShopId')
+                ShopId.text = "86997"
+
+                Subscription = SubElement(Login, 'Subscription')
+                Subscription.text ="vip-100000"
+
+                Permissions = SubElement(Login,'Permissions')
+                permission_items = ["getOrder","setOrder","getStock","setStock","getProduct","setProduct","getProductDB","setProductDB","getProductParameter","setProductParameter","getCategory","setCategory","getCustomer","setCustomer","checkCustomer","getCustomerGroup","setCustomerGroup","getNewsletter","setNewsletter","getScriptTag","setScriptTag","getPage","setPage","getPageContent","setPageContent","getStorage","setStorage","getAutomatism","setAutomatism","getOrderStatus","setOrderStatus","getCoupon","setCoupon"]
+                for item in permission_items:
+                    permission_sub = SubElement(Permissions,'Permission')  
+                    permission_sub.text = item
+
+                Status = SubElement(Login,'Status')
+                Status.text = "ok"
+                
+                response = '<?xml version="1.0" encoding="UTF-8" ?>\n' + ET.tostring(Login,encoding='unicode')
+                print(response)
+                return Response(response, status=HTTP_200_OK, content_type="application/xml")
+            return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
