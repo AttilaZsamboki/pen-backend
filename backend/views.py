@@ -332,7 +332,7 @@ class QuestionProductsDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = serializers.QuestionProductsSerializer(question_products, many=True)
         return Response(serializer.data)
 
-class ERPSync(APIView):
+class ErpSync(APIView):
     def get(self, request):
         log("Penészmentesítés ERP szinkronizáció meghívva", "INFO", "pen_erp_sync", request.body)
         return Response("Succesfully received data", status=HTTP_200_OK)
