@@ -371,5 +371,5 @@ class UnasLogin(APIView):
                 
                 response = '<?xml version="1.0" encoding="UTF-8" ?>\n' + ET.tostring(Login,encoding='unicode')
                 print(response)
-                return Response(response, status=HTTP_200_OK, content_type="application/xml")
+                return Response(response, status=HTTP_200_OK, content_type="text/xml")
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
