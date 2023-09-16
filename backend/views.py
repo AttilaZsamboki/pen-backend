@@ -371,5 +371,5 @@ class UnasLogin(APIView):
                 
                 response = '<?xml version="1.0" encoding="UTF-8" ?>\n' + ET.tostring(Login,encoding='unicode')
                 print(response)
-                return Response(data=response, status=HTTP_200_OK, headers={"cache-control": "no-cache, must-revalidate","cache-control":"max-age=604800", "access-control-allow-origin":"*","access-control-allow-headers":"Authorization","expires":"Sat, 23 Sep 2023 16:55:47 GMT","vary":"Accept-Encoding", "content-encoding":"gzip","content-type":"text/html; charset=UTF-8"})
+                return HttpResponse(response, status=HTTP_200_OK, headers={"cache-control": "no-cache, must-revalidate","cache-control":"max-age=604800", "access-control-allow-origin":"*","access-control-allow-headers":"Authorization","expires":"Sat, 23 Sep 2023 16:55:47 GMT","vary":"Accept-Encoding", "content-encoding":"gzip","content-type":"text/html; charset=UTF-8"})
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
