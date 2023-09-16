@@ -166,6 +166,8 @@ class Felmeresek(models.Model):
     template = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
+    created_at = models.DateField(blank=True, null=True)
+    updated_at = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -210,3 +212,11 @@ class QuestionProducts(models.Model):
         managed = False
         db_table = 'pen_question_products'
         unique_together = (('product', 'question'),)
+
+class ErpAuthTokens(models.Model):
+    token = models.CharField(max_length=255, blank=True, null=True)
+    expire = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_erp_auth_tokens'
