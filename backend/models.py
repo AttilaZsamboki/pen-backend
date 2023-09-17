@@ -220,3 +220,11 @@ class ErpAuthTokens(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_erp_auth_tokens'
+
+class Orders(models.Model):
+    adatlap_id = models.IntegerField(blank=True, null=True)
+    order_id = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_orders'

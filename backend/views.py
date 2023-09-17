@@ -1,5 +1,5 @@
 from .utils.google_maps import get_street_view, get_street_view_url
-from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, list_to_dos, update_todo, statuses
+from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, list_to_dos, update_todo, statuses, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap
 from .utils.logs import log
 from .utils.utils import delete_s3_file
 from .utils.google_maps import calculate_distance
@@ -16,6 +16,7 @@ from rest_framework import generics
 
 from django.db import connection
 from django.http import HttpResponse
+from django.db.models import Q
 
 import json
 import requests
@@ -128,11 +129,16 @@ class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class OrderWebhook(APIView):
     def post(self, request):
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", request.body)
+        data = json.loads(request.body)
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", data["Id"])
+        try:
+            models.Orders(adatlap_id=data["Id"], order_id=data["Head"]["Id"]).save()
+        except Exception as e:
+            log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_order_webhook", e)
+            return
+        log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_order_webhook")
         return Response("Succesfully received data", status=HTTP_200_OK)
 
-
-from django.db.models import Q
 
 class ProductsList(generics.ListCreateAPIView):
     serializer_class = serializers.ProductsSerializer
@@ -360,7 +366,7 @@ class UnasLogin(APIView):
                 Expire.text = (datetime.datetime.now() + datetime.timedelta(days=365*2)).strftime("%Y.%m.%d %H:%M:%S")
                 
                 ShopId = ET.SubElement(Login, 'ShopId')
-                ShopId.text = "86997"
+                ShopId.text = "119"
 
                 Subscription = ET.SubElement(Login, 'Subscription')
                 Subscription.text ="vip-100000"
@@ -380,6 +386,164 @@ class UnasLogin(APIView):
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
 
 class UnasGetOrder(APIView):
-    def post(self, request):
-        response = request.body.decode("utf-8")
-        root = ET.fromstring(response)
+    def get(self, request):
+        # token = request.headers.get("Token")
+        # if token:
+        if True:
+            # try:
+                # token = models.ErpAuthTokens.objects.get(token=token)
+                # if token.expire > datetime.datetime.now():
+                if True:
+                    datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id), "AdatlapDetails": get_adatlap_details(id=i["Id"]), "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"]), "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])} for i in get_all_adatlap(category_id=29, status_id=3008)["Results"].values() if get_all_adatlap(category_id=29, status_id=3008)["Results"] != {}]
+                    print(json.dumps(datas, indent=4, ensure_ascii=False))
+                    response = """<?xml version="1.0" encoding="UTF-8" ?>
+                    <Orders> """ + "\n".join([f"""<Order>
+                            <Key>{data["OrderData"]["Id"]}</Key>
+                            <Date>{data["AdatlapDetails"]["CreatedAt"]}</Date>
+                            <DateMod>{data["AdatlapDetails"]["UpdatedAt"]}</DateMod>
+                            <Lang>hu</Lang>
+                            <Customer>
+                                <Id>{data["Kapcsolat"]["Id"]}</Id>
+                                <Email>
+                                    {data["Kapcsolat"]["Email"]}
+                                </Email>
+                                <Username>
+                                    {data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}
+                                </Username>
+                                <Contact>
+                                    <Name>
+                                        {data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}
+                                    </Name>
+                                    <Phone>
+                                        {data["Kapcsolat"]["Phone"]}
+                                    </Phone>
+                                    <Mobile>
+                                        {data["Kapcsolat"]["Phone"]}
+                                    </Mobile>
+                                    <Lang>hu</Lang>
+                                </Contact>
+                                <Addresses>
+                                    <Invoice>
+                                        <Name>
+                                            {data["BusinessKapcsolat"]["Name"]}
+                                        </Name>
+                                        <ZIP>{data["Cím"]["PostalCode"]}</ZIP>
+                                        <City>
+                                            {data["Cím"]["City"]}
+                                        </City>
+                                        <Street>
+                                            {data["Cím"]["Address"]}
+                                        </Street>
+                                        <StreetName>
+                                            {data["Cím"]["Address"].split(" ")[0]}
+                                        </StreetName>
+                                        <StreetType>
+                                            {data["Cím"]["Address"].split(" ")[1]}
+                                        </StreetType>
+                                        <StreetNumber>
+                                            {data["Cím"]["Address"].split(" ")[2]}
+                                        </StreetNumber>
+                                        <County>
+                                            {data["Cím"]["County"]}
+                                        </County>
+                                        <Country>
+                                            {data["Cím"]["CountryId"]}
+                                        </Country>
+                                        <CountryCode>hu</CountryCode>
+                                        <TaxNumber>
+                                            {data["BusinessKapcsolat"]["VatNumber"]}
+                                        </TaxNumber>
+                                        <EUTaxNumber>
+                                            {data['BusinessKapcsolat']["EUVatNumber"] if data['BusinessKapcsolat']["EUVatNumber"] else ""}
+                                        </EUTaxNumber>
+                                        <CustomerType>
+                                            private
+                                        </CustomerType>
+                                    </Invoice>
+                                    <Shipping>
+                                        <Name>
+                                            {data['OrderData']["Customer"]["Name"]}
+                                        </Name>
+                                        <ZIP>{data['OrderData']["Customer"]["PostalCode"]}</ZIP>
+                                        <City>
+                                            {data["OrderData"]["Customer"]["City"]}
+                                        </City>
+                                        <Street>
+                                            {data["OrderData"]["Customer"]["Address"]}
+                                        </Street>
+                                        <StreetName>
+                                            {data["OrderData"]["Customer"]["Address"].split(" ")[0]}
+                                        </StreetName>
+                                        <StreetType>
+                                            {data["OrderData"]["Customer"]["Address"].split(" ")[1]}
+                                        </StreetType>
+                                        <StreetNumber>
+                                            {data["OrderData"]["Customer"]["Address"].split(" ")[2]}
+                                        </StreetNumber>
+                                        <County>
+                                            {data["OrderData"]["Customer"]["County"]}
+                                        </County>
+                                        <Country>
+                                            {data["OrderData"]["Customer"]["CountryId"]}
+                                        </Country>
+                                        <CountryCode>hu</CountryCode>
+                                        <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
+                                        <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
+                                        <RecipientName>
+                                            {data["OrderData"]["Customer"]["Name"]}
+                                        </RecipientName>
+                                    </Shipping>
+                                </Addresses>
+                            </Customer>
+                            <Currency>{data['OrderData']["CurrencyCode"]}</Currency>
+                            <Status>
+                                Folyamatban
+                            </Status>
+                            <StatusDateMod>
+                                <![CDATA[2021.03.25 20:15:39]]>
+                            </StatusDateMod>
+                            <StatusID>
+                                3008
+                            </StatusID>
+                            <Payment>
+                                <Id>3338656</Id>
+                                <Name>
+                                    {data["OrderData"]["PaymentMethod"]}
+                                </Name>
+                                <Type>transfer</Type>
+                            </Payment>
+                            <Shipping>
+                                <Id>3372937</Id>
+                                <Name>
+                                    <![CDATA[GLS CsomagPontok]]>
+                                </Name>
+                            </Shipping>
+                            <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
+                            <Items>
+                                """+"\n".join([f"""<Item>
+                                    <Id>{i["Id"]}</Id>
+                                    <Sku>{i["SKU"]}</Sku>
+                                    <Name>
+                                        {i["Name"]}
+                                    </Name>
+                                    <ProductParams>
+                                    </ProductParams>
+                                    <Unit>{i["Unit"]}</Unit>
+                                    <Quantity>{i["Quantity"]}</Quantity>
+                                    <PriceNet>{i["PriceNet"]}</PriceNet>
+                                    <PriceGross>{float(i["PriceNet"])*1.27}</PriceGross>
+                                    <Vat>{i["VAT"]}</Vat>
+                                    <Status>
+                                        <![CDATA[]]>
+                                    </Status>""" for i in data["OrderData"]["Items"]])+"""
+                                </Item>
+                            </Items>
+                        </Order> """ for data in datas]) + """
+                        </Orders>
+                    """
+                    print(response)
+                    return Response(status=HTTP_200_OK)
+                else:
+                    return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
+            # except Exception as e:
+            #     return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)

@@ -31,10 +31,15 @@ def update_adatlap_fields(id, fields):
         return {"code": adatlap.status_code, "reason": adatlap.reason}
 
 
-def get_all_adatlap(category_id, status_id=None):
+def get_all_adatlap(category_id, status_id=None, criteria=None):
     query_params = {"CategoryId": category_id} if not status_id else {
         "CategoryId": category_id, "StatusId": status_id}
-    return get_request(endpoint="Project", query_params=query_params)
+    adatlapok = get_request(endpoint="Project", query_params=query_params)
+    if adatlapok == "Error":
+        return "Error"
+    if criteria:
+        return [adatlap for adatlap in adatlapok["Results"] if criteria(adatlap)]
+    return adatlapok
 
 
 def get_adatlap_details(id):
@@ -46,6 +51,14 @@ def contact_details(contact_id):
     return get_request(
         "Contact", id=contact_id)
 
+def get_all_contacts(adatlap_ids, type="ContactId"):
+    contacts = []
+    for adatlap_id in adatlap_ids:
+        adatlap_details = get_adatlap_details(adatlap_id)
+        if adatlap_details == "Error":
+            return "Error"
+        contacts.append({"AdatlapId": adatlap_id, **contact_details(adatlap_details[type])})
+    return contacts
 
 def address_ids(contact_id):
     return get_request("AddressList", id=contact_id)["Results"].keys()
@@ -55,6 +68,11 @@ def address_details(address_id):
     return get_request(
         "Address", id=address_id)
 
+def get_all_addresses(contact_ids):
+    addresses = []
+    for contact_id in contact_ids:
+        addresses.append(address_list(contact_id=contact_id))
+    return addresses
 
 def address_list(contact_id):
     return [address_details(
@@ -81,21 +99,32 @@ def create_to_do(adatlap_id, user, type, comment, deadline):
     return requests.put(
         f"https://r3.minicrm.hu/Api/R3/ToDo/", auth=(system_id, api_key), params=data)
 
-def get_all_adatlap_details(category_id, status_id=None, criteria=None, deleted=False):
-    adatlapok = get_all_adatlap(category_id=category_id, status_id=status_id)
-    if adatlapok == "Error":
-        return "Error"
-    adatlapok_detailed = []
-    for i in adatlapok["Results"]:
-        if adatlapok["Results"][i]["Deleted"] != deleted:
-            continue
-        adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])
-        if criteria:
-            if criteria(adatlap):
-                adatlapok_detailed.append(adatlap)
-            continue
-        adatlapok_detailed.append(adatlap)
-    return adatlapok_detailed
+def get_all_adatlap_details(category_id=None, status_id=None, criteria=None, deleted=False, ids=None):
+    if not ids:
+        adatlapok = get_all_adatlap(category_id=category_id, status_id=status_id)
+        if adatlapok == "Error":
+            return "Error"
+        adatlapok_detailed = []
+        for i in adatlapok["Results"]:
+            if adatlapok["Results"][i]["Deleted"] != deleted:
+                continue
+            adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])
+            if criteria:
+                if criteria(adatlap):
+                    adatlapok_detailed.append(adatlap)
+                continue
+            adatlapok_detailed.append(adatlap)
+        return adatlapok_detailed
+    else:
+        adatlapok_detailed = []
+        for id in ids:
+            adatlap = get_adatlap_details(id)
+            if criteria:
+                if criteria(adatlap):
+                    adatlapok_detailed.append(adatlap)
+                continue
+            adatlapok_detailed.append(adatlap)
+        return adatlapok_detailed
 
 def list_to_dos(adatlap_id, criteria=None):
     todos = get_request(endpoint="ToDoList", id=adatlap_id)
@@ -214,3 +243,6 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None):
 
 def get_offer(offer_id):
     return get_request(endpoint="Offer", id=offer_id, isR3=False)
+
+def get_order(order_id):
+    return get_request(endpoint="Order", id=order_id, isR3=False)

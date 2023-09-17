@@ -1,6 +1,6 @@
 from ..utils.logs import log
 from ..utils.minicrm import get_all_adatlap_details, create_order
-from ..models import FelmeresItems, Offers, Products
+from ..models import FelmeresItems, Offers, Products, Felmeresek
 import os
 import dotenv
 dotenv.load_dotenv()
@@ -11,11 +11,11 @@ def main():
     adatlapok = get_all_adatlap_details(category_id=21, status_id=2896)
     for adatlap in adatlapok:
         log(f"{adatlap['Name']} megrendelés létrehozása", script_name="pen_create_order", status="INFO")
-        id = adatlap["Felmeresid"]
+        id = Felmeresek.objects.filter(adatlap_id=adatlap["Felmeresid"]).order_by("-created_at")[0].id
         items = [{"sku": Products.objects.filter(id=i.productId)[0].sku if Products.objects.filter(id=i.productId).exists() else "", "productId": i.productId, "netPrice": i.netPrice, "inputValues": i.inputValues, "name": i.name} for i in FelmeresItems.objects.filter(adatlap_id=id)]
         offer = Offers.objects.filter(adatlap_id=adatlap["Id"])
-        if offer:
-            order = create_order(adatlap_id=id, contact_id=adatlap["ContactId"], items=items, offer_id=offer[0].offer_id, adatlap_status="Szervezésre vár")
+        if offer and items:
+            order = create_order(adatlap_id=adatlap["Felmeresid"], contact_id=adatlap["ContactId"], items=items, offer_id=offer[0].offer_id, adatlap_status="Szervezésre vár")
             if order == "Error":
                 log(f"{adatlap['Name']} megrendelés létrehozása sikertelen", script_name="pen_create_order", status="ERROR")
                 continue
