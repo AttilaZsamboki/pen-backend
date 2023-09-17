@@ -401,128 +401,66 @@ class UnasGetOrder(APIView):
                             <Lang>hu</Lang>
                             <Customer>
                                 <Id>{data["Kapcsolat"]["Id"]}</Id>
-                                <Email>
-                                    {data["Kapcsolat"]["Email"]}
-                                </Email>
-                                <Username>
-                                    {data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}
-                                </Username>
+                                <Email>{data["Kapcsolat"]["Email"]}</Email>
+                                <Username>{data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}</Username>
                                 <Contact>
-                                    <Name>
-                                        {data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}
-                                    </Name>
-                                    <Phone>
-                                        {data["Kapcsolat"]["Phone"]}
-                                    </Phone>
-                                    <Mobile>
-                                        {data["Kapcsolat"]["Phone"]}
-                                    </Mobile>
+                                    <Name>{data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}</Name>
+                                    <Phone>{data["Kapcsolat"]["Phone"]}</Phone>
+                                    <Mobile>{data["Kapcsolat"]["Phone"]}</Mobile>
                                     <Lang>hu</Lang>
                                 </Contact>
                                 <Addresses>
                                     <Invoice>
-                                        <Name>
-                                            {data["BusinessKapcsolat"]["Name"]}
-                                        </Name>
+                                        <Name>{data["BusinessKapcsolat"]["Name"]}</Name>
                                         <ZIP>{data["Cím"]["PostalCode"]}</ZIP>
-                                        <City>
-                                            {data["Cím"]["City"]}
-                                        </City>
-                                        <Street>
-                                            {data["Cím"]["Address"]}
-                                        </Street>
-                                        <StreetName>
-                                            {data["Cím"]["Address"].split(" ")[0]}
-                                        </StreetName>
-                                        <StreetType>
-                                            {data["Cím"]["Address"].split(" ")[1]}
-                                        </StreetType>
-                                        <StreetNumber>
-                                            {data["Cím"]["Address"].split(" ")[2]}
-                                        </StreetNumber>
-                                        <County>
-                                            {data["Cím"]["County"]}
-                                        </County>
-                                        <Country>
-                                            {data["Cím"]["CountryId"]}
-                                        </Country>
+                                        <City>{data["Cím"]["City"]}</City>
+                                        <Street>{data["Cím"]["Address"]}</Street>
+                                        <StreetName>{data["Cím"]["Address"].split(" ")[0]}</StreetName>
+                                        <StreetType>{data["Cím"]["Address"].split(" ")[1]}</StreetType>
+                                        <StreetNumber>{data["Cím"]["Address"].split(" ")[2]}</StreetNumber>
+                                        <County>{data["Cím"]["County"]}</County>
+                                        <Country>{data["Cím"]["CountryId"]}</Country>
                                         <CountryCode>hu</CountryCode>
-                                        <TaxNumber>
-                                            {data["BusinessKapcsolat"]["VatNumber"]}
-                                        </TaxNumber>
-                                        <EUTaxNumber>
-                                            {data['BusinessKapcsolat']["EUVatNumber"] if data['BusinessKapcsolat']["EUVatNumber"] else ""}
-                                        </EUTaxNumber>
-                                        <CustomerType>
-                                            private
-                                        </CustomerType>
+                                        <TaxNumber>{data["BusinessKapcsolat"]["VatNumber"]}</TaxNumber>
+                                        <EUTaxNumber>{data['BusinessKapcsolat']["EUVatNumber"] if data['BusinessKapcsolat']["EUVatNumber"] else ""}</EUTaxNumber>
+                                        <CustomerType>private</CustomerType>
                                     </Invoice>
                                     <Shipping>
-                                        <Name>
-                                            {data['OrderData']["Customer"]["Name"]}
-                                        </Name>
+                                        <Name>{data['OrderData']["Customer"]["Name"]}</Name>
                                         <ZIP>{data['OrderData']["Customer"]["PostalCode"]}</ZIP>
-                                        <City>
-                                            {data["OrderData"]["Customer"]["City"]}
-                                        </City>
-                                        <Street>
-                                            {data["OrderData"]["Customer"]["Address"]}
-                                        </Street>
-                                        <StreetName>
-                                            {data["OrderData"]["Customer"]["Address"].split(" ")[0]}
-                                        </StreetName>
-                                        <StreetType>
-                                            {data["OrderData"]["Customer"]["Address"].split(" ")[1]}
-                                        </StreetType>
-                                        <StreetNumber>
-                                            {data["OrderData"]["Customer"]["Address"].split(" ")[2]}
-                                        </StreetNumber>
-                                        <County>
-                                            {data["OrderData"]["Customer"]["County"]}
-                                        </County>
-                                        <Country>
-                                            {data["OrderData"]["Customer"]["CountryId"]}
-                                        </Country>
+                                        <City>{data["OrderData"]["Customer"]["City"]}</City>
+                                        <Street>{data["OrderData"]["Customer"]["Address"]}</Street>
+                                        <StreetName>{data["OrderData"]["Customer"]["Address"].split(" ")[0]}</StreetName>
+                                        <StreetType>{data["OrderData"]["Customer"]["Address"].split(" ")[1]}</StreetType>
+                                        <StreetNumber>{data["OrderData"]["Customer"]["Address"].split(" ")[2]}</StreetNumber>
+                                        <County>{data["OrderData"]["Customer"]["County"]}</County>
+                                        <Country>{data["OrderData"]["Customer"]["CountryId"]}</Country>
                                         <CountryCode>hu</CountryCode>
                                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
-                                        <RecipientName>
-                                            {data["OrderData"]["Customer"]["Name"]}
-                                        </RecipientName>
+                                        <RecipientName>{data["OrderData"]["Customer"]["Name"]}</RecipientName>
                                     </Shipping>
                                 </Addresses>
                             </Customer>
                             <Currency>{data['OrderData']["CurrencyCode"]}</Currency>
-                            <Status>
-                                Folyamatban
-                            </Status>
-                            <StatusDateMod>
-                                <![CDATA[2021.03.25 20:15:39]]>
-                            </StatusDateMod>
-                            <StatusID>
-                                3008
-                            </StatusID>
+                            <Status>Folyamatban</Status>
+                            <StatusDateMod><![CDATA[2021.03.25 20:15:39]]></StatusDateMod>
+                            <StatusID>3008</StatusID>
                             <Payment>
                                 <Id>3338656</Id>
-                                <Name>
-                                    {data["OrderData"]["PaymentMethod"]}
-                                </Name>
+                                <Name>{data["OrderData"]["PaymentMethod"]}</Name>
                                 <Type>transfer</Type>
                             </Payment>
                             <Shipping>
                                 <Id>3372937</Id>
-                                <Name>
-                                    <![CDATA[GLS CsomagPontok]]>
-                                </Name>
+                                <Name><![CDATA[GLS CsomagPontok]]></Name>
                             </Shipping>
                             <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
                             <Items>
                                 """+"\n".join([f"""<Item>
                                     <Id>{i["Id"]}</Id>
                                     <Sku>{i["SKU"]}</Sku>
-                                    <Name>
-                                        {i["Name"]}
-                                    </Name>
+                                    <Name>{i["Name"]}</Name>
                                     <ProductParams>
                                     </ProductParams>
                                     <Unit>{i["Unit"]}</Unit>
@@ -543,3 +481,4 @@ class UnasGetOrder(APIView):
                     return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
             except Exception as e:
                 return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
+        return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
