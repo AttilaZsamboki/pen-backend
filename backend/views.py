@@ -381,19 +381,16 @@ class UnasLogin(APIView):
                 Status.text = "ok"
                 
                 response = '<?xml version="1.0" encoding="UTF-8" ?>\n' + ET.tostring(Login,encoding='unicode')
-                print(response)
                 return HttpResponse(response, status=HTTP_200_OK)
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
 
 class UnasGetOrder(APIView):
     def get(self, request):
-        # token = request.headers.get("Token")
-        # if token:
-        if True:
-            # try:
-                # token = models.ErpAuthTokens.objects.get(token=token)
-                # if token.expire > datetime.datetime.now():
-                if True:
+        token = request.headers.get("Token")
+        if token:
+            try:
+                token = models.ErpAuthTokens.objects.get(token=token)
+                if token.expire > datetime.datetime.now():
                     datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id), "AdatlapDetails": get_adatlap_details(id=i["Id"]), "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"]), "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])} for i in get_all_adatlap(category_id=29, status_id=3008)["Results"].values() if get_all_adatlap(category_id=29, status_id=3008)["Results"] != {}]
                     print(json.dumps(datas, indent=4, ensure_ascii=False))
                     response = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -541,9 +538,8 @@ class UnasGetOrder(APIView):
                         </Order> """ for data in datas]) + """
                         </Orders>
                     """
-                    print(response)
-                    return Response(status=HTTP_200_OK)
+                    return HttpResponse(response, status=HTTP_200_OK)
                 else:
                     return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
-            # except Exception as e:
-            #     return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
+            except Exception as e:
+                return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
