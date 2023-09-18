@@ -466,7 +466,7 @@ class UnasGetOrder(APIView):
                             <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
                             <Items>
                                 """+"\n".join([f"""<Item>
-                                    <Id>1505</Id>
+                                    <Id>{i["Id"]}</Id>
                                     <Sku>{i["SKU"] if i["SKU"] else i["Id"]}</Sku>
                                     <Name>{i["Name"]}</Name>
                                     <ProductParams>
