@@ -497,8 +497,3 @@ class UnasSetProduct(APIView):
     def post(self, request):
         log("Unas termék szinkron megkezdődött", "INFO", "pen_unas_set_product", request.body.decode("utf-8"))
         return Response(status=HTTP_200_OK)
-
-class UnasGetProduct(APIView):
-    def get(self, request):
-        log("Unas termék lekérdezés megkezdődött", "INFO", "pen_unas_get_product", request.body.decode("utf-8"))
-        return Response(status=HTTP_200_OK)
