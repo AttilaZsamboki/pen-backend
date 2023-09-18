@@ -404,8 +404,8 @@ class UnasGetOrder(APIView):
                     response = """<?xml version="1.0" encoding="UTF-8" ?>
                     <Orders> """ + "\n".join([f"""<Order>
                             <Key>{data["OrderData"]["Id"]}</Key>
-                            <Date>{data["AdatlapDetails"]["CreatedAt"]}</Date>
-                            <DateMod>{data["AdatlapDetails"]["UpdatedAt"]}</DateMod>
+                            <Date>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</Date>
+                            <DateMod>{data["AdatlapDetails"]["UpdatedAt"].replace("-", ".")}</DateMod>
                             <Lang>hu</Lang>
                             <Customer>
                                 <Id>{data["Kapcsolat"]["Id"]}</Id>
