@@ -350,6 +350,7 @@ class QuestionProductsDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class UnasLogin(APIView):
     def get(self, request):
+        log("Unas login meghívva", "INFO", "pen_unas_login", request.body.decode("utf-8"))
         response = request.body.decode("utf-8")
         root = ET.fromstring(response)
         for element in root.iter('ApiKey'):
