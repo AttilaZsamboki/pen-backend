@@ -386,7 +386,7 @@ class UnasLogin(APIView):
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
 
 class UnasGetOrder(APIView):
-    def get(self, request):
+    def post(self, request):
         auth_header = request.headers.get('Authorization')
         if auth_header and auth_header.startswith('Bearer '):
             try:
