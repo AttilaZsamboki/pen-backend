@@ -14,6 +14,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import generics
 
+from rest_framework_xml.parsers import XMLParser
+
 from django.db import connection
 from django.http import HttpResponse
 from django.db.models import Q
@@ -386,7 +388,7 @@ class UnasLogin(APIView):
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
 
 class UnasGetOrder(APIView):
-
+    parser_classes = (XMLParser, )
     def post(self, request):
         log("Unas rendelések lekérdezése meghívva", "INFO", "pen_unas_get_order", request.body.decode("utf-8"))
         auth_header = request.headers.get('Authorization')
