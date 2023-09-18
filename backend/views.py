@@ -466,7 +466,7 @@ class UnasGetOrder(APIView):
                             <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
                             <Items>
                                 """+"\n".join([f"""<Item>
-                                    <Id>{i["Id"]}</Id>
+                                    <Id>1505</Id>
                                     <Sku>{i["SKU"] if i["SKU"] else i["Id"]}</Sku>
                                     <Name>{i["Name"]}</Name>
                                     <ProductParams>
@@ -491,3 +491,8 @@ class UnasGetOrder(APIView):
             except Exception as e:
                 return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
+
+class UnasSetProduct(APIView):
+    def post(self, request):
+        log("Unas termék szinkron megkezdődött", "INFO", "pen_unas_set_product", request.body.decode("utf-8"))
+        return Response(status=HTTP_200_OK)
