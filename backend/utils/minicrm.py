@@ -156,7 +156,7 @@ statuses = {
 def update_todo(id, fields):
     update_request(id=id, fields=fields, endpoint="ToDo")
 
-def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None):
+def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, project_data=None):
     adatlap = get_adatlap_details(id=adatlap_id)
     contactData = contact_details(contact_id=contact_id)
     offerData = get_offer(offer_id)
@@ -225,6 +225,7 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None):
                 </Products>
                 <Project>
                     <Enum1951>{adatlap_status if adatlap_status else ''}</Enum1951>
+                    """+"\n".join([f"<{k}>{v}</{k}>" for k, v in project_data.items() if v])+"""
                 </Project>
             </Order>
         </Orders>
