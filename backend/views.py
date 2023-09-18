@@ -376,7 +376,7 @@ class UnasLogin(APIView):
                 Subscription.text ="vip-100000"
 
                 Permissions = ET.SubElement(Login,'Permissions')
-                permission_items = ["getOrder"]
+                permission_items = ["getOrder", "setProduct"]
                 for item in permission_items:
                     permission_sub = ET.SubElement(Permissions,'Permission')  
                     permission_sub.text = item
