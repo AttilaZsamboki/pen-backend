@@ -372,7 +372,7 @@ class UnasLogin(APIView):
                 Subscription.text ="vip-100000"
 
                 Permissions = ET.SubElement(Login,'Permissions')
-                permission_items = ["getOrder","setOrder","getStock","setStock","getProduct","setProduct","getProductDB","setProductDB","getProductParameter","setProductParameter","getCategory","setCategory","getCustomer","setCustomer","checkCustomer","getCustomerGroup","setCustomerGroup","getNewsletter","setNewsletter","getScriptTag","setScriptTag","getPage","setPage","getPageContent","setPageContent","getStorage","setStorage","getAutomatism","setAutomatism","getOrderStatus","setOrderStatus","getCoupon","setCoupon"]
+                permission_items = ["getOrder"]
                 for item in permission_items:
                     permission_sub = ET.SubElement(Permissions,'Permission')  
                     permission_sub.text = item
