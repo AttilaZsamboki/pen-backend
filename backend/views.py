@@ -467,7 +467,7 @@ class UnasGetOrder(APIView):
                             <Items>
                                 """+"\n".join([f"""<Item>
                                     <Id>{i["Id"]}</Id>
-                                    <Sku>{i["SKU"]}</Sku>
+                                    <Sku>{i["SKU"] if i["SKU"] else i["Id"]}</Sku>
                                     <Name>{i["Name"]}</Name>
                                     <ProductParams>
                                     </ProductParams>
