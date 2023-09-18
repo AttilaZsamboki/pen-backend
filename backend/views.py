@@ -15,6 +15,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import generics
 
 from rest_framework_xml.parsers import XMLParser
+from rest_framework_xml.renderers import XMLRenderer
 
 from django.db import connection
 from django.http import HttpResponse
@@ -389,6 +390,8 @@ class UnasLogin(APIView):
 
 class UnasGetOrder(APIView):
     parser_classes = (XMLParser, )
+    renderer_classes = (XMLRenderer, )
+
     def post(self, request):
         log("Unas rendelések lekérdezése meghívva", "INFO", "pen_unas_get_order", request.body.decode("utf-8"))
         auth_header = request.headers.get('Authorization')
