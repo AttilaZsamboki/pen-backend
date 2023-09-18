@@ -386,9 +386,10 @@ class UnasLogin(APIView):
 
 class UnasGetOrder(APIView):
     def get(self, request):
-        token = request.headers.get("Token")
-        if token:
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
             try:
+                token = auth_header[7:]  # Extract the token
                 token = models.ErpAuthTokens.objects.get(token=token)
                 if token.expire > datetime.datetime.now():
                     datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id), "AdatlapDetails": get_adatlap_details(id=i["Id"]), "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"]), "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])} for i in get_all_adatlap(category_id=29, status_id=3008)["Results"].values() if get_all_adatlap(category_id=29, status_id=3008)["Results"] != {}]
