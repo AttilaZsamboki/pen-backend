@@ -3,7 +3,9 @@ from ..config_production import base_path as prod
 import boto3
 from django.conf import settings
 from dotenv import load_dotenv
+
 import os
+
 load_dotenv()
 
 base_path = dev if os.environ.get("ENVIRONMENT") == "development" else prod

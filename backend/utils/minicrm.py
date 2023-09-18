@@ -1,7 +1,11 @@
 import os
 import requests
 import random
+
+from html import escape
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -161,7 +165,7 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, p
     contactData = contact_details(contact_id=contact_id)
     offerData = get_offer(offer_id)
     if offerData == "Error":
-        return "Error"
+        return {"status": "Error", "response": "Offer not found"}
     randomId = random.randint(100000, 999999)
     products = '\n'.join([
         f'''<Product Id="{item['productId']}">
@@ -225,7 +229,7 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, p
                 </Products>
                 <Project>
                     <Enum1951>{adatlap_status if adatlap_status else ''}</Enum1951>
-                    """+"\n".join([f"<{k}>{v}</{k}>" for k, v in project_data.items() if v])+"""
+                    """+"\n".join([f"<{k}><![CDATA[{v}]]></{k}>" for k, v in project_data.items() if v])+"""
                 </Project>
             </Order>
         </Orders>
@@ -236,11 +240,11 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, p
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
     data = requests.post(
-        f"https://r3.minicrm.hu/Api/SyncFeed/119/Upload", auth=(system_id, api_key), data=xml_string.encode("utf-8"))
+        f"https://r3.minicrm.hu/Api/SyncFeed/119/Upload", auth=(system_id, api_key), data=xml_string.encode("utf-8"), headers={"Content-Type": "application/xml"})
     if data.status_code == 200:
-        return data.json()
+        return {"status": "success", "response": data.json()}
     else:
-        return "Error"
+        return {"status": "error", "response": data.text, "xml": xml_string}
 
 def get_offer(offer_id):
     return get_request(endpoint="Offer", id=offer_id, isR3=False)
