@@ -387,6 +387,7 @@ class UnasLogin(APIView):
 
 class UnasGetOrder(APIView):
     def post(self, request):
+        log("Unas rendelések lekérdezése meghívva", "INFO", "pen_unas_get_order", request.body.decode("utf-8"))
         auth_header = request.headers.get('Authorization')
         if auth_header and auth_header.startswith('Bearer '):
             try:
