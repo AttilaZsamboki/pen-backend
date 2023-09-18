@@ -494,6 +494,9 @@ class UnasGetOrder(APIView):
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
 class UnasSetProduct(APIView):
+    parser_classes = (XMLParser, )
+    renderer_classes = (XMLRenderer, )
+
     def post(self, request):
         log("Unas termék szinkron megkezdődött", "INFO", "pen_unas_set_product", request.body.decode("utf-8"))
         return Response(status=HTTP_200_OK)
