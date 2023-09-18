@@ -393,7 +393,6 @@ class UnasGetOrder(APIView):
                 token = models.ErpAuthTokens.objects.get(token=token)
                 if token.expire > datetime.datetime.now():
                     datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id), "AdatlapDetails": get_adatlap_details(id=i["Id"]), "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"]), "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])} for i in get_all_adatlap(category_id=29, status_id=3008)["Results"].values() if get_all_adatlap(category_id=29, status_id=3008)["Results"] != {}]
-                    print(json.dumps(datas, indent=4, ensure_ascii=False))
                     response = """<?xml version="1.0" encoding="UTF-8" ?>
                     <Orders> """ + "\n".join([f"""<Order>
                             <Key>{data["OrderData"]["Id"]}</Key>
@@ -471,8 +470,9 @@ class UnasGetOrder(APIView):
                                     <Vat>{i["VAT"]}</Vat>
                                     <Status>
                                         <![CDATA[]]>
-                                    </Status>""" for i in data["OrderData"]["Items"]])+"""
-                                </Item>
+                                    </Status>
+                                    </Item>
+                                    """ for i in data["OrderData"]["Items"]])+"""
                             </Items>
                         </Order> """ for data in datas]) + """
                         </Orders>
