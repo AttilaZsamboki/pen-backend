@@ -134,7 +134,7 @@ class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
 class OrderWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", data)
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", request.body)
         try:
             models.Orders.objects.filter(adatlap_id=data["Id"]).delete()
             models.Orders(adatlap_id=data["Id"], order_id=data["Head"]["Id"]).save()
