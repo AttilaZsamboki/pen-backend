@@ -310,8 +310,6 @@ class OfferWebhook(APIView):
             except Exception as e:
                 log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
                 return Response("Succesfully received data", status=HTTP_200_OK)
-        else:
-            log("Az ajánlat már létezik", "INFO", "pen_offer_webhook", data["Id"])
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class QuestionProductsList(generics.ListCreateAPIView):
