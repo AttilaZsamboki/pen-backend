@@ -212,7 +212,8 @@ class QuestionsList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         if self.request.query_params.get('product'):
-            return models.Questions.objects.filter(product=self.request.query_params.get('product'))
+            question_id = models.QuestionProducts.objects.filter(product=self.request.query_params.get('product')).values("question")[0]["question"]
+            return models.Questions.objects.filter(id=question_id)
         elif self.request.query_params.get("connection"):
             return models.Questions.objects.filter(connection=self.request.query_params.get('connection'))
         return super().get_queryset()
