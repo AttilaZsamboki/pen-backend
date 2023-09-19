@@ -570,7 +570,7 @@ class UnasGetOrder(APIView):
                                 <Items>
                                     """+"\n".join([f"""<Item>
                                         <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] else "discount-ammount"}</Id>
-                                        <Sku>{i["SKU"] if i["SKU"] else "discount-ammount"}</Sku>
+                                        <Sku>{i["SKU"] if i["SKU"] else "discount-amount"}</Sku>
                                         <Name>{i["Name"]}</Name>
                                         <ProductParams>
                                         </ProductParams>
