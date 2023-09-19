@@ -301,14 +301,17 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class OfferWebhook(APIView):
     def post(self, request):
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", request.body)
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", request["Id"])
         data = json.loads(request.body)
-        try:
-            models.Offers(adatlap_id=data["Id"], offer_id=data["Head"]["Id"]).save()
-            log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
-        except Exception as e:
-           log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
-        return Response("Succesfully received data", status=HTTP_200_OK)
+        if data["Data"]["StatusId"] == 2895 and models.Offers.objects.filter(adatlap_id=data["Id"]).count() == 0:
+            try:
+                models.Offers(adatlap_id=data["Id"], offer_id=data["Head"]["Id"]).save()
+                log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
+            except Exception as e:
+                log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
+                return Response("Succesfully received data", status=HTTP_200_OK)
+        else:
+            log("Az ajánlat már létezik", "INFO", "pen_offer_webhook", data["Id"])
 
 class QuestionProductsList(generics.ListCreateAPIView):
     queryset = models.QuestionProducts.objects.all()
