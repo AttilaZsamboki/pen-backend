@@ -495,7 +495,7 @@ class UnasGetOrder(APIView):
                 else:
                     return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
             except Exception as e:
-                log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order", "Error: "+e+". Data: "+json.dumps(datas))
+                log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order", "Error: "+str(e)+". Data: "+json.dumps(datas))
                 return Response(str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
