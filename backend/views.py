@@ -302,8 +302,8 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
 class OfferWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", data["Id"])
-        if data["Data"]["StatusId"] == 2895 and models.Offers.objects.filter(offer_id=data["Head"]["Id"]).count() == 0:
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", "AdatlapId: "+data["Id"]+", StatusId: "+data["Data"]["Data"]["StatusId"])
+        if data["Data"]["Data"]["StatusId"] == 2895 and models.Offers.objects.filter(offer_id=data["Head"]["Id"]).count() == 0:
             try:
                 models.Offers(adatlap_id=data["Id"], offer_id=data["Head"]["Id"]).save()
                 log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
