@@ -302,7 +302,7 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
 class OfferWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", "AdatlapId: "+data["Id"]+", StatusId: "+data["Data"]["StatusId"])
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", "AdatlapId: "+str(data["Id"])+", StatusId: "+str(data["Data"]["StatusId"]))
         if data["Data"]["StatusId"] == 2895 and models.Offers.objects.filter(offer_id=data["Head"]["Id"]).count() == 0:
             try:
                 models.Offers(adatlap_id=data["Id"], offer_id=data["Head"]["Id"]).save()
@@ -312,6 +312,7 @@ class OfferWebhook(APIView):
                 return Response("Succesfully received data", status=HTTP_200_OK)
         else:
             log("Az ajánlat már létezik", "INFO", "pen_offer_webhook", data["Id"])
+        return Response("Succesfully received data", status=HTTP_200_OK)
 
 class QuestionProductsList(generics.ListCreateAPIView):
     queryset = models.QuestionProducts.objects.all()
