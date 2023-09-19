@@ -1,7 +1,7 @@
 from .utils.google_maps import get_street_view, get_street_view_url
 from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, list_to_dos, update_todo, statuses, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap
 from .utils.logs import log
-from .utils.utils import delete_s3_file
+from .utils.utils import delete_s3_file, replace_self_closing_tags
 from .utils.google_maps import calculate_distance
 
 from . import models
@@ -28,6 +28,7 @@ import os
 import random
 import string
 import datetime
+import re
 
 import xml.etree.ElementTree as ET
 
@@ -443,7 +444,7 @@ class UnasGetOrder(APIView):
                                         <StreetNumber>{data["OrderData"]["Customer"]["Address"].split(" ")[2]}</StreetNumber>
                                         <County>{data["OrderData"]["Customer"]["County"]}</County>
                                         <Country>{data["OrderData"]["Customer"]["CountryId"]}</Country>
-                                        <CountryCode>hu</CountryCode>
+                                       <CountryCode>hu</CountryCode>
                                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
                                         <RecipientName>{data["OrderData"]["Customer"]["Name"]}</RecipientName>
@@ -499,4 +500,21 @@ class UnasSetProduct(APIView):
 
     def post(self, request):
         log("Unas termék szinkron megkezdődött", "INFO", "pen_unas_set_product", request.body.decode("utf-8"))
-        return Response(status=HTTP_200_OK)
+        xml_string = request.body.decode("utf-8")
+        self_closing_tags = ["br", "img", "input", "hr", "meta", "link"]
+        for tag in self_closing_tags:
+            pattern = re.compile(r"<({})([^<>]*)>".format(tag))
+            xml_string = pattern.sub(replace_self_closing_tags, xml_string)
+        root = ET.fromstring(xml_string)
+        products = [{"id": element.find("local_id").text, "sku": element.find("Sku").text} for element in root.iter('Product')]
+        response = """<?xml version="1.0" encoding="UTF-8" ?>
+<Products>
+    """+"\n".join([f"""
+    <Product>
+	    <Id>{product["id"]}</Id>
+  	    <Sku>{product["sku"]}</Sku>
+  	    <Action>add</Action>
+  	    <Status>ok</Status>
+    </Product>""" for product in products])+"""
+</Products>"""
+        return HttpResponse(response, status=HTTP_200_OK)
