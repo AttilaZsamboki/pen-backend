@@ -429,9 +429,9 @@ class UnasGetOrder(APIView):
                                         <ZIP>{data["Cím"]["PostalCode"]}</ZIP>
                                         <City>{data["Cím"]["City"]}</City>
                                         <Street>{data["Cím"]["Address"]}</Street>
-                                        <StreetName>{data["Cím"]["Address"].split(" ")[0]}</StreetName>
-                                        <StreetType>{data["Cím"]["Address"].split(" ")[1]}</StreetType>
-                                        <StreetNumber>{data["Cím"]["Address"].split(" ")[2]}</StreetNumber>
+                                        <StreetName>{data["Cím"]["Address"].split(" ")[0] if len(data["Cím"]["Address"]) else ""}</StreetName>
+                                        <StreetType>{data["Cím"]["Address"].split(" ")[1] if len(data["Cím"]["Address"]) > 0 else ""}</StreetType>
+                                        <StreetNumber>{data["Cím"]["Address"].split(" ")[2] if len(data["Cím"]["Address"]) > 1 else ""}</StreetNumber>
                                         <County>{data["Cím"]["County"]}</County>
                                         <Country>{data["Cím"]["CountryId"]}</Country>
                                         <CountryCode>hu</CountryCode>
