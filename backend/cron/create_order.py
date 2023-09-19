@@ -18,7 +18,8 @@ def main():
         items = [{"sku": Products.objects.filter(id=i.productId)[0].sku if Products.objects.filter(id=i.productId).exists() else "", "productId": i.productId, "netPrice": i.netPrice, "inputValues": i.inputValues, "name": i.name} for i in FelmeresItems.objects.filter(adatlap_id=id)]
         offer = Offers.objects.filter(adatlap_id=adatlap["Id"])
         felmeres = get_adatlap_details(adatlap["Felmeresid"])
-        if offer and items and felmeres:
+        if offer and items and felmeres["status"] != "Error":
+            felmeres = felmeres["response"]
             order = create_order(adatlap_id=adatlap["Felmeresid"], contact_id=adatlap["ContactId"], items=items, offer_id=offer[0].offer_id, adatlap_status="Szervezésre vár", project_data={"Megye2": felmeres["Megye"], "Utcakep": felmeres["StreetViewUrl"], "IngatlanKepe2": felmeres["IngatlanKepe"], "FelmeresLink": felmeres["FelmeresAdatok"], "KiMerteFel2": felmeres["Felmero2"],"FelmeresDatuma2": felmeres["FelmeresIdopontja2"] })
             if order["status"] == "error":
                 if order["response"].lower() == "xml is not valid!":

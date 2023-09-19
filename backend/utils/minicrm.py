@@ -16,9 +16,9 @@ def get_request(endpoint, id=None, query_params=None, isR3=True):
     data = requests.get(
         f"https://r3.minicrm.hu/Api/{'R3/' if isR3 else ''}{endpoint}{'/'+str(id) if id else ''}", auth=(system_id, api_key), params=query_params)
     if data.status_code == 200:
-        return data.json()
+        return {"status": "Success", "response": data.json()}
     else:
-        return "Error"
+        return {"status": "Error", "response": data.text}
 
 def update_request(id, fields, endpoint):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
@@ -39,11 +39,11 @@ def get_all_adatlap(category_id, status_id=None, criteria=None):
     query_params = {"CategoryId": category_id} if not status_id else {
         "CategoryId": category_id, "StatusId": status_id}
     adatlapok = get_request(endpoint="Project", query_params=query_params)
-    if adatlapok == "Error":
+    if adatlapok["status"] == "Error":
         return "Error"
     if criteria:
-        return [adatlap for adatlap in adatlapok["Results"] if criteria(adatlap)]
-    return adatlapok
+        return [adatlap for adatlap in adatlapok["response"]["Results"] if criteria(adatlap)]
+    return adatlapok["response"]
 
 
 def get_adatlap_details(id):
@@ -59,13 +59,13 @@ def get_all_contacts(adatlap_ids, type="ContactId"):
     contacts = []
     for adatlap_id in adatlap_ids:
         adatlap_details = get_adatlap_details(adatlap_id)
-        if adatlap_details == "Error":
+        if adatlap_details["status"] == "Error":
             return "Error"
-        contacts.append({"AdatlapId": adatlap_id, **contact_details(adatlap_details[type])})
+        contacts.append({"AdatlapId": adatlap_id, **contact_details(adatlap_details["response"][type])["response"]})
     return contacts
 
 def address_ids(contact_id):
-    return get_request("AddressList", id=contact_id)["Results"].keys()
+    return get_request("AddressList", id=contact_id)["response"]["Results"].keys()
 
 
 def address_details(address_id):
@@ -80,7 +80,7 @@ def get_all_addresses(contact_ids):
 
 def address_list(contact_id):
     return [address_details(
-        i) for i in address_ids(contact_id)]
+        i)["response"] for i in address_ids(contact_id)]
 
 
 def billing_address(contact_id):
@@ -112,7 +112,7 @@ def get_all_adatlap_details(category_id=None, status_id=None, criteria=None, del
         for i in adatlapok["Results"]:
             if adatlapok["Results"][i]["Deleted"] != deleted:
                 continue
-            adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])
+            adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])["response"]
             if criteria:
                 if criteria(adatlap):
                     adatlapok_detailed.append(adatlap)
@@ -122,7 +122,7 @@ def get_all_adatlap_details(category_id=None, status_id=None, criteria=None, del
     else:
         adatlapok_detailed = []
         for id in ids:
-            adatlap = get_adatlap_details(id)
+            adatlap = get_adatlap_details(id)["response"]
             if criteria:
                 if criteria(adatlap):
                     adatlapok_detailed.append(adatlap)
@@ -132,10 +132,10 @@ def get_all_adatlap_details(category_id=None, status_id=None, criteria=None, del
 
 def list_to_dos(adatlap_id, criteria=None):
     todos = get_request(endpoint="ToDoList", id=adatlap_id)
-    if todos == "Error":
+    if todos["status"] == "Error":
         return 
     if criteria:
-        return [todo for todo in todos["Results"] if criteria(todo)]
+        return [todo for todo in todos["response"]["Results"] if criteria(todo)]
     return todos
 
 
@@ -161,9 +161,9 @@ def update_todo(id, fields):
     update_request(id=id, fields=fields, endpoint="ToDo")
 
 def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, project_data=None):
-    adatlap = get_adatlap_details(id=adatlap_id)
-    contactData = contact_details(contact_id=contact_id)
-    offerData = get_offer(offer_id)
+    adatlap = get_adatlap_details(id=adatlap_id)["response"]
+    contactData = contact_details(contact_id=contact_id)["response"]
+    offerData = get_offer(offer_id)["response"]
     if offerData == "Error":
         return {"status": "Error", "response": "Offer not found"}
     randomId = random.randint(100000, 999999)

@@ -1,4 +1,4 @@
-from ..utils.minicrm import get_all_adatlap, get_adatlap_details, contact_details, billing_address, update_adatlap_fields, statuses
+from ..utils.minicrm import get_all_adatlap_details, contact_details, billing_address, update_adatlap_fields, statuses
 from ..utils.logs import log
 import requests
 import datetime
@@ -21,7 +21,6 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         else:
             name = "számla"
             script_name = "invoice"
-    payment_method = "készpénz" if cash else "átutalás"
     log(f"{name.capitalize()} készítésének futtatása", "INFO", f"pen_{script_name}")
     status_id = 0
     if cash:
@@ -30,23 +29,25 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         status_id = 3079
     else:
         status_id = 3023
-    adatlapok = get_all_adatlap(23, status_id)
-    adatlapok = adatlapok["Results"] 
+
+    def criteria(adatlap):
+        if adatlap["Deleted"] == 1:
+            return False
+        elif (not cash and adatlap["FizetesiMod2"] != "Átutalás") or (cash and adatlap["FizetesiMod2"] == "Átutalás"):
+            return False
+        elif cash and adatlap["DijbekeroSzama2"] != "":
+            return False
+        elif not cash and not is_proform and adatlap["DijbekeroSzama2"] == "":
+            log("Nincs díjbekérő száma", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+            return
+        return True
+
+    adatlapok = get_all_adatlap_details(23, status_id, criteria=criteria)
     if adatlapok == []:
         log(f"Nincs új {name}", "INFO", f"pen_{script_name}")
         return
-    for i in adatlapok.keys():
-        if adatlapok[i]["Deleted"] == 1:
-            continue
+    for adatlap in adatlapok:
         try:
-            adatlap = get_adatlap_details(adatlapok[i]["Id"])
-            if (not cash and adatlap["FizetesiMod2"] != "Átutalás") or (cash and adatlap["FizetesiMod2"] == "Átutalás"):
-                continue
-            if cash and adatlap["DijbekeroSzama2"] != "":
-                continue
-            if not cash and not is_proform and adatlap["DijbekeroSzama2"] == "":
-                log("Nincs díjbekérő száma", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
-                continue
             query_xml = f"""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
@@ -59,11 +60,12 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 if is_proform or query_response.headers["szlahu_szamlaszam"][0] == "E" or cash:
                     log(f"Már létezik {name}", "INFO", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
                     continue
-            contact_id = adatlapok[i]["BusinessId"]
-            contact = contact_details(contact_id)
+            contact_id = adatlap["BusinessId"]
+            contact = contact_details(contact_id)["response"]
             address = billing_address(contact_id)
 
-            if SZAMLA_AGENT_KULCS is None or adatlap is None or contact is None or address is None:
+            if contact is None or address is None:
+                log("Nincsenek számlázási adatok", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
                 continue
             if None in [contact.get("Name"), address.get("PostalCode"), address.get("City"), address.get("Address"), contact.get("Email"), contact.get("VatNumber"), adatlap.get("Name"), adatlap.get("Iranyitoszam"), adatlap.get("Telepules"), adatlap.get("Cim2"), adatlap.get("Id"), contact.get("Phone")]:
                 log("Nincsenek számlázási adatok", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
