@@ -505,21 +505,33 @@ class UnasSetProduct(APIView):
 
     def post(self, request):
         log("Unas termék szinkron megkezdődött", "INFO", "pen_unas_set_product", request.body.decode("utf-8"))
-        xml_string = request.body.decode("utf-8")
-        self_closing_tags = ["br", "img", "input", "hr", "meta", "link"]
-        for tag in self_closing_tags:
-            pattern = re.compile(r"<({})([^<>]*)>".format(tag))
-            xml_string = pattern.sub(replace_self_closing_tags, xml_string)
-        root = ET.fromstring(xml_string)
-        products = [{"id": element.find("local_id").text, "sku": element.find("Sku").text} for element in root.iter('Product')]
-        response = """<?xml version="1.0" encoding="UTF-8" ?>
-<Products>
-    """+"\n".join([f"""
-    <Product>
-	    <Id>{product["id"]}</Id>
-  	    <Sku>{product["sku"]}</Sku>
-  	    <Action>add</Action>
-  	    <Status>ok</Status>
-    </Product>""" for product in products])+"""
-</Products>"""
-        return HttpResponse(response, status=HTTP_200_OK)
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            try:
+                token = auth_header[7:]
+                token = models.ErpAuthTokens.objects.get(token=token)
+                if token.expire > datetime.datetime.now():
+                    xml_string = request.body.decode("utf-8")
+                    self_closing_tags = ["br", "img", "input", "hr", "meta", "link"]
+                    for tag in self_closing_tags:
+                        pattern = re.compile(r"<({})([^<>]*)>".format(tag))
+                        xml_string = pattern.sub(replace_self_closing_tags, xml_string)
+                    root = ET.fromstring(xml_string)
+                    products = [{"id": element.find("local_id").text, "sku": element.find("Sku").text} for element in root.iter('Product')]
+                    response = """<?xml version="1.0" encoding="UTF-8" ?>
+            <Products>
+                """+"\n".join([f"""
+                <Product>
+                    <Id>{product["id"]}</Id>
+                    <Sku>{product["sku"]}</Sku>
+                    <Action>add</Action>
+                    <Status>ok</Status>
+                </Product>""" for product in products])+"""
+            </Products>"""
+                    return HttpResponse(response, status=HTTP_200_OK)
+                else:
+                    return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
+            except Exception as e:
+                log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order", e)
+                return Response("Hibás Token "+str(e), status=HTTP_401_UNAUTHORIZED)
+        return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
