@@ -401,7 +401,12 @@ class UnasGetOrder(APIView):
                 token = auth_header[7:]  # Extract the token
                 token = models.ErpAuthTokens.objects.get(token=token)
                 if token.expire > datetime.datetime.now():
-                    datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id), "AdatlapDetails": get_adatlap_details(id=i["Id"]), "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"]), "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])} for i in get_all_adatlap(category_id=29, status_id=3008)["Results"].values() if get_all_adatlap(category_id=29, status_id=3008)["Results"] != {}]
+                    adatlapok = get_all_adatlap(category_id=29, status_id=3008)["Results"]
+                    if not adatlapok:
+                        return HttpResponse("""<?xml version="1.0" encoding="UTF-8" ?>
+                                            <Orders>
+                                            </Orders>""", status=HTTP_200_OK)
+                    datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id), "AdatlapDetails": get_adatlap_details(id=i["Id"]), "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"]), "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])} for i in adatlapok.values() if adatlapok != {}]
                     response = """<?xml version="1.0" encoding="UTF-8" ?>
                     <Orders> """ + "\n".join([f"""<Order>
                             <Key>{data["OrderData"]["Id"]}</Key>
@@ -491,7 +496,7 @@ class UnasGetOrder(APIView):
                     return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
             except Exception as e:
                 log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order", e)
-                return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
+                return Response("Hibás Token "+str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
 class UnasSetProduct(APIView):
