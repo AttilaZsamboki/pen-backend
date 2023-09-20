@@ -137,7 +137,7 @@ class OrderWebhook(APIView):
         log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", "AdatlapId: "+str(data["Id"]) + ", StatusId: " + str(data["Data"]["StatusId"]))
         if data["Data"]["StatusId"] == 3007 and models.Orders.objects.filter(order_id=data["Head"]["Id"]).count() == 0:
             try:
-                models.Orders(adatlap_id=data["Id"], order_id=data["Head"]["Id"]).save()
+                models.Orders.objects.create(adatlap_id=data["Id"], order_id=data["Head"]["Id"])
                 log("Rendelés azonosító elmentve", "SUCCESS", "pen_order_webhook", "OrderId: "+str(data["Head"]["Id"]))
             except Exception as e:
                 log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_order_webhook", e)
