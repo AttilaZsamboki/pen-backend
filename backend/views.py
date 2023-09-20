@@ -134,13 +134,14 @@ class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
 class OrderWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", request.body)
-        try:
-            models.Orders.objects.filter(adatlap_id=data["Id"]).delete()
-            models.Orders(adatlap_id=data["Id"], order_id=data["Head"]["Id"]).save()
-        except Exception as e:
-            log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_order_webhook", e)
-            return
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", data["Id"])
+        if data["Data"]["StatusId"] == 3005 and models.Orders.objects.filter(order_id=data["Head"]["Id"]).count() == 0:
+            try:
+                models.Orders(adatlap_id=data["Id"], order_id=data["Head"]["Id"]).save()
+                log("Rendelés azonosító elmentve", "SUCCESS", "pen_order_webhook", "OrderId: "+data["Head"]["Id"])
+            except Exception as e:
+                log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_order_webhook", e)
+                return Response("Succesfully received data", status=HTTP_200_OK)
         log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_order_webhook")
         return Response("Succesfully received data", status=HTTP_200_OK)
 
