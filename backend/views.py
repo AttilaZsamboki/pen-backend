@@ -135,7 +135,7 @@ class OrderWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
         log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_order_webhook", "AdatlapId: "+str(data["Id"]) + ", StatusId: " + str(data["Data"]["StatusId"]))
-        if data["Data"]["StatusId"] == 3005 and models.Orders.objects.filter(order_id=data["Head"]["Id"]).count() == 0:
+        if data["Data"]["StatusId"] == 3007 and models.Orders.objects.filter(order_id=data["Head"]["Id"]).count() == 0:
             try:
                 models.Orders(adatlap_id=data["Id"], order_id=data["Head"]["Id"]).save()
                 log("Rendelés azonosító elmentve", "SUCCESS", "pen_order_webhook", "OrderId: "+str(data["Head"]["Id"]))
