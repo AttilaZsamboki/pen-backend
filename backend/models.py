@@ -120,6 +120,7 @@ class Filters(models.Model):
     name = models.TextField(blank=True, null=True)
     value = models.JSONField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
+    field = models.TextField()
 
     class Meta:
         managed = False
