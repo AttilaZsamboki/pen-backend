@@ -71,7 +71,7 @@ class CalculateDistance(APIView):
             county = ""
             log(log_value="Penészmentesítés MiniCRM webhook sikertelen", status="FAILED", script_name="pen_calculate_distance", details=f"Nem található megye a településhez: {data['Telepules']}")
         response = update_adatlap_fields(data["Id"], {
-            "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={address}&travelmode=driving", "Megye": county})
+            "IngatlanKepe": "https://www.pen.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={address}&travelmode=driving", "Megye": county})
         if response["code"] == 200:
             log("Penészmentesítés MiniCRM webhook sikeresen lefutott",
                 "SUCCESS", "pen_calculate_distance")
@@ -86,12 +86,10 @@ class GoogleSheetWebhook(APIView):
         urlap = data["Adatlap hash (ne módosítsd!!)"]["response"]
         log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", urlap)
         [models.FelmeresNotes(field=j, value=k["response"] if k["type"] not in ["GRID", "CHECKBOX_GRID", "FILE_UPLOAD", "CHECKBOX"] else json.dumps(k["response"], ensure_ascii=False), adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
-        requests.get("https://peneszmentesites.dataupload.xyz/api/revalidate?tag=felmeresek")
-        requests.get(f"https://peneszmentesites.dataupload.xyz/api/revalidate?tag={data['Adatlap hash (ne módosítsd!!)']['response']}")
         def criteria(adatlap):
             return adatlap["ProjectHash"] == urlap
         adatlap_id = get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"]
-        update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://peneszmentesites.dataupload.xyz/felmeresek/"+urlap, "StatusId": "Elszámolásra vár"})
+        update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://app.peneszmentesites.hu/"+urlap, "StatusId": "Elszámolásra vár"})
         def todo_criteria(todo):
             return todo["Type"] == statuses["ToDo"]["Felmérés"] and todo["Status"] == "Open"
         todo_id = list_to_dos(adatlap_id, todo_criteria)[0]["Id"]

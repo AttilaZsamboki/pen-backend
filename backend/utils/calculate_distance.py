@@ -7,4 +7,4 @@ address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Or
 print(address)
 print(get_street_view(location=address))
 print(update_adatlap_fields("41587", {
-    "IngatlanKepe": "https://www.dataupload.xyz/static/images/google_street_view/street_view.jpg"}))
+    "IngatlanKepe": "https://www.pen.dataupload.xyz/static/images/google_street_view/street_view.jpg"}))
