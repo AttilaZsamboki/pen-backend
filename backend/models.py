@@ -116,16 +116,22 @@ class ProductAttributes(models.Model):
         db_table = 'pen_product_attributes'
 
 class Filters(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.TextField(blank=True, null=True)
-    value = models.JSONField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
-    field = models.TextField()
 
     class Meta:
         managed = False
         db_table = 'pen_filters'
 
+class FilterItems(models.Model):
+    field = models.TextField(blank=True, null=True)
+    type = models.CharField(max_length=225, blank=True, null=True)
+    value = models.TextField(blank=True, null=True)
+    filter = models.ForeignKey('Filters', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_filter_items'
 
 class Questions(models.Model):
     id = models.AutoField(primary_key=True)

@@ -632,3 +632,18 @@ class UnasSetProduct(APIView):
                 log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order", e)
                 return Response("Hibás Token "+str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
+
+class FilterItemsList(generics.ListCreateAPIView):
+    queryset = models.FilterItems.objects.all()
+    serializer_class = serializers.FilterItemsSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        if self.request.query_params.get('filter'):
+            return models.FilterItems.objects.filter(filter=self.request.query_params.get('filter'))
+        return super().get_queryset()
+
+class FilterItemsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.FilterItems.objects.all()
+    serializer_class = serializers.FilterItemsSerializer
+    permission_classes = [AllowAny]

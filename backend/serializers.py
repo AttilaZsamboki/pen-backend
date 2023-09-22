@@ -60,3 +60,8 @@ class QuestionProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.QuestionProducts
         fields = "__all__"
+
+class FilterItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FilterItems
+        fields = "__all__"
