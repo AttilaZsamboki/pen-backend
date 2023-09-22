@@ -9,7 +9,7 @@ from . import serializers
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import generics
@@ -642,6 +642,21 @@ class FilterItemsList(generics.ListCreateAPIView):
         if self.request.query_params.get('filter'):
             return models.FilterItems.objects.filter(filter=self.request.query_params.get('filter'))
         return super().get_queryset()
+
+    def post(self, request):
+        data = request.data
+        if isinstance(data, list):
+            items = []
+            for item in data:
+                filter_id = item.pop('filter', None)
+                if filter_id is not None:
+                    item['filter'] = models.Filters.objects.get(id=filter_id)
+                items.append(models.FilterItems(**item))
+            models.FilterItems.objects.bulk_create(items)
+            return Response({'status': 'success'}, status=HTTP_201_CREATED)
+        else:
+            return Response({'status': 'bad request', 'message': 'Expected a list of items'}, status=HTTP_400_BAD_REQUEST)
+
 
 class FilterItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FilterItems.objects.all()
