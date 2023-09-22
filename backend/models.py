@@ -127,7 +127,7 @@ class FilterItems(models.Model):
     field = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=225, blank=True, null=True)
     value = models.TextField(blank=True, null=True)
-    filter = models.ForeignKey('Filters', models.DO_NOTHING)
+    filter = models.ForeignKey('Filters', models.CASCADE)
 
     class Meta:
         managed = False
