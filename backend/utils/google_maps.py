@@ -2,7 +2,10 @@ import requests
 import os
 import googlemaps
 import dotenv
+
 from .logs import log
+from .utils import base_path
+
 dotenv.load_dotenv()
 
 def calculate_distance(start, end, mode="driving"):
@@ -32,7 +35,7 @@ def get_street_view(location):
     if response.status_code == 200:
         # The request was successful, return the response
         if response.content is not None:
-            with open("/home/atti/googleds/dataupload/static/images/google_street_view/street_view.jpg", "wb") as img_file:
+            with open(base_path+"/static/images/google_street_view/street_view.jpg", "wb") as img_file:
                 img_file.write(response.content)
     else:
         # The request failed, print the error message
