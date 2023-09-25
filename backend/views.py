@@ -302,15 +302,16 @@ class OfferWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
         adatlap_id = data["Id"]
-        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", "AdatlapId: "+str(adatlap_id)+", StatusId: "+str(data["Data"]["StatusId"]))
+        log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", request.body)
         if data["Data"]["StatusId"] == 2895 and models.Offers.objects.filter(offer_id=data["Head"]["Id"], adatlap=adatlap_id).count() == 0:
             try:
                 models.Offers(offer_id=data["Head"]["Id"], adatlap=adatlap_id).save()
                 log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
+                return Response("Succesfully received data", status=HTTP_200_OK)
             except Exception as e:
                 log("Penészmentesítés rendelés webhook sikertelen", "ERROR", "pen_offer_webhook", e)
                 return Response("Succesfully received data", status=HTTP_200_OK)
-        log("A offer már létezik", "FAILED", "pen_offer_webhook")
+        log("A offer már létezik", "FAILED", "pen_offer_webhook", f"StatusId: {data['Data']['StatusId']}. OfferId: {data['Head']['Id']}. AdatlapId: {adatlap_id}, Offer: {models.Offers.objects.filter(offer_id=data['Head']['Id'], adatlap=adatlap_id)}")
         return Response("Succesfully received data", status=HTTP_200_OK)
 
 class QuestionProductsList(generics.ListCreateAPIView):
