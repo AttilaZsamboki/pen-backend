@@ -77,7 +77,7 @@ class CalculateDistance(APIView):
                 "SUCCESS", "pen_calculate_distance")
         else:
             log("Penészmentesítés MiniCRM webhook sikertelen",
-                "ERROR", "pen_calculate_distance", response.reason)
+                "ERROR", "pen_calculate_distance", response["reason"])
         return Response({'status': 'success'}, status=HTTP_200_OK)
 
 class GoogleSheetWebhook(APIView):
