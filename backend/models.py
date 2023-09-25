@@ -206,7 +206,7 @@ class Counties(models.Model):
 class Offers(models.Model):
     id = models.AutoField(primary_key=True)
     offer_id = models.IntegerField(blank=True, null=True)
-    adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING)
+    adatlap = models.IntegerField(db_column="adatlap_id")
 
     class Meta:
         managed = False

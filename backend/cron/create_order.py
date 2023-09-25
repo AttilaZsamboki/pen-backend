@@ -16,7 +16,7 @@ def main():
         log(f"{adatlap['Name']} megrendelés létrehozása", script_name="pen_create_order", status="INFO")
         id = Felmeresek.objects.filter(adatlap_id=adatlap["Felmeresid"]).order_by("-created_at")[0].id
         items = [{"sku": Products.objects.filter(id=i.productId)[0].sku if Products.objects.filter(id=i.productId).exists() else "", "productId": i.productId, "netPrice": i.netPrice, "inputValues": i.inputValues, "name": i.name} for i in FelmeresItems.objects.filter(adatlap_id=id)]
-        offer = Offers.objects.filter(adatlap_id=adatlap["Id"])
+        offer = Offers.objects.filter(adatlap=adatlap["Id"])
         felmeres = get_adatlap_details(adatlap["Felmeresid"])
         if offer and items and felmeres["status"] != "Error":
             felmeres = felmeres["response"]
