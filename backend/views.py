@@ -303,7 +303,7 @@ class OfferWebhook(APIView):
         data = json.loads(request.body)
         adatlap_id = data["Id"]
         log("Penészmentesítés rendelés webhook meghívva", "INFO", "pen_offer_webhook", request.body)
-        if data["Data"]["StatusId"] == 2895 and models.Offers.objects.filter(offer_id=data["Head"]["Id"], adatlap=adatlap_id).count() == 0:
+        if data["Data"]["StatusId"] == "2895" and models.Offers.objects.filter(offer_id=data["Head"]["Id"], adatlap=adatlap_id).count() == 0:
             try:
                 models.Offers(offer_id=data["Head"]["Id"], adatlap=adatlap_id).save()
                 log("Penészmentesítés rendelés webhook sikeresen lefutott", "SUCCESS", "pen_offer_webhook")
