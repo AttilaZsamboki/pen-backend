@@ -36,6 +36,6 @@ def main():
             requests.post(
                 f'https://r3.minicrm.hu/Api/Offer/{offer[0].offer_id}/Project', auth=(system_id, api_key), json={"StatusId": "Sikeres megrendelés"})
             continue
-        log(f"{adatlap['Name']} megrendelés létrehozása sikertelen, nem létezik felmérés", script_name="pen_create_order", status="ERROR", details=f"Felmérés: {felmeres}")
+        log(f"{adatlap['Name']} megrendelés létrehozása sikertelen, nem létezik felmérés", script_name="pen_create_order", status="ERROR", details=f"Offer: {offer}. Felmérés: {felmeres}")
     log("Megrendelések létrehozása sikeresen befejeződött", script_name="pen_create_order", status="SUCCESS")
 main()
