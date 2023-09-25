@@ -174,7 +174,7 @@ class Felmeresek(models.Model):
     template = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
-    created_at = models.DateField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateField(blank=True, null=True)
 
     class Meta:

@@ -189,7 +189,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 f.write(response.content)
                 f.close()
             update_resp = update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"http://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"], "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
+                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"], "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
             if update_resp["code"] == 400:
                 log(f"Hiba akadt a {name} feltöltésében", "ERROR", script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}")
             os.remove(pdf_path)
