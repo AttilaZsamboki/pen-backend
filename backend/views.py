@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 from rest_framework.permissions import AllowAny
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
 
 from rest_framework_xml.parsers import XMLParser
@@ -145,9 +145,10 @@ class OrderWebhook(APIView):
 
 
 class ProductsList(generics.ListCreateAPIView):
+    queryset = models.Products.objects.all()
     serializer_class = serializers.ProductsSerializer
     permission_classes = [AllowAny]
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         queryset = models.Products.objects.all()
@@ -165,7 +166,17 @@ class ProductsList(generics.ListCreateAPIView):
                     Q(price_list_alapertelmezett_net_price_huf__icontains=word)
                     # Add more Q objects for each column you want to search
                 )
-    
+
+            queryset = queryset.filter(q_objects)
+
+        query_params = self.request.query_params
+        if query_params is not None:
+            q_objects = Q()
+
+            for key, value in query_params.items():
+                if key != "filter" and key != "page":
+                    q_objects &= Q(**{key+"__icontains": value})
+
             queryset = queryset.filter(q_objects)
     
         return queryset
