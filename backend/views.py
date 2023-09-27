@@ -150,13 +150,24 @@ class ProductsList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
     pagination_class = PageNumberPagination
 
+    def get(self, request, *args, **kwargs):
+        all = request.query_params.get('all', 'false')
+        if all.lower() == 'true':
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = models.Products.objects.all()
         filter = self.request.query_params.get('filter', None)
+        all = self.request.query_params.get('all', 'false')
+
         if filter is not None:
             filter_words = filter.split(" ")
             q_objects = Q()
-    
+
             for word in filter_words:
                 q_objects &= (
                     Q(id__icontains=word) |
@@ -174,12 +185,12 @@ class ProductsList(generics.ListCreateAPIView):
             q_objects = Q()
 
             for key, value in query_params.items():
-                if key != "filter" and key != "page":
+                if key != "filter" and key != "page" and key != "all":
                     q_objects &= Q(**{key+"__icontains": value})
 
             queryset = queryset.filter(q_objects)
-    
-        return queryset
+            return queryset
+     
 
 class ProductsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Products.objects.all()
