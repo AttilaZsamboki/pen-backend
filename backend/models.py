@@ -130,7 +130,6 @@ class FilterItems(models.Model):
     filter = models.ForeignKey('Filters', models.CASCADE)
     label = models.TextField(blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
-    type = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -190,6 +189,7 @@ class FelmeresItems(models.Model):
     inputValues = models.JSONField(db_column="input_values",blank=True, null=True)
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
     adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, db_column="adatlap_id")
+    type = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
