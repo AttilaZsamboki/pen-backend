@@ -3,7 +3,6 @@ from . import views
 
 urlpatterns = [
     path('minicrm_webhook/', views.CalculateDistance.as_view()),
-    path('googlesheet_webhook/', views.GoogleSheetWebhook.as_view()),
     path('felmeres_questions/', views.FelmeresQuestionsList.as_view()),
     path('felmeres_questions/<pk>/', views.FelmeresQuestionDetail.as_view()),
     path('felmeresek_notes', views.FelmeresekNotesList.as_view()),

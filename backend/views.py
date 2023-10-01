@@ -80,22 +80,6 @@ class CalculateDistance(APIView):
                 "ERROR", "pen_calculate_distance", response["reason"])
         return Response({'status': 'success'}, status=HTTP_200_OK)
 
-class GoogleSheetWebhook(APIView):
-    def post(self, request):
-        data = json.loads(request.body)
-        urlap = data["Adatlap hash (ne módosítsd!!)"]["response"]
-        log("Penészmentesítés Google Sheets webhook meghívva", "INFO", "pen_google_sheet_webhook", urlap)
-        [models.FelmeresNotes(field=j, value=k["response"] if k["type"] not in ["GRID", "CHECKBOX_GRID", "FILE_UPLOAD", "CHECKBOX"] else json.dumps(k["response"], ensure_ascii=False), adatlap_id=urlap, type=k["type"], options=k["options"], section=k["section"]).save() for j, k in data.items()]
-        def criteria(adatlap):
-            return adatlap["ProjectHash"] == urlap
-        adatlap_id = get_all_adatlap_details(category_id=23, criteria=criteria)[0]["Id"]
-        update_adatlap_fields(adatlap_id, {"FelmeresAdatok": "https://app.peneszmentesites.hu/"+urlap, "StatusId": "Elszámolásra vár"})
-        def todo_criteria(todo):
-            return todo["Type"] == statuses["ToDo"]["Felmérés"] and todo["Status"] == "Open"
-        todo_id = list_to_dos(adatlap_id, todo_criteria)[0]["Id"]
-        update_todo(todo_id, {"Status": "Closed"})
-        return Response("Succesfully received data", status=HTTP_200_OK)
-
 class FelmeresQuestionsList(generics.ListCreateAPIView):
     queryset = models.FelmeresQuestions.objects.all()
     serializer_class = serializers.FelmeresQuestionsSerializer

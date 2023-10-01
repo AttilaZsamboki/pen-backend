@@ -130,6 +130,7 @@ class FilterItems(models.Model):
     filter = models.ForeignKey('Filters', models.CASCADE)
     label = models.TextField(blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
+    type = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = False
