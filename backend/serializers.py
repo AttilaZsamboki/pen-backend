@@ -1,6 +1,8 @@
 from . import models
 from rest_framework import serializers
 
+from django.db.models.functions import Coalesce
+
 class FelmeresQuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresQuestions
@@ -47,13 +49,13 @@ class FelmeresekSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class FelmeresItemsSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="coalesced_name", read_only=True)
+    name = Coalesce(serializers.CharField(source="coalesced_name"), serializers.CharField(source="name"))
     sku = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.FelmeresItems
         fields = "__all__"
-        read_only_fields = ['name', 'sku'] 
+        read_only_fields = ['sku'] 
 
 
 class OffersSerializer(serializers.ModelSerializer):

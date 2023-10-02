@@ -282,8 +282,8 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class FelmeresItemsList(generics.ListCreateAPIView):
     queryset = models.FelmeresItems.objects.all()
-    serializer_class = serializers.FelmeresItemsSerializer
     permission_classes = [AllowAny]
+    serializer_class = serializers.FelmeresItemsSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data, many=True)
