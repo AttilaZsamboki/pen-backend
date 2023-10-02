@@ -185,7 +185,7 @@ class FelmeresItems(models.Model):
     name = models.TextField(blank=True, null=True)
     place = models.BooleanField(blank=True, null=True)
     placeOptions = models.JSONField(db_column="place_options", blank=True, null=True)  # This field type is a guess.
-    productId = models.IntegerField(db_column="product_id", blank=True, null=True)
+    product = models.ForeignKey('Products', models.DO_NOTHING, db_column="product_id", blank=True, null=True)
     inputValues = models.JSONField(db_column="input_values",blank=True, null=True)
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
     adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, db_column="adatlap_id")

@@ -47,9 +47,14 @@ class FelmeresekSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class FelmeresItemsSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="coalesced_name", read_only=True)
+    sku = serializers.CharField(read_only=True)
+
     class Meta:
         model = models.FelmeresItems
         fields = "__all__"
+        read_only_fields = ['name', 'sku'] 
+
 
 class OffersSerializer(serializers.ModelSerializer):
     class Meta:

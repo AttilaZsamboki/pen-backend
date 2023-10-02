@@ -19,10 +19,10 @@ from rest_framework_xml.renderers import XMLRenderer
 
 from django.db import connection
 from django.http import HttpResponse
-from django.db.models import Q
+from django.db.models import Q, F, Value, CharField
+from django.db.models.functions import Coalesce 
 
 import json
-import requests
 import math
 import os
 import random
@@ -294,7 +294,10 @@ class FelmeresItemsList(generics.ListCreateAPIView):
     
     def get(self, request):
         if request.query_params.get("adatlap_id"):
-            felmeres_items = models.FelmeresItems.objects.filter(adatlap_id=request.query_params.get("adatlap_id"))
+            felmeres_items = models.FelmeresItems.objects.filter(adatlap_id=request.query_params.get("adatlap_id")).annotate(
+                coalesced_name=Coalesce('name', F('product_id__name'), output_field=CharField()),
+                sku=Coalesce('product_id__sku', Value(''), output_field=CharField())
+            )
             serializer = serializers.FelmeresItemsSerializer(felmeres_items, many=True)
             return Response(serializer.data)
         return super().get(request)
