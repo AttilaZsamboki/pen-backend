@@ -481,8 +481,8 @@ class UnasGetOrder(APIView):
                             <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
                             <Items>
                                 """+"\n".join([f"""<Item>
-                                    <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] else "discount-ammount"}</Id>
-                                    <Sku>{i["SKU"] if i["SKU"] else "discount-ammount"}</Sku>
+                                    <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] else "discount-amount"}</Id>
+                                    <Sku>{i["SKU"] if i["SKU"] else "discount-amount"}</Sku>
                                     <Name>{i["Name"]}</Name>
                                     <ProductParams>
                                     </ProductParams>
@@ -579,7 +579,7 @@ class UnasGetOrder(APIView):
                                 <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
                                 <Items>
                                     """+"\n".join([f"""<Item>
-                                        <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] else "discount-ammount"}</Id>
+                                        <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] else "discount-amount"}</Id>
                                         <Sku>{i["SKU"] if i["SKU"] else "discount-amount"}</Sku>
                                         <Name>{i["Name"]}</Name>
                                         <ProductParams>
