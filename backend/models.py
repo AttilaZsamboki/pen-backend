@@ -190,6 +190,7 @@ class FelmeresItems(models.Model):
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
     adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, db_column="adatlap_id")
     type = models.CharField(max_length=255, blank=True, null=True)
+    valueType = models.CharField(max_length=255, blank=True, null=True, default="fixed", db_column="value_type")
 
     class Meta:
         managed = False
