@@ -47,7 +47,7 @@ class FelmeresekSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class FelmeresItemsSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
+    name = serializers.CharField()
     sku = serializers.CharField(read_only=True)
 
     class Meta:
@@ -55,11 +55,12 @@ class FelmeresItemsSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ['sku']
 
-    def get_name(self, obj):
-        try:
-            return obj.coalesced_name
-        except AttributeError:
-            return obj.name
+    def create(self, validated_data):
+        name = validated_data.pop('name')
+        instance = super().create(validated_data)
+        instance.name = name
+        instance.save()
+        return instance
 
 
 class OffersSerializer(serializers.ModelSerializer):
