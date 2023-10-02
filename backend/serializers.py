@@ -47,7 +47,7 @@ class FelmeresekSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class FelmeresItemsSerializer(serializers.ModelSerializer):
-    name = serializers.CharField()
+    name = serializers.CharField(required=False)
     sku = serializers.CharField(read_only=True)
 
     class Meta:
