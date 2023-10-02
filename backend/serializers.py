@@ -47,13 +47,19 @@ class FelmeresekSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class FelmeresItemsSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="coalesced_name") if serializers.CharField(source="coalesced_name") else serializers.CharField(source="name")
+    name = serializers.SerializerMethodField()
     sku = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.FelmeresItems
         fields = "__all__"
-        read_only_fields = ['sku'] 
+        read_only_fields = ['sku']
+
+    def get_name(self, obj):
+        try:
+            return obj.coalesced_name
+        except AttributeError:
+            return obj.name
 
 
 class OffersSerializer(serializers.ModelSerializer):
