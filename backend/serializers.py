@@ -56,11 +56,13 @@ class FelmeresItemsSerializer(serializers.ModelSerializer):
         read_only_fields = ['sku']
 
     def create(self, validated_data):
-        name = validated_data.pop('name')
-        instance = super().create(validated_data)
-        instance.name = name
-        instance.save()
-        return instance
+        if 'name' in validated_data:
+            name = validated_data.pop('name')
+            if name:
+                instance = super().create(validated_data)
+                instance.name = name
+                instance.save()
+                return instance
 
 
 class OffersSerializer(serializers.ModelSerializer):
