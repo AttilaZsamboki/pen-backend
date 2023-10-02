@@ -295,7 +295,7 @@ class FelmeresItemsList(generics.ListCreateAPIView):
     def get(self, request):
         if request.query_params.get("adatlap_id"):
             felmeres_items = models.FelmeresItems.objects.filter(adatlap_id=request.query_params.get("adatlap_id")).annotate(
-                coalesced_name=Coalesce('name', F('product_id__name'), output_field=CharField()),
+                coalesced_name=Coalesce('name', F('product_id__name'), output_field=CharField(blank=True, null=True)),
                 sku=Coalesce('product_id__sku', Value(''), output_field=CharField())
             )
             serializer = serializers.FelmeresItemsSerializer(felmeres_items, many=True)
