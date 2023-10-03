@@ -165,10 +165,10 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, p
     contactData = contact_details(contact_id=contact_id)["response"]
     offerData = get_offer(offer_id)["response"]
     if offerData == "Error":
-        return {"status": "Error", "response": "Offer not found"}
+        return {"status": "error", "response": "Offer not found"}
     randomId = random.randint(100000, 999999)
     products = '\n'.join([
-        f'''<Product Id="{item['productId']}">
+        f'''<Product Id="{item['product_id']}">
         <!-- Name of product [required int] -->
         <Name>{item['name']}</Name>
         <!-- SKU code of product [optional string]-->

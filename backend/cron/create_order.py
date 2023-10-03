@@ -14,13 +14,15 @@ def main():
     adatlapok = get_all_adatlap_details(category_id=21, status_id=2896)
     for adatlap in adatlapok:
         log(f"{adatlap['Name']} megrendelés létrehozása", script_name="pen_create_order", status="INFO")
-        id = Felmeresek.objects.filter(adatlap_id=adatlap["Felmeresid"]).order_by("-created_at")[0].id
-        items = [{"sku": Products.objects.filter(id=i.productId)[0].sku if Products.objects.filter(id=i.productId).exists() else "", "productId": i.productId, "netPrice": i.netPrice, "inputValues": i.inputValues, "name": i.name} for i in FelmeresItems.objects.filter(adatlap_id=id)]
+        id = adatlap["Felmeresid"]
+        adatlap_id = Felmeresek.objects.get(id=id).adatlap_id
+        items = [{"sku": i.product.sku if i.product else "", "product_id": i.product.id if i.product else "", "netPrice": i.netPrice, "inputValues": i.inputValues, "name": i.name if i.name else i.product.name} for i in FelmeresItems.objects.filter(adatlap_id=id)]
+        print(items)
         offer = Offers.objects.filter(adatlap=adatlap["Id"])
-        felmeres = get_adatlap_details(adatlap["Felmeresid"])
+        felmeres = get_adatlap_details(adatlap_id)
         if offer and items and felmeres["status"] != "Error":
             felmeres = felmeres["response"]
-            order = create_order(adatlap_id=adatlap["Felmeresid"], contact_id=adatlap["ContactId"], items=items, offer_id=offer[0].offer_id, adatlap_status="Szervezésre vár", project_data={"Megye2": felmeres["Megye"], "Utcakep": felmeres["StreetViewUrl"], "IngatlanKepe2": felmeres["IngatlanKepe"], "FelmeresLink": felmeres["FelmeresAdatok"], "KiMerteFel2": felmeres["Felmero2"],"FelmeresDatuma2": felmeres["FelmeresIdopontja2"] })
+            order = create_order(adatlap_id=adatlap_id, contact_id=adatlap["ContactId"], items=items, offer_id=offer[0].offer_id, adatlap_status="Szervezésre vár", project_data={"Megye2": felmeres["Megye"], "Utcakep": felmeres["StreetViewUrl"], "IngatlanKepe2": felmeres["IngatlanKepe"], "FelmeresLink": felmeres["FelmeresAdatok"], "KiMerteFel2": felmeres["Felmero2"],"FelmeresDatuma2": felmeres["FelmeresIdopontja2"] })
             if order["status"] == "error":
                 if order["response"].lower() == "xml is not valid!":
                     log(f"{adatlap['Name']} megrendelés létrehozása sikertelen, XML nem valid", script_name="pen_create_order", status="ERROR", details=order["xml"])
@@ -30,11 +32,14 @@ def main():
                     continue
                 log(f"{adatlap['Name']} megrendelés létrehozása sikertelen", script_name="pen_create_order", status="ERROR", details=order["response"])
                 continue
-            log(f"{adatlap['Name']} megrendelés létrehozása sikeres", script_name="pen_create_order", status="SUCCESS")
             system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
             api_key = os.environ.get("PEN_MINICRM_API_KEY")
-            requests.post(
+            resp = requests.post(
                 f'https://r3.minicrm.hu/Api/Offer/{offer[0].offer_id}/Project', auth=(system_id, api_key), json={"StatusId": "Sikeres megrendelés"})
+            if resp.status_code != 200:
+                log(f"{adatlap['Name']} megrendelés létrehozása sikertelen, megrendelés státusz frissítése sikertelen", script_name="pen_create_order", status="ERROR", details=resp.text)
+                continue
+            log(f"{adatlap['Name']} megrendelés létrehozása sikeres", script_name="pen_create_order", status="SUCCESS")
             continue
         log(f"{adatlap['Name']} megrendelés létrehozása sikertelen, nem létezik felmérés", script_name="pen_create_order", status="ERROR", details=f"Offer: {offer}. Felmérés: {felmeres}")
     log("Megrendelések létrehozása sikeresen befejeződött", script_name="pen_create_order", status="SUCCESS")
