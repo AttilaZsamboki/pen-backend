@@ -238,3 +238,81 @@ class Orders(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_orders'
+
+class Order(models.Model):
+    row_type = models.TextField(db_column='Row_Type', blank=True, null=True)  # Field name made lowercase.
+    order_id = models.TextField(db_column='Order_ID', blank=True, null=True)  # Field name made lowercase.
+    sku = models.TextField(db_column='SKU', blank=True, null=True)  # Field name made lowercase.
+    product_name = models.TextField(db_column='Product_Name', blank=True, null=True)  # Field name made lowercase.
+    default_supplier_unit_price = models.FloatField(db_column='Default_Supplier_Unit_Price', blank=True, null=True)  # Field name made lowercase.
+    default_supplier_currency = models.TextField(db_column='Default_Supplier_Currency', blank=True, null=True)  # Field name made lowercase.
+    quantity = models.FloatField(db_column='Quantity', blank=True, null=True)  # Field name made lowercase.
+    unit_price = models.FloatField(db_column='Unit_Price', blank=True, null=True)  # Field name made lowercase.
+    discount = models.FloatField(db_column='Discount', blank=True, null=True)  # Field name made lowercase.
+    tax = models.FloatField(db_column='Tax', blank=True, null=True)  # Field name made lowercase.
+    subtotal = models.FloatField(db_column='Subtotal', blank=True, null=True)  # Field name made lowercase.
+    landed_cost = models.FloatField(db_column='Landed_Cost', blank=True, null=True)  # Field name made lowercase.
+    cogs = models.FloatField(db_column='Cogs', blank=True, null=True)  # Field name made lowercase.
+    margin = models.FloatField(db_column='Margin', blank=True, null=True)  # Field name made lowercase.
+    margin_field = models.FloatField(db_column='Margin_', blank=True, null=True)  # Field name made lowercase. Field renamed because it ended with '_'.
+    item_note = models.FloatField(db_column='Item_Note', blank=True, null=True)  # Field name made lowercase.
+    weight = models.FloatField(db_column='Weight', blank=True, null=True)  # Field name made lowercase.
+    webshop_id = models.TextField(db_column='Webshop_ID', blank=True, null=True, primary_key=True)  # Field name made lowercase.
+    return_reason = models.TextField(db_column='Return_Reason', blank=True, null=True)  # Field name made lowercase.
+    package_number = models.FloatField(db_column='Package_Number', blank=True, null=True)  # Field name made lowercase.
+    order_total = models.FloatField(db_column='Order_Total', blank=True, null=True)  # Field name made lowercase.
+    currency = models.TextField(db_column='Currency', blank=True, null=True)  # Field name made lowercase.
+    source = models.TextField(db_column='Source', blank=True, null=True)  # Field name made lowercase.
+    source_name = models.TextField(db_column='Source_Name', blank=True, null=True)  # Field name made lowercase.
+    order_status = models.TextField(db_column='Order_Status', blank=True, null=True)  # Field name made lowercase.
+    order_date = models.TextField(db_column='Order_Date', blank=True, null=True)  # Field name made lowercase.
+    customer_identifier = models.FloatField(db_column='Customer_Identifier', blank=True, null=True)  # Field name made lowercase.
+    memo = models.TextField(db_column='Memo', blank=True, null=True)  # Field name made lowercase.
+    billing_email = models.TextField(db_column='Billing_Email', blank=True, null=True)  # Field name made lowercase.
+    billing_address_1 = models.TextField(db_column='Billing_Address_1', blank=True, null=True)  # Field name made lowercase.
+    billing_address_2 = models.TextField(db_column='Billing_Address_2', blank=True, null=True)  # Field name made lowercase.
+    billing_country = models.TextField(db_column='Billing_Country', blank=True, null=True)  # Field name made lowercase.
+    billing_city = models.TextField(db_column='Billing_City', blank=True, null=True)  # Field name made lowercase.
+    billing_zip_code = models.BigIntegerField(db_column='Billing_Zip_Code', blank=True, null=True)  # Field name made lowercase.
+    billing_last_name = models.TextField(db_column='Billing_Last_Name', blank=True, null=True)  # Field name made lowercase.
+    billing_first_name = models.TextField(db_column='Billing_First_Name', blank=True, null=True)  # Field name made lowercase.
+    billing_tax_number = models.TextField(db_column='Billing_Tax_Number', blank=True, null=True)  # Field name made lowercase.
+    billing_company = models.TextField(db_column='Billing_Company', blank=True, null=True)  # Field name made lowercase.
+    manual_invoicing = models.BooleanField(db_column='Manual_Invoicing', blank=True, null=True)  # Field name made lowercase.
+    manual_proforma = models.BooleanField(db_column='Manual_Proforma', blank=True, null=True)  # Field name made lowercase.
+    shipping_email = models.TextField(db_column='Shipping_Email', blank=True, null=True)  # Field name made lowercase.
+    shipping_address_1 = models.TextField(db_column='Shipping_Address_1', blank=True, null=True)  # Field name made lowercase.
+    shipping_address_2 = models.TextField(db_column='Shipping_Address_2', blank=True, null=True)  # Field name made lowercase.
+    shipping_country = models.TextField(db_column='Shipping_Country', blank=True, null=True)  # Field name made lowercase.
+    shipping_city = models.TextField(db_column='Shipping_City', blank=True, null=True)  # Field name made lowercase.
+    shipping_zip_code = models.TextField(db_column='Shipping_Zip_Code', blank=True, null=True)  # Field name made lowercase.
+    shipping_last_name = models.TextField(db_column='Shipping_Last_Name', blank=True, null=True)  # Field name made lowercase.
+    shipping_first_name = models.TextField(db_column='Shipping_First_Name', blank=True, null=True)  # Field name made lowercase.
+    shipping_company = models.TextField(db_column='Shipping_Company', blank=True, null=True)  # Field name made lowercase.
+    delivery_note = models.TextField(db_column='Delivery_Note', blank=True, null=True)  # Field name made lowercase.
+    shipping_method = models.TextField(db_column='Shipping_Method', blank=True, null=True)  # Field name made lowercase.
+    payment_method = models.TextField(db_column='Payment_Method', blank=True, null=True)  # Field name made lowercase.
+    discount_value = models.BigIntegerField(db_column='Discount_Value', blank=True, null=True)  # Field name made lowercase.
+    exchange_rate = models.BigIntegerField(db_column='Exchange_Rate', blank=True, null=True)  # Field name made lowercase.
+    payment_status = models.TextField(db_column='Payment_Status', blank=True, null=True)  # Field name made lowercase.
+    warehouse = models.TextField(db_column='Warehouse', blank=True, null=True)  # Field name made lowercase.
+    delivery_date = models.FloatField(db_column='Delivery_Date', blank=True, null=True)  # Field name made lowercase.
+    proforma_invoice_id = models.TextField(db_column='Proforma_Invoice_ID', blank=True, null=True)  # Field name made lowercase.
+    proforma_invoice_id_2 = models.FloatField(db_column='Proforma_Invoice_ID_2', blank=True, null=True)  # Field name made lowercase.
+    invoice_id = models.TextField(db_column='Invoice_ID', blank=True, null=True)  # Field name made lowercase.
+    reverse_invoice_id = models.TextField(db_column='Reverse_Invoice_ID', blank=True, null=True)  # Field name made lowercase.
+    prepayment_reverse_invoice_id = models.FloatField(db_column='Prepayment_Reverse_Invoice_ID', blank=True, null=True)  # Field name made lowercase.
+    prepayment_reverse_invoice_id_2 = models.FloatField(db_column='Prepayment_Reverse_Invoice_ID_2', blank=True, null=True)  # Field name made lowercase.
+    tags = models.TextField(db_column='Tags', blank=True, null=True)  # Field name made lowercase.
+    customer_classes = models.TextField(db_column='Customer_Classes', blank=True, null=True)  # Field name made lowercase.
+    created_by = models.TextField(db_column='Created_By', blank=True, null=True)  # Field name made lowercase.
+    default_customer_class = models.TextField(db_column='Default_Customer_Class', blank=True, null=True)  # Field name made lowercase.
+    paid_at = models.TextField(db_column='Paid_At', blank=True, null=True)  # Field name made lowercase.
+    cancel_reason = models.TextField(db_column='Cancel_Reason', blank=True, null=True)  # Field name made lowercase.
+    cancelled_by = models.TextField(db_column='Cancelled_By', blank=True, null=True)  # Field name made lowercase.
+    cancelled_at = models.TextField(db_column='Cancelled_At', blank=True, null=True)  # Field name made lowercase.
+    completed_at = models.TextField(db_column='Completed_At', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'pen_order'

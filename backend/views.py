@@ -1,5 +1,5 @@
 from .utils.google_maps import get_street_view, get_street_view_url
-from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap, update_offer
+from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap, update_offer_order
 from .utils.logs import log
 from .utils.utils import delete_s3_file, replace_self_closing_tags
 from .utils.google_maps import calculate_distance
@@ -335,7 +335,6 @@ class QuestionProductsList(generics.ListCreateAPIView):
 
     def post(self, request):
         data = json.loads(request.body)
-        print(data)
         question_instance = models.Questions.objects.get(id=data["question_id"])
         product_instance = models.Products.objects.get(id=data["product_id"])
 
@@ -731,7 +730,7 @@ class CancelOffer(APIView):
         offer_adatlap = offer_adatlap[0]
 
         offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).offer_id
-        update_resp = update_offer(offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True)
+        update_resp = update_offer_order(offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True)
         if update_resp.status_code != 200:
             log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer", update_resp.text)
             return Response(update_resp.text, HTTP_400_BAD_REQUEST)
@@ -753,7 +752,7 @@ class CancelOffer(APIView):
             offer_adatlap = offer_adatlap[0]
 
             offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).offer_id
-            update_resp = update_offer(offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True)
+            update_resp = update_offer_order(offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True)
             if update_resp.status_code != 200:
                 log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer_dev", update_resp.text)
                 return Response(update_resp.text, HTTP_400_BAD_REQUEST)
