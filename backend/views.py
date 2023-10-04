@@ -1,5 +1,5 @@
 from .utils.google_maps import get_street_view, get_street_view_url
-from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, list_to_dos, update_todo, statuses, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap
+from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap, update_offer
 from .utils.logs import log
 from .utils.utils import delete_s3_file, replace_self_closing_tags
 from .utils.google_maps import calculate_distance
@@ -672,3 +672,45 @@ class FilterItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FilterItems.objects.all()
     serializer_class = serializers.FilterItemsSerializer
     permission_classes = [AllowAny]
+
+class CancelOffer(APIView):
+    def post(self, request):
+        log("MiniCRM ajánlat sztornózása megkezdődött", "INFO", "pen_cancel_offer", request.body.decode("utf-8"))
+        adatlap_id = request.data["adatlap_id"]
+        def critera(adatlap):
+            return adatlap["Felmeresid"] == adatlap_id
+
+        offer_adatlap = get_all_adatlap_details(category_id=21, criteria=critera)
+        if len(offer_adatlap) == 0:
+            log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer", "Nincs ilyen ajánlat")
+            return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
+        offer_adatlap = offer_adatlap[0]
+
+        offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).offer_id
+        update_resp = update_offer(offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True)
+        if update_resp.status_code != 200:
+            log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer", update_resp.text)
+            return Response(update_resp.text, HTTP_400_BAD_REQUEST)
+        return Response("Sikeres sztornózás", HTTP_200_OK)
+
+
+    def get(self, request):
+        log("MiniCRM ajánlat sztornózása megkezdődött", "INFO", "pen_cancel_offer_dev", request.body.decode("utf-8"))
+        if os.environ.get("ENVIRONMENT") == "development":
+            adatlap_id = "148"
+
+            def critera(adatlap):
+                return adatlap["Felmeresid"] == adatlap_id
+
+            offer_adatlap = get_all_adatlap_details(category_id=21, criteria=critera)
+            if len(offer_adatlap) == 0:
+                log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer_dev", "Nincs ilyen ajánlat")
+                return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
+            offer_adatlap = offer_adatlap[0]
+
+            offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).offer_id
+            update_resp = update_offer(offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True)
+            if update_resp.status_code != 200:
+                log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer_dev", update_resp.text)
+                return Response(update_resp.text, HTTP_400_BAD_REQUEST)
+            return Response("Sikeres sztornózás", HTTP_200_OK)

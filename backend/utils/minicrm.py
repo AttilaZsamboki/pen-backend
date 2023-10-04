@@ -2,7 +2,6 @@ import os
 import requests
 import random
 
-from html import escape
 
 from dotenv import load_dotenv
 
@@ -20,12 +19,17 @@ def get_request(endpoint, id=None, query_params=None, isR3=True):
     else:
         return {"status": "Error", "response": data.text}
 
-def update_request(id, fields, endpoint):
+def update_request(id, fields, endpoint, isR3=True, method="PUT"):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
-    return requests.put(
-        f'https://r3.minicrm.hu/Api/R3/{endpoint}/{id}', auth=(system_id, api_key), json=fields)
+    print(fields)
+    if method == "PUT":
+        return requests.put(
+            f'https://r3.minicrm.hu/Api{"/R3" if isR3 else ""}/{endpoint}/{id}', auth=(system_id, api_key), json=fields)
+    elif method == "POST":
+        return requests.post(
+            f'https://r3.minicrm.hu/Api{"/R3" if isR3 else ""}/{endpoint}/{id}', auth=(system_id, api_key), json=fields)
 
 def update_adatlap_fields(id, fields):
     adatlap = update_request(id=id, fields=fields, endpoint="Project")
@@ -251,3 +255,6 @@ def get_offer(offer_id):
 
 def get_order(order_id):
     return get_request(endpoint="Order", id=order_id, isR3=False)
+
+def update_offer(offer_id, fields, project=True):
+    return update_request(id=str(offer_id)+("/Project" if project else ""), fields=fields, endpoint="Offer", isR3=False, method="POST")
