@@ -416,7 +416,7 @@ class UnasGetOrder(APIView):
                 token = auth_header[7:]
                 token = models.ErpAuthTokens.objects.get(token=token)
                 if token.expire > datetime.datetime.now():
-                    adatlapok = get_all_adatlap(category_id=29, status_id=3008)["Results"]
+                    adatlapok = get_all_adatlap(category_id=29, status_id=3008)["Results"].values()
                     if not adatlapok:
                         return HttpResponse("""<?xml version="1.0" encoding="UTF-8" ?>
                                             <Orders>
