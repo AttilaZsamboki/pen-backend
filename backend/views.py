@@ -421,7 +421,29 @@ class UnasGetOrder(APIView):
                         return HttpResponse("""<?xml version="1.0" encoding="UTF-8" ?>
                                             <Orders>
                                             </Orders>""", status=HTTP_200_OK)
-                    datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id)["response"], "AdatlapDetails": get_adatlap_details(id=i["Id"])["response"], "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"])["response"], "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])["response"]} for i in adatlapok.values() if adatlapok != {}]
+                    datas = []
+                    for adatlap in adatlapok:
+                        # Get the order data, adatlap details, business contact details, address, and contact details for each adatlap
+                        order_data = get_order(models.Orders.objects.get(adatlap_id=adatlap["Id"]).order_id)["response"]
+                        adatlap_details = get_adatlap_details(id=adatlap["Id"])["response"]
+                        kapcsolat = contact_details(contact_id=adatlap["ContactId"])["response"]
+                        try:
+                            business_kapcsolat = contact_details(contact_id=adatlap["BusinessId"])["response"]
+                        except:
+                            business_kapcsolat = order_data["Customer"]
+                        try:
+                            cim = address_list(adatlap["BusinessId"])[0]
+                        except:
+                            cim = order_data["Customer"]
+                        
+                        # Add the data to the datas list
+                        datas.append({
+                            "OrderData": order_data,
+                            "AdatlapDetails": adatlap_details,
+                            "BusinessKapcsolat": business_kapcsolat,
+                            "Cím": cim,
+                            "Kapcsolat": kapcsolat
+                        })
                     response = """<?xml version="1.0" encoding="UTF-8" ?>
                     <Orders> """ + "\n".join([f"""<Order>
                             <Key>{data["OrderData"]["Id"]}</Key>
