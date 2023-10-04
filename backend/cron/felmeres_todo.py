@@ -13,7 +13,7 @@ def felmeres_todo():
         log("Hiba akadt az adatlapok lekérdezése közben", "ERROR", script_name="pen_felmeres_todo")
         return
     for adatlap in adatlapok:
-        url = "https://app.peneszmentesites.hu/felmeresek/new?adatlap_id=" + str(adatlap["Id"])
+        url = "https://app.peneszmentesites.hu/new?adatlap_id=" + str(adatlap["Id"])
         urlap = update_adatlap_fields(id=adatlap["Id"], fields={"Urlap": url})
         if urlap["code"] == "Error":
             log("Hiba akadt az adatlap Urlap mezőjének frissítése közben", "ERROR", script_name="pen_felmeres_todo", details="Adatlap: "+str(adatlap["Id"])+", Error: "+str(urlap["reason"]) )

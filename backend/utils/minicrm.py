@@ -55,7 +55,9 @@ def get_adatlap_details(id):
         endpoint="Project", id=id)
 
 
-def contact_details(contact_id):
+def contact_details(contact_id=None, adatlap_id=None):
+    if adatlap_id and not contact_id:
+        contact_id = get_adatlap_details(adatlap_id)["response"]["ContactId"]
     return get_request(
         "Contact", id=contact_id)
 
@@ -258,3 +260,7 @@ def get_order(order_id):
 
 def update_offer(offer_id, fields, project=True):
     return update_request(id=str(offer_id)+("/Project" if project else ""), fields=fields, endpoint="Offer", isR3=False, method="POST")
+
+def get_order_address(order_id):
+    address = get_order(order_id=order_id)
+    return {"status": address["status"], "response": address["response"]["Customer"] if address["status"] == "Success" else address["response"]}
