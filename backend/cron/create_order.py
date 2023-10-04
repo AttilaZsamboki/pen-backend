@@ -17,7 +17,6 @@ def main():
         id = adatlap["Felmeresid"]
         adatlap_id = Felmeresek.objects.get(id=id).adatlap_id
         items = [{"sku": i.product.sku if i.product else "", "product_id": i.product.id if i.product else "", "netPrice": i.netPrice, "inputValues": i.inputValues, "name": i.name if i.name else i.product.name} for i in FelmeresItems.objects.filter(adatlap_id=id)]
-        print(items)
         offer = Offers.objects.filter(adatlap=adatlap["Id"])
         felmeres = get_adatlap_details(adatlap_id)
         if offer and items and felmeres["status"] != "Error":

@@ -514,12 +514,37 @@ class UnasGetOrder(APIView):
             if True:
                 try:
                     if True:
-                        adatlapok = get_all_adatlap(category_id=29, status_id=3008)["Results"]
+                        adatlapok = get_all_adatlap(category_id=29, status_id=3008)["Results"].values()
                         if not adatlapok:
                             return HttpResponse("""<?xml version="1.0" encoding="UTF-8" ?>
                                                 <Orders>
                                                 </Orders>""", status=HTTP_200_OK)
-                        datas = [{"OrderData": get_order(models.Orders.objects.get(adatlap_id=i["Id"]).order_id)["response"], "AdatlapDetails": get_adatlap_details(id=i["Id"])["response"], "BusinessKapcsolat": contact_details(contact_id=i["BusinessId"])["response"], "Cím": address_list(i["BusinessId"])[0], "Kapcsolat": contact_details(contact_id=i["ContactId"])["response"]} for i in adatlapok.values() if adatlapok != {}]
+
+                        # Get all adatlap objects with category_id=29 and status_id=3008
+                        datas = []
+                        for adatlap in adatlapok:
+                            # Get the order data, adatlap details, business contact details, address, and contact details for each adatlap
+                            order_data = get_order(models.Orders.objects.get(adatlap_id=adatlap["Id"]).order_id)["response"]
+                            adatlap_details = get_adatlap_details(id=adatlap["Id"])["response"]
+                            kapcsolat = contact_details(contact_id=adatlap["ContactId"])["response"]
+                            try:
+                                business_kapcsolat = contact_details(contact_id=adatlap["BusinessId"])["response"]
+                            except:
+                                business_kapcsolat = order_data["Customer"]
+                            try:
+                                cim = address_list(adatlap["BusinessId"])[0]
+                            except:
+                                cim = order_data["Customer"]
+                            
+                            # Add the data to the datas list
+                            datas.append({
+                                "OrderData": order_data,
+                                "AdatlapDetails": adatlap_details,
+                                "BusinessKapcsolat": business_kapcsolat,
+                                "Cím": cim,
+                                "Kapcsolat": kapcsolat
+                            })
+
                         response = """<?xml version="1.0" encoding="UTF-8" ?>
                         <Orders> """ + "\n".join([f"""<Order>
                                 <Key>{data["OrderData"]["Id"]}</Key>
@@ -598,13 +623,10 @@ class UnasGetOrder(APIView):
                             </Order> """ for data in datas]) + """
                             </Orders>
                         """
-                        return HttpResponse(response, status=HTTP_200_OK)
-                    else:
-                        return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
+                        return Response(response, status=HTTP_200_OK)
                 except Exception as e:
                     log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order_dev", "Error: "+str(e))
                     return Response(str(e), status=HTTP_401_UNAUTHORIZED)
-            return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
 class UnasSetProduct(APIView):
     parser_classes = (XMLParser, )
@@ -714,3 +736,5 @@ class CancelOffer(APIView):
                 log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer_dev", update_resp.text)
                 return Response(update_resp.text, HTTP_400_BAD_REQUEST)
             return Response("Sikeres sztornózás", HTTP_200_OK)
+        else:
+            return Response("Nem development környezet", HTTP_400_BAD_REQUEST)
