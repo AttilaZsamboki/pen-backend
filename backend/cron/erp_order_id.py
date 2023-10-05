@@ -14,6 +14,7 @@ def main():
         order_id = order_id.order_id
 
         order = Order.objects.filter(webshop_id=order_id).first()
+        print(order)
         if not order:
             log("Nem található megfelelő rendelés a megrendeléshez", "WARNING", "pen_erp_order_id")
             continue

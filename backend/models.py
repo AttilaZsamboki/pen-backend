@@ -118,6 +118,8 @@ class ProductAttributes(models.Model):
 class Filters(models.Model):
     name = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
+    sort_by = models.TextField(blank=True, null=True)
+    sort_order = models.CharField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -257,7 +259,7 @@ class Order(models.Model):
     margin_field = models.FloatField(db_column='Margin_', blank=True, null=True)  # Field name made lowercase. Field renamed because it ended with '_'.
     item_note = models.FloatField(db_column='Item_Note', blank=True, null=True)  # Field name made lowercase.
     weight = models.FloatField(db_column='Weight', blank=True, null=True)  # Field name made lowercase.
-    webshop_id = models.TextField(db_column='Webshop_ID', blank=True, null=True, primary_key=True)  # Field name made lowercase.
+    webshop_id = models.TextField(db_column='Webshop_ID', blank=True, null=True)  # Field name made lowercase.
     return_reason = models.TextField(db_column='Return_Reason', blank=True, null=True)  # Field name made lowercase.
     package_number = models.FloatField(db_column='Package_Number', blank=True, null=True)  # Field name made lowercase.
     order_total = models.FloatField(db_column='Order_Total', blank=True, null=True)  # Field name made lowercase.
@@ -312,6 +314,7 @@ class Order(models.Model):
     cancelled_by = models.TextField(db_column='Cancelled_By', blank=True, null=True)  # Field name made lowercase.
     cancelled_at = models.TextField(db_column='Cancelled_At', blank=True, null=True)  # Field name made lowercase.
     completed_at = models.TextField(db_column='Completed_At', blank=True, null=True)  # Field name made lowercase.
+    id = models.AutoField(db_column='id', primary_key=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
