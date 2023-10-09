@@ -1,6 +1,7 @@
 import os
 import requests
 import random
+import json
 
 
 from dotenv import load_dotenv
@@ -173,22 +174,22 @@ def create_order(adatlap_id, contact_id, items, offer_id, adatlap_status=None, p
         return {"status": "error", "response": "Offer not found"}
     randomId = random.randint(100000, 999999)
     products = '\n'.join([
-        f'''<Product Id="{item['product_id']}">
+        f'''<Product Id="{item['Id']}">
         <!-- Name of product [required int] -->
-        <Name>{item['name']}</Name>
+        <Name>{item['Name']}</Name>
         <!-- SKU code of product [optional string]-->
-        <SKU>{item['sku']}</SKU>
+        <SKU>{item['SKU']}</SKU>
         <!-- Nett price of product [required int] -->
-        <PriceNet>{item['netPrice']}</PriceNet>
+        <PriceNet>{item['PriceNet']}</PriceNet>
         <!-- Quantity of product [required int] -->
-        <Quantity>{sum(value['ammount'] for value in item['inputValues'])}</Quantity>
+        <Quantity>{item["Quantity"]}</Quantity>
         <!-- Unit of product [required string] -->
         <Unit>darab</Unit>
         <!-- VAT of product [required int] -->
         <VAT>27%</VAT>
         <!-- Folder of product in MiniCRM. If it does not exist, then it is created automaticly [required string] -->
         <FolderName>Default products</FolderName>
-    </Product>''' for item in items
+    </Product>''' for item in offerData["Items"]
     ])
     xml_string = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Projects>

@@ -9,14 +9,13 @@ def main():
 
         order_id = Orders.objects.filter(adatlap_id=adatlap["Id"]).first()
         if not order_id:
-            log("Nem található megfelelő rendelés a megrendeléshez", "WARNING", "pen_erp_order_id")
+            log("Nem található megfelelő rendelés a megrendeléshez", "WARNING", "pen_erp_order_id", adatlap["Id"])
             continue
         order_id = order_id.order_id
 
         order = Order.objects.filter(webshop_id=order_id).first()
-        print(order)
         if not order:
-            log("Nem található megfelelő rendelés a megrendeléshez", "WARNING", "pen_erp_order_id")
+            log("Nincs benne a rendelés az ERP feedben", "WARNING", "pen_erp_order_id", adatlap["Id"])
             continue
         resp = update_offer_order(order.webshop_id, {"ClouderpMegrendeles": "https://app.clouderp.hu/v2/order?search="+str(order.order_id), "RendelesSzama": order.order_id}, type="Order")
         if resp.ok:
