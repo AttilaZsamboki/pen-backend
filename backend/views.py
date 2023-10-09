@@ -494,7 +494,7 @@ def get_unas_order_data():
             <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
             <Items>
                 """+"\n".join([f"""<Item>
-                    <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] else "discount-amount"}</Id>
+                    <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] and i["SKU"] != "null" else "discount-amount"}</Id>
                     <Sku>{i["SKU"] if i["SKU"] else "discount-amount"}</Sku>
                     <Name>{i["Name"]}</Name>
                     <ProductParams>
