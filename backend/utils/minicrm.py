@@ -23,7 +23,6 @@ def update_request(id, fields={}, endpoint="Project", isR3=True, method="PUT"):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
-    print(f'https://r3.minicrm.hu/Api{"/R3" if isR3 else ""}/{endpoint}/{id}')
     if method == "PUT":
         return requests.put(
             f'https://r3.minicrm.hu/Api{"/R3" if isR3 else ""}/{endpoint}/{id}', auth=(system_id, api_key), json=fields)

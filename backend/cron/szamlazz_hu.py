@@ -59,6 +59,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
             if "szlahu_szamlaszam" in query_response.headers.keys():
                 if is_proform or query_response.headers["szlahu_szamlaszam"][0] == "E" or cash:
                     log(f"Már létezik {name}", "INFO", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+                    update_adatlap_fields(adatlap["Id"], {("DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"): f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}"})
                     continue
             contact_id = adatlap["BusinessId"]
             contact = contact_details(contact_id)["response"]
@@ -94,7 +95,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <szamlaNyelve>hu</szamlaNyelve>
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                                     -->
-                    <megjegyzes>{adatlap["DijbekeroMegjegyzes2"] if is_proform else adatlap["SzamlaMegjegyzes"]}</megjegyzes>
+                    <megjegyzes><![CDATA[{adatlap["DijbekeroMegjegyzes2"] if is_proform else adatlap["SzamlaMegjegyzes"]}]]></megjegyzes>
                     <rendelesSzam>{adatlap["Id"]}</rendelesSzam>
                     <!-- order number -->
                     <dijbekeroSzamlaszam>{adatlap["DijbekeroSzama2"]}</dijbekeroSzamlaszam>
@@ -121,27 +122,27 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 </elado>
                 <vevo>
                     <!--Buyer details -->
-                    <nev>{contact["Name"]}</nev>
+                    <nev><![CDATA[{contact["Name"]}]]></nev>
                     <!-- name -->
-                    <irsz>{address["PostalCode"]}</irsz>
+                    <irsz><![CDATA[{address["PostalCode"]}]]></irsz>
                     <!-- ZIP code -->
-                    <telepules>{address["City"]}</telepules>
+                    <telepules><![CDATA[{address["City"]}]]></telepules>
                     <!-- city -->
-                    <cim>{address["Address"]}</cim>
+                    <cim><![CDATA[{address["Address"]}]]></cim>
                     <!-- address -->
-                    <email>{contact["Email"]}</email>
+                    <email><![CDATA[{contact["Email"]}]]></email>
                     <!-- e-mail address, if given, we will send the invoice to this mail address -->
                     <sendEmail>false</sendEmail>
                     <!-- should we send the e-mail to the customer (by email) -->
                     <adoszam>{contact["VatNumber"]}</adoszam>
                     <!-- fiscal number/tax number -->
-                    <postazasiNev>{adatlap["Name"]}</postazasiNev>
+                    <postazasiNev><![CDATA[{adatlap["Name"]}]]></postazasiNev>
                     <!--delivery name/postal name -->
                     <postazasiIrsz>{adatlap["Iranyitoszam"]}</postazasiIrsz>
                     <!--delivery ZIP code/postal ZIP code -->
-                    <postazasiTelepules>{adatlap["Telepules"]}</postazasiTelepules>
+                    <postazasiTelepules><![CDATA[{adatlap["Telepules"]}]]></postazasiTelepules>
                     <!--delivery city/postal city -->
-                    <postazasiCim>{adatlap["Cim2"]}</postazasiCim>
+                    <postazasiCim><![CDATA[{adatlap["Cim2"]}]]></postazasiCim>
                     <!--delivery address/postal address -->
                     <azonosito>{adatlap["Id"]}</azonosito>
                     <!-- identification -->
@@ -177,19 +178,20 @@ def create_invoice_or_proform(is_proform=True, cash=False):
             url = "https://www.szamlazz.hu/szamla/"
             response = requests.post(
                 url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")})
-            if response.status_code != 200:
+            try:
+                szamlaszam = response.headers["szlahu_szamlaszam"]
+            except:
                 update_resp = update_adatlap_fields(adatlap["Id"], {
-                    "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} készítése sikertelen volt: {response.text}"})
-                log(f"{name.capitalize()} készítése sikertelen volt: {response.text}", "ERROR", f"pen_{script_name}", f"adatlap: {adatlap['Id']}, error: {response.text}")
+                    ("DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"): f"{name.capitalize()} készítése sikertelen volt: {response.text[:800]}"})
+                log(f"{name.capitalize()} készítése sikertelen volt", "ERROR", f"pen_{script_name}", f"adatlap: {adatlap['Id']}, error: {response.text}")
                 continue
             os.remove(invoice_path)
-            szamlaszam = response.headers["szlahu_szamlaszam"]
             pdf_path = f"{base_path}/static/{szamlaszam}.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
             update_resp = update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"], "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek": f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
+                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"], "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], ("DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"): f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
             if update_resp["code"] == 400:
                 log(f"Hiba akadt a {name} feltöltésében", "ERROR", script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}")
             os.remove(pdf_path)
