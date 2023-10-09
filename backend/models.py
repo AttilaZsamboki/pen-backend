@@ -319,3 +319,10 @@ class Order(models.Model):
     class Meta:
         managed = False
         db_table = 'pen_order'
+
+class PaymentMethods(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_payment_methods'
