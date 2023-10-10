@@ -193,6 +193,7 @@ class FelmeresItems(models.Model):
     adatlap = models.ForeignKey('Felmeresek', models.DO_NOTHING, db_column="adatlap_id")
     type = models.CharField(max_length=255, blank=True, null=True)
     valueType = models.CharField(max_length=255, blank=True, null=True, default="fixed", db_column="value_type")
+    source = models.CharField(max_length=100, blank=True, null=True, default="Manual")
 
     class Meta:
         managed = False
