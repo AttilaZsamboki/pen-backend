@@ -21,6 +21,7 @@ from django.db import connection
 from django.http import HttpResponse
 from django.db.models import Q, F, Value, CharField
 from django.db.models.functions import Coalesce 
+from django.shortcuts import get_object_or_404
 
 import json
 import math
@@ -286,11 +287,17 @@ class FelmeresItemsList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresItemsSerializer
 
     def post(self, request):
-        serializer = self.get_serializer(data=request.data, many=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=HTTP_201_CREATED, headers=headers)
+        data = request.data
+        for item in data:
+            adatlap_id = item.pop('adatlap', None)
+            if adatlap_id is not None:
+                adatlap = get_object_or_404(models.Felmeresek, id=adatlap_id)
+                item['adatlap'] = adatlap
+            instance, created = models.FelmeresItems.objects.update_or_create(
+                id=item.get('id', None),  # assuming 'id' is the unique field
+                defaults=item
+            )
+        return Response(status=HTTP_200_OK)
     
     def get(self, request):
         if request.query_params.get("adatlap_id"):
@@ -434,6 +441,7 @@ def get_unas_order_data():
             "Cím": cim,
             "Kapcsolat": kapcsolat
         })
+    
 
     return """<?xml version="1.0" encoding="UTF-8" ?>
     <Orders> """ + "\n".join([f"""<Order>
