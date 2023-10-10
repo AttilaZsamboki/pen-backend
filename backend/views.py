@@ -288,6 +288,11 @@ class FelmeresItemsList(generics.ListCreateAPIView):
 
     def post(self, request):
         data = request.data
+        adatlap_ids_in_request = [item.get('adatlap') for item in data]
+    
+        # Delete items not in request
+        models.FelmeresItems.objects.exclude(id__in=adatlap_ids_in_request).delete()
+    
         for item in data:
             adatlap_id = item.pop('adatlap', None)
             product_id = item.pop('product', None)
