@@ -290,9 +290,14 @@ class FelmeresItemsList(generics.ListCreateAPIView):
         data = request.data
         for item in data:
             adatlap_id = item.pop('adatlap', None)
+            product_id = item.pop('product', None)
             if adatlap_id is not None:
                 adatlap = get_object_or_404(models.Felmeresek, id=adatlap_id)
                 item['adatlap'] = adatlap
+            if product_id is not None:
+                product = get_object_or_404(models.Products, id=product_id)
+                item['product'] = product
+            item = {k: v for k, v in item.items() if k in [f.name for f in models.FelmeresItems._meta.get_fields()]}
             instance, created = models.FelmeresItems.objects.update_or_create(
                 id=item.get('id', None),  # assuming 'id' is the unique field
                 defaults=item
