@@ -13,15 +13,18 @@ from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREA
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
+from rest_framework.parsers import MultiPartParser
 
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
 
+from django.http import JsonResponse
 from django.db import connection
 from django.http import HttpResponse
 from django.db.models import Q, F, Value, CharField
 from django.db.models.functions import Coalesce 
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 
 import json
 import math
@@ -30,6 +33,7 @@ import random
 import string
 import datetime
 import re
+import boto3
 
 import xml.etree.ElementTree as ET
 
@@ -669,3 +673,23 @@ class CancelOffer(APIView):
             return Response("Sikeres sztornózás", HTTP_200_OK)
         else:
             return Response("Nem development környezet", HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def upload_file(request):
+    if request.method == "POST":
+        parser = MultiPartParser()
+        files = parser.parse(request).getlist('files')
+        if not files:
+            return JsonResponse({"success": False}, status=400)
+        
+        s3_client = boto3.client('s3', region_name='your-region', 
+                                 aws_access_key_id='your-access-key', 
+                                 aws_secret_access_key='your-secret-key')
+        
+        try:
+            for file in files:
+                s3_client.upload_fileobj(file, 'your-bucket-name', file.name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
+            return JsonResponse({"success": True, "async_id_symbol": file.name}, status=200)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"success": False}, status=500)

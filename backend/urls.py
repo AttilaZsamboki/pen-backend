@@ -33,4 +33,5 @@ urlpatterns = [
     path('filter_items/', views.FilterItemsList.as_view()),
     path('filter_items/<int:pk>/', views.FilterItemsDetail.as_view()),
     path('cancel_offer/', views.CancelOffer.as_view()),
+    path('save-image/', views.upload_file)
 ]
