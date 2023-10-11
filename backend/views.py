@@ -688,7 +688,7 @@ def upload_file(request):
         
         try:
             for file in files:
-                s3_client.upload_fileobj(file, 'your-bucket-name', file.name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
+                s3_client.upload_fileobj(file, os.getenv("AWS_BUCKET_NAME"), file.name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
             return JsonResponse({"success": True, "async_id_symbol": file.name}, status=200)
         except Exception as e:
             print(e)

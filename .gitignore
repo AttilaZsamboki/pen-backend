@@ -6,3 +6,4 @@
 pen-env/
 .credentials
 .env
+backend/test
