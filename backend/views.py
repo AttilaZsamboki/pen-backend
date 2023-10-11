@@ -674,22 +674,23 @@ class CancelOffer(APIView):
         else:
             return Response("Nem development környezet", HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
-def upload_file(request):
-    if request.method == "POST":
-        parser = MultiPartParser()
-        files = parser.parse(request).getlist('files')
-        if not files:
-            return JsonResponse({"success": False}, status=400)
+# @csrf_exempt
+# def upload_file(request):
+#     if request.method == "POST":
+#         parser = MultiPartParser()
+#         files = parser.parse(request).getlist('files')
+#         if not files:
+#             return JsonResponse({"success": False}, status=400)
         
-        s3_client = boto3.client('s3', region_name=os.getenv("AWS_REGION"), 
-                                 aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), 
-                                 aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
+#         s3_client = boto3.client('s3', region_name=os.getenv("AWS_REGION"), 
+#                                  aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), 
+#                                  aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
         
-        try:
-            for file in files:
-                s3_client.upload_fileobj(file, 'your-bucket-name', file.name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
-            return JsonResponse({"success": True, "async_id_symbol": file.name}, status=200)
-        except Exception as e:
-            print(e)
-            return JsonResponse({"success": False}, status=500)
+#         try:
+#             for file in files:
+#                 s3_client.upload_fileobj(file, 'your-bucket-name', file.name, ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
+#             return JsonResponse({"success": True, "async_id_symbol": file.name}, status=200)
+#         except Exception as e:
+#             print(e)
+#             return JsonResponse({"success": False}, status=500)
+#     return JsonResponse({"success": False}, status=400)
