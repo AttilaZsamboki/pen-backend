@@ -682,9 +682,9 @@ def upload_file(request):
         if not files:
             return JsonResponse({"success": False}, status=400)
         
-        s3_client = boto3.client('s3', region_name='your-region', 
-                                 aws_access_key_id='your-access-key', 
-                                 aws_secret_access_key='your-secret-key')
+        s3_client = boto3.client('s3', region_name=os.getenv("AWS_REGION"), 
+                                 aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), 
+                                 aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
         
         try:
             for file in files:
