@@ -677,8 +677,7 @@ class CancelOffer(APIView):
 @csrf_exempt
 def upload_file(request):
     if request.method == "POST":
-        parser = MultiPartParser()
-        files = parser.parse(request.body).getlist('files')
+        files = request.FILES.getlist('files')
         if not files:
             return JsonResponse({"success": False}, status=400)
         
