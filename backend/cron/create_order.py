@@ -1,7 +1,7 @@
 from ..utils.logs import log
 from ..utils.minicrm import get_all_adatlap_details, create_order, get_adatlap_details
 
-from ..models import FelmeresItems, Offers, Products, Felmeresek
+from ..models import FelmeresItems, Offers, Felmeresek
 
 import os
 import dotenv
