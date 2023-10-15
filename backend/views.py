@@ -558,11 +558,12 @@ class UnasGetOrder(APIView):
                 return Response(str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
-    if os.environ.get("ENVIRONMENT") == "development":
-        def get(self, request):
+    def get(self, request):
+        if os.environ.get("ENVIRONMENT") == "development":
             log("Unas rendelések lekérdezése meghívva", "INFO", "pen_unas_get_order_dev", request.body.decode("utf-8"))
             response = get_unas_order_data()
             return Response(response, HTTP_200_OK)
+        log("Unas rendelések lekérdezése sikertelen", "ERROR", "pen_unas_get_order", "Nem development környezetben fut")
 
 class UnasSetProduct(APIView):
     parser_classes = (XMLParser, )
