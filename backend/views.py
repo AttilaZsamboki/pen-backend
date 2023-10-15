@@ -650,7 +650,7 @@ class CancelOffer(APIView):
         if update_resp.status_code != 200:
             log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer", update_resp.text)
             return Response(update_resp.text, HTTP_400_BAD_REQUEST)
-        models.Felmeresek.objects.filter(adatlap_id=adatlap_id).update(status="CANCELLED")
+        models.Felmeresek.objects.filter(id=adatlap_id).update(status="CANCELLED")
         return Response("Sikeres sztornózás", HTTP_200_OK)
 
 
