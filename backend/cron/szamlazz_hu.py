@@ -104,14 +104,14 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <!-- invoice (after a deposit invoice) -->
                     <dijbekero>{'true' if is_proform else 'false'}</dijbekero>
                     <!-- proform invoice -->
-                    <szamlaszamElotag>KLCSR</szamlaszamElotag>
+                    <szamlaszamElotag>TMTSZ</szamlaszamElotag>
                     <!-- One of the prefixes from the invoice pad menu  -->
                 </fejlec>
                 <elado>
                     <!-- Details of the merchant-->
-                    <bank>BB</bank>
+                    <bank>OTP</bank>
                     <!-- bank name -->
-                    <bankszamlaszam>12345678-12345678-12345678</bankszamlaszam>
+                    <bankszamlaszam>11741055-20013712</bankszamlaszam>
                     <!-- bank account -->
                     <emailReplyto>zsamboki.attila.jr@gmail.com</emailReplyto>
                     <!-- reply e-mail address -->
