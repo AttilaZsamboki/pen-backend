@@ -356,7 +356,7 @@ class UnasLogin(APIView):
         root = ET.fromstring(response)
         for element in root.iter('ApiKey'):
             api_key = element.text
-            if api_key == os.environ.get("CLOUD_API_KEY"):
+            if api_key.strip() == os.environ.get("CLOUD_API_KEY"):
                 Login = ET.Element('Login')
                 Token = ET.SubElement(Login, 'Token')
                 Token.text = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=32))
