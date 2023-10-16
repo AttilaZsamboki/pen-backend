@@ -519,8 +519,6 @@ def get_unas_order_data():
                     <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] and i["SKU"] != "null" else "discount-amount"}</Id>
                     <Sku>{i["SKU"] if i["SKU"] else "discount-amount"}</Sku>
                     <Name>{i["Name"]}</Name>
-                    <ProductParams>
-                    </ProductParams>
                     <Unit>{i["Unit"]}</Unit>
                     <Quantity>{i["Quantity"]}</Quantity>
                     <PriceNet>{i["PriceNet"]}</PriceNet>
@@ -532,6 +530,13 @@ def get_unas_order_data():
                     </Item>
                     """ for i in data["OrderData"]["Items"]])+"""
             </Items>
+            <Params>
+"""+"\n".join([f"""<Param>
+<Id>{index}</Id>
+<Name><![CDATA[Beépítő {index+1}]]></Name>
+<Value><![CDATA[{i}]]></Value>
+</Param>""" for index, i in enumerate(data["AdatlapDetails"]["Beepitok"].split(", "))]) + """
+            </Params>
         </Order> """ for data in datas]) + """
         </Orders>
     """
