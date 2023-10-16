@@ -26,7 +26,12 @@ def process_data(data, source="webhook"):
     }
     fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
     try:
-        get_street_view(location=address[0])
+        resp = get_street_view(location=address)
+        if not resp.ok:
+            log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", script_name,
+                f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}. Google API válasz: {resp.text}")
+        else:
+            log("Google streetview kép sikeresen mentve", "INFO", script_name, f"Adatlap id: {data['Id']}")
     except Exception as e:
         log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
     street_view_url = get_street_view_url(location=address)
@@ -46,16 +51,18 @@ def process_data(data, source="webhook"):
     return "Success"
 
 def criteria(adatlap):
-    if adatlap["Tavolsag"] and adatlap["FelmeresiDij"]:
-        return False
-    return True
+    # if adatlap["Tavolsag"] and adatlap["FelmeresiDij"]:
+    #     return False
+    # return True
+    if adatlap["Id"] == 43200:
+        return True
 
 
 log("Penészmentesítés távolságszámítás megkezdődött",
     "INFO", "pen_calculate_distance_cron")
 adatlapok = get_all_adatlap_details(category_id=23, criteria=criteria, status_id=2927)
 for adatlap in adatlapok:
-    stat = process_data(adatlap, cron=True)
+    stat = process_data(adatlap, source="cron")
     if stat == "Error":
         log("Penészmentesítés távolságszámítás sikertelen",
             "ERROR", "pen_calculate_distance_cron", details=adatlap["Id"])

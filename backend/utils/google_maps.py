@@ -2,6 +2,7 @@ import requests
 import os
 import googlemaps
 import dotenv
+import urllib.parse
 
 from .logs import log
 from .utils import base_path
@@ -37,10 +38,10 @@ def get_street_view(location):
         if response.content is not None:
             with open(base_path+"/static/images/google_street_view/street_view.jpg", "wb") as img_file:
                 img_file.write(response.content)
+        return response
     else:
         # The request failed, print the error message
-        print("Failed to get street view image:", response.content)
-        return None
+        return response
 
 
 def get_street_view_url(location):
