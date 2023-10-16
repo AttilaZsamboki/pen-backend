@@ -1,11 +1,11 @@
-from .utils.google_maps import get_street_view, get_street_view_url
-from .utils.minicrm import update_adatlap_fields, get_all_adatlap_details, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap, update_offer_order
+from .utils.minicrm import get_all_adatlap_details, get_order, get_adatlap_details, contact_details, address_list, get_all_adatlap, update_offer_order
 from .utils.logs import log
 from .utils.utils import delete_s3_file, replace_self_closing_tags
-from .utils.google_maps import calculate_distance
 
 from . import models
 from . import serializers
+
+from .cron.calculate_distance import process_data
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,7 +13,6 @@ from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREA
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
-from rest_framework.parsers import MultiPartParser
 
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
@@ -27,7 +26,6 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
 import json
-import math
 import os
 import random
 import string
@@ -42,47 +40,11 @@ import xml.etree.ElementTree as ET
 class CalculateDistance(APIView):
     def post(self, request):
         log("Penészmentesítés MiniCRM webhook meghívva",
-            "INFO", "pen_calculate_distance", request.body.decode("utf-8"))
+            "INFO", "pen_calculate_distance_webhook", request.body.decode("utf-8"))
         data = json.loads(request.body.decode("utf-8"))["Data"]
-        telephely = "Budapest, Nagytétényi út 218-220, 1225"
-
-        address = f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
-        gmaps_result = calculate_distance(
-            start=telephely, end=address)
-        if gmaps_result == "Error":
-            log("Penészmentesítés MiniCRM webhook sikertelen", "ERROR", "pen_calculate_distance",
-                f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}")
+        response = process_data(data)
+        if response == "Error":
             return Response({'status': 'error'}, status=HTTP_200_OK)
-        duration = gmaps_result["duration"] / 60
-        distance = gmaps_result["distance"] // 1000
-        formatted_duration = f"{math.floor(duration//60)} óra {math.floor(duration%60)} perc"
-        fee_map = {
-            0: 20000,
-            31: 25000,
-            101: 30000,
-            201: 35000,
-        }
-        fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
-
-        try:
-            get_street_view(location=address[0])
-        except Exception as e:
-            log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
-        street_view_url = get_street_view_url(
-            location=address)
-        try:
-            county = models.Counties.objects.get(telepules=data["Telepules"]).megye
-        except:
-            county = ""
-            log(log_value="Penészmentesítés MiniCRM webhook sikertelen", status="FAILED", script_name="pen_calculate_distance", details=f"Nem található megye a településhez: {data['Telepules']}")
-        response = update_adatlap_fields(data["Id"], {
-            "IngatlanKepe": "https://pen.dataupload.xyz/static/images/google_street_view/street_view.jpg", "UtazasiIdoKozponttol": formatted_duration, "Tavolsag": distance, "FelmeresiDij": fee, "StreetViewUrl": street_view_url, "BruttoFelmeresiDij": round(fee*1.27), "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={address}&travelmode=driving", "Megye": county})
-        if response["code"] == 200:
-            log("Penészmentesítés MiniCRM webhook sikeresen lefutott",
-                "SUCCESS", "pen_calculate_distance")
-        else:
-            log("Penészmentesítés MiniCRM webhook sikertelen",
-                "ERROR", "pen_calculate_distance", response["reason"])
         return Response({'status': 'success'}, status=HTTP_200_OK)
 
 class FelmeresQuestionsList(generics.ListCreateAPIView):
