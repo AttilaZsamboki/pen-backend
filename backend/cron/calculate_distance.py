@@ -51,11 +51,9 @@ def process_data(data, source="webhook"):
     return "Success"
 
 def criteria(adatlap):
-    # if adatlap["Tavolsag"] and adatlap["FelmeresiDij"]:
-    #     return False
-    # return True
-    if adatlap["Id"] == 43200:
-        return True
+    if adatlap["Tavolsag"] and adatlap["FelmeresiDij"]:
+        return False
+    return True
 
 
 log("Penészmentesítés távolságszámítás megkezdődött",
