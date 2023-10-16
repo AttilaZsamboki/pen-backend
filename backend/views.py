@@ -495,7 +495,7 @@ def get_unas_order_data():
             <Params>
 """+"\n".join([f"""<Param>
 <Id>{index}</Id>
-<Name><![CDATA[clouderp-params]]></Name>
+<Name><![CDATA[clouderp-labels]]></Name>
 <Value><![CDATA[{i}]]></Value>
 </Param>""" for index, i in enumerate(data["AdatlapDetails"]["Beepitok"].split(", "))]) + """
             </Params>
