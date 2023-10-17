@@ -18,6 +18,12 @@ def main():
         status="INFO",
     )
     adatlapok = get_all_adatlap_details(category_id=21, status_id=2896)
+    if adatlapok == "Error":
+        log(
+            "Megrendelések létrehozása sikertelen, adatlapok lekérése sikertelen",
+            script_name="pen_create_order",
+            status="ERROR",
+        )
     for adatlap in adatlapok:
         log(
             f"{adatlap['Name']} megrendelés létrehozása",
@@ -26,24 +32,13 @@ def main():
         )
         id = adatlap["Felmeresid"]
         adatlap_id = Felmeresek.objects.get(id=id).adatlap_id
-        items = [
-            {
-                "sku": i.product.sku if i.product else "",
-                "product_id": i.product.id if i.product else "",
-                "netPrice": i.netPrice,
-                "inputValues": i.inputValues,
-                "name": i.name if i.name else i.product.name,
-            }
-            for i in FelmeresItems.objects.filter(adatlap_id=id)
-        ]
         offer = Offers.objects.filter(adatlap=adatlap["Id"])
         felmeres = get_adatlap_details(adatlap_id)
-        if offer and items and felmeres["status"] != "Error":
+        if offer and felmeres["status"] != "Error":
             felmeres = felmeres["response"]
             order = create_order(
                 adatlap_id=adatlap_id,
                 contact_id=adatlap["ContactId"],
-                items=items,
                 offer_id=offer[0].offer_id,
                 adatlap_status="Szervezésre vár",
                 project_data={
