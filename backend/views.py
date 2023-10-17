@@ -9,11 +9,10 @@ from .utils.minicrm import (
 )
 from .utils.logs import log
 from .utils.utils import delete_s3_file, replace_self_closing_tags
+from .utils.calculate_distance import process_data
 
 from . import models
 from . import serializers
-
-from .cron.calculate_distance import process_data
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
