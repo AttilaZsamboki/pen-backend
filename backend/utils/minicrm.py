@@ -59,7 +59,7 @@ def get_all_adatlap(category_id, status_id=None, criteria=None, deleted=False):
     adatlapok = get_request(endpoint="Project", query_params=query_params)
     if adatlapok["status"] == "Error":
         return "Error"
-    if deleted:
+    if not deleted:
         adatlapok = [
             adatlap
             for adatlap in adatlapok["response"]["Results"]
