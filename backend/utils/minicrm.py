@@ -152,8 +152,6 @@ def get_all_adatlap_details(
             return "Error"
         adatlapok_detailed = []
         for i in adatlapok["Results"]:
-            if adatlapok["Results"][i]["Deleted"] != deleted:
-                continue
             adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])["response"]
             if criteria:
                 if criteria(adatlap):
