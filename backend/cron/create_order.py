@@ -25,11 +25,19 @@ def main():
             status="ERROR",
         )
     for adatlap in adatlapok:
-        log(
-            f"{adatlap['Name']} megrendelés létrehozása",
-            script_name="pen_create_order",
-            status="INFO",
-        )
+        try:
+            log(
+                f"{adatlap['Name']} megrendelés létrehozása",
+                script_name="pen_create_order",
+                status="INFO",
+            )
+        except Exception as e:
+            log(
+                f"Adatlap nevének lekérése sikertelen, Error: {e}",
+                script_name="pen_create_order",
+                status="ERROR",
+                details=f"Adatlap: {adatlap}",
+            )
         id = adatlap["Felmeresid"]
         adatlap_id = Felmeresek.objects.get(id=id).adatlap_id
         offer = Offers.objects.filter(adatlap=adatlap["Id"])
