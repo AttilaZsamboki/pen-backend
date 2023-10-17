@@ -50,7 +50,7 @@ def update_adatlap_fields(id, fields):
         return {"code": adatlap.status_code, "reason": adatlap.reason}
 
 
-def get_all_adatlap(category_id, status_id=None, criteria=None):
+def get_all_adatlap(category_id, status_id=None, criteria=None, deleted=False):
     query_params = (
         {"CategoryId": category_id}
         if not status_id
@@ -59,6 +59,12 @@ def get_all_adatlap(category_id, status_id=None, criteria=None):
     adatlapok = get_request(endpoint="Project", query_params=query_params)
     if adatlapok["status"] == "Error":
         return "Error"
+    if deleted:
+        adatlapok = [
+            adatlap
+            for adatlap in adatlapok["response"]["Results"]
+            if adatlap[deleted] == 0
+        ]
     if criteria:
         return [
             adatlap
@@ -139,7 +145,9 @@ def get_all_adatlap_details(
     category_id=None, status_id=None, criteria=None, deleted=False, ids=None
 ):
     if not ids:
-        adatlapok = get_all_adatlap(category_id=category_id, status_id=status_id)
+        adatlapok = get_all_adatlap(
+            category_id=category_id, status_id=status_id, deleted=deleted
+        )
         if adatlapok == "Error":
             return "Error"
         adatlapok_detailed = []
