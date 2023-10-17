@@ -952,6 +952,5 @@ def upload_file(request):
                 {"success": True, "async_id_symbol": file.name}, status=200
             )
         except Exception as e:
-            print(e)
             return JsonResponse({"success": False}, status=500)
     return JsonResponse({"success": False}, status=400)

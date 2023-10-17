@@ -16,4 +16,3 @@ class TestLogin(APITestCase):
 """
 
         response = self.client.post(url, data, format='json')
-        print(response.json())

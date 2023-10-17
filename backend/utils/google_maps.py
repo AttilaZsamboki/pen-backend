@@ -40,7 +40,6 @@ def get_street_view(location):
                 img_file.write(response.content)
         return response
     else:
-        # The request failed, print the error message
         return response
 
 

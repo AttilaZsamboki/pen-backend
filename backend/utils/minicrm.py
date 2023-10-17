@@ -59,19 +59,18 @@ def get_all_adatlap(category_id, status_id=None, criteria=None, deleted=False):
     adatlapok = get_request(endpoint="Project", query_params=query_params)
     if adatlapok["status"] == "Error":
         return "Error"
+    adatlapok = adatlapok["response"]
     if not deleted:
         adatlapok = [
             adatlap
-            for adatlap in adatlapok["response"]["Results"]
-            if adatlap[deleted] == 0
+            for adatlap in adatlapok["Results"].values()
+            if adatlap["Deleted"] == 0
         ]
     if criteria:
         return [
-            adatlap
-            for adatlap in adatlapok["response"]["Results"].values()
-            if criteria(adatlap)
+            adatlap for adatlap in adatlapok["Results"].values() if criteria(adatlap)
         ]
-    return adatlapok["response"]
+    return adatlapok
 
 
 def get_adatlap_details(id):
@@ -151,8 +150,8 @@ def get_all_adatlap_details(
         if adatlapok == "Error":
             return "Error"
         adatlapok_detailed = []
-        for i in adatlapok["Results"]:
-            adatlap = get_adatlap_details(adatlapok["Results"][i]["Id"])["response"]
+        for adatlap in adatlapok:
+            adatlap = get_adatlap_details(adatlap["Id"])["response"]
             if criteria:
                 if criteria(adatlap):
                     adatlapok_detailed.append(adatlap)

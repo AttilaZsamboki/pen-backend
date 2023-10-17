@@ -1,9 +1,16 @@
-from ..utils.minicrm import get_all_adatlap_details, contact_details, billing_address, update_adatlap_fields, statuses
+from ..utils.minicrm import (
+    get_all_adatlap_details,
+    contact_details,
+    billing_address,
+    update_adatlap_fields,
+    statuses,
+)
 from ..utils.logs import log
 import requests
 import datetime
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
@@ -31,14 +38,20 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         status_id = 3023
 
     def criteria(adatlap):
-        if adatlap["Deleted"] == 1:
-            return False
-        elif (not cash and adatlap["FizetesiMod2"] != "Átutalás") or (cash and adatlap["FizetesiMod2"] == "Átutalás"):
+        print(adatlap)
+        if (not cash and adatlap["FizetesiMod2"] != "Átutalás") or (
+            cash and adatlap["FizetesiMod2"] == "Átutalás"
+        ):
             return False
         elif cash and adatlap["DijbekeroSzama2"] != "":
             return False
         elif not cash and not is_proform and adatlap["DijbekeroSzama2"] == "":
-            log("Nincs díjbekérő száma", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+            log(
+                "Nincs díjbekérő száma",
+                "FAILED",
+                f"pen_{script_name}",
+                f"adatlap: {adatlap['Id']}",
+            )
             return
         return True
 
@@ -48,6 +61,15 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         return
     for adatlap in adatlapok:
         try:
+            log("Új adatlap", "INFO", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+        except Exception as e:
+            log(
+                "Hiba akadt az adatlapok lekérdezése során",
+                "ERROR",
+                f"pen_{script_name}",
+                f"error: {e}. adatlap: {adatlap['Id']}. adatlapok: {adatlapok}",
+            )
+        try:
             query_xml = f"""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
@@ -55,21 +77,63 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <rendelesSzam>{adatlap["Id"]}</rendelesSzam>
                 </xmlszamlaxml>
             """.strip()
-            query_response = requests.post("https://www.szamlazz.hu/szamla/", files={"action-szamla_agent_xml": ("invoice.xml", query_xml)})
+            query_response = requests.post(
+                "https://www.szamlazz.hu/szamla/",
+                files={"action-szamla_agent_xml": ("invoice.xml", query_xml)},
+            )
             if "szlahu_szamlaszam" in query_response.headers.keys():
-                if is_proform or query_response.headers["szlahu_szamlaszam"][0] == "E" or cash:
-                    log(f"Már létezik {name}", "INFO", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
-                    update_adatlap_fields(adatlap["Id"], {("DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"): f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}"})
+                if (
+                    is_proform
+                    or query_response.headers["szlahu_szamlaszam"][0] == "E"
+                    or cash
+                ):
+                    log(
+                        f"Már létezik {name}",
+                        "INFO",
+                        f"pen_{script_name}",
+                        f"adatlap: {adatlap['Id']}",
+                    )
+                    update_adatlap_fields(
+                        adatlap["Id"],
+                        {
+                            (
+                                "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
+                            ): f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}"
+                        },
+                    )
                     continue
             contact_id = adatlap["BusinessId"]
             contact = contact_details(contact_id)["response"]
             address = billing_address(contact_id)
 
             if contact is None or address is None:
-                log("Nincsenek számlázási adatok", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+                log(
+                    "Nincsenek számlázási adatok",
+                    "FAILED",
+                    f"pen_{script_name}",
+                    f"adatlap: {adatlap['Id']}",
+                )
                 continue
-            if None in [contact.get("Name"), address.get("PostalCode"), address.get("City"), address.get("Address"), contact.get("Email"), contact.get("VatNumber"), adatlap.get("Name"), adatlap.get("Iranyitoszam"), adatlap.get("Telepules"), adatlap.get("Cim2"), adatlap.get("Id"), contact.get("Phone")]:
-                log("Nincsenek számlázási adatok", "FAILED", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+            if None in [
+                contact.get("Name"),
+                address.get("PostalCode"),
+                address.get("City"),
+                address.get("Address"),
+                contact.get("Email"),
+                contact.get("VatNumber"),
+                adatlap.get("Name"),
+                adatlap.get("Iranyitoszam"),
+                adatlap.get("Telepules"),
+                adatlap.get("Cim2"),
+                adatlap.get("Id"),
+                contact.get("Phone"),
+            ]:
+                log(
+                    "Nincsenek számlázási adatok",
+                    "FAILED",
+                    f"pen_{script_name}",
+                    f"adatlap: {adatlap['Id']}",
+                )
                 continue
 
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
@@ -165,7 +229,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 </tetelek>
             </xmlszamla>
             """
-            if ENVIRONMENT == 'production':
+            if ENVIRONMENT == "production":
                 from ..config_production import base_path
             else:
                 from ..config_development import base_path
@@ -177,35 +241,83 @@ def create_invoice_or_proform(is_proform=True, cash=False):
 
             url = "https://www.szamlazz.hu/szamla/"
             response = requests.post(
-                url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")})
+                url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")}
+            )
             try:
                 szamlaszam = response.headers["szlahu_szamlaszam"]
             except:
-                update_resp = update_adatlap_fields(adatlap["Id"], {
-                    ("DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"): f"{name.capitalize()} készítése sikertelen volt: {response.text[:800]}"})
-                log(f"{name.capitalize()} készítése sikertelen volt", "ERROR", f"pen_{script_name}", f"adatlap: {adatlap['Id']}, error: {response.text}")
+                update_resp = update_adatlap_fields(
+                    adatlap["Id"],
+                    {
+                        (
+                            "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
+                        ): f"{name.capitalize()} készítése sikertelen volt: {response.text[:800]}"
+                    },
+                )
+                log(
+                    f"{name.capitalize()} készítése sikertelen volt",
+                    "ERROR",
+                    f"pen_{script_name}",
+                    f"adatlap: {adatlap['Id']}, error: {response.text}",
+                )
                 continue
             os.remove(invoice_path)
             pdf_path = f"{base_path}/static/{szamlaszam}.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
-            update_resp = update_adatlap_fields(adatlap["Id"], {
-                "DijbekeroPdf2" if is_proform else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf", "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"], "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam, f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime("%Y-%m-%d"), "FizetesiHatarido": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d") if is_proform else adatlap["FizetesiHatarido"], ("DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"): f"{name.capitalize()} elkészült {datetime.datetime.now()}"})
+            update_resp = update_adatlap_fields(
+                adatlap["Id"],
+                {
+                    "DijbekeroPdf2"
+                    if is_proform
+                    else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+                    "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"],
+                    "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam,
+                    f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime(
+                        "%Y-%m-%d"
+                    ),
+                    "FizetesiHatarido": (
+                        datetime.datetime.now() + datetime.timedelta(days=3)
+                    ).strftime("%Y-%m-%d")
+                    if is_proform
+                    else adatlap["FizetesiHatarido"],
+                    (
+                        "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
+                    ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
+                },
+            )
             if update_resp["code"] == 400:
-                log(f"Hiba akadt a {name} feltöltésében", "ERROR", script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}")
+                log(
+                    f"Hiba akadt a {name} feltöltésében",
+                    "ERROR",
+                    script_name=f"pen_{script_name}",
+                    details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}",
+                )
             os.remove(pdf_path)
         except KeyError as e:
-            log("Nincsenek számlázási adatok", "FAILED",
-                script_name=f"pen_{script_name}", details=f"adatlap: {adatlap['Id']}, error: {e}")
+            log(
+                "Nincsenek számlázási adatok",
+                "FAILED",
+                script_name=f"pen_{script_name}",
+                details=f"adatlap: {adatlap['Id']}, error: {e}",
+            )
             continue
         except Exception as e:
-            log(f"Hiba akadt a {name} feltöltésében", "ERROR",
-                script_name=f"pen_{script_name}", details=f"error:{e}")
+            log(
+                f"Hiba akadt a {name} feltöltésében",
+                "ERROR",
+                script_name=f"pen_{script_name}",
+                details=f"error:{e}",
+            )
             continue
-        log(f"{name.capitalize()}k feltöltése sikeres",
-            "SUCCESS", script_name=f"pen_{script_name}")
+        log(
+            f"{name.capitalize()}k feltöltése sikeres",
+            "SUCCESS",
+            script_name=f"pen_{script_name}",
+        )
         continue
+
 
 create_invoice_or_proform(is_proform=False)
 create_invoice_or_proform(is_proform=True)
