@@ -8,7 +8,7 @@ from .utils.minicrm import (
     update_offer_order,
 )
 from .utils.logs import log
-from .utils.utils import delete_s3_file, replace_self_closing_tags
+from .utils.utils import replace_self_closing_tags
 from .utils.calculate_distance import process_data
 
 from . import models
@@ -81,27 +81,6 @@ class FelmeresQuestionDetail(generics.RetrieveUpdateDestroyAPIView):
         felmeres = models.FelmeresQuestions.objects.filter(adatlap_id=pk)
         serializer = serializers.FelmeresQuestionsSerializer(felmeres, many=True)
         return Response(serializer.data)
-
-
-class FelmeresekNotesList(generics.ListCreateAPIView):
-    queryset = models.FelmeresNotes.objects.all()
-    serializer_class = serializers.FelmeresekNotesSerializer
-    permission_classes = [AllowAny]
-
-
-class FelmeresekNotesDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.FelmeresNotes.objects.all()
-    serializer_class = serializers.FelmeresekNotesSerializer
-    permission_classes = [AllowAny]
-
-    def delete(self, request, pk):
-        note = models.FelmeresNotes.objects.get(pk=pk)
-        if note:
-            delete_s3_file(note.value)
-            note.delete()
-            return Response(status=HTTP_200_OK)
-        else:
-            return Response(status=HTTP_404_NOT_FOUND)
 
 
 class OrderWebhook(APIView):
@@ -326,6 +305,25 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
     permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        adatlap = get_all_adatlap_details(
+            21, 2896, lambda adatlap: adatlap["Felmeresid"] == str(pk)
+        )
+        if adatlap:
+            felmeres = models.Felmeresek.objects.filter(id=pk)
+            return Response(
+                serializers.FelmeresekSerializer(
+                    [
+                        {
+                            "offer_status": adatlap[0]["StatusId"],
+                            **felmeres.first().__dict__,
+                        }
+                    ],
+                    many=True,
+                ).data
+            )
+        return super().get(request)
 
 
 class FelmeresItemsList(generics.ListCreateAPIView):

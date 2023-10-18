@@ -1,60 +1,77 @@
 from . import models
 from rest_framework import serializers
 
+
 class FelmeresQuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresQuestions
         fields = "__all__"
+
 
 class FelmeresekNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresNotes
         fields = "__all__"
 
+
 class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Products
         fields = "__all__"
+
 
 class ProductAttributesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductAttributes
         fields = "__all__"
 
+
 class FiltersSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Filters
         fields = "__all__"
+
 
 class QuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Questions
         fields = "__all__"
 
+
 class ProductTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductTemplate
         fields = "__all__"
+
 
 class TemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Templates
         fields = "__all__"
 
+
 class FelmeresekSerializer(serializers.ModelSerializer):
+    offer_status = serializers.CharField(
+        required=False, allow_null=True, read_only=True
+    )
+
     class Meta:
         model = models.Felmeresek
         fields = "__all__"
+        read_only_fields = ["offer_status"]
+
 
 class FelmeresItemsSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(required=False, read_only=True)
-    create_name = serializers.CharField(required=False, allow_null=True, write_only=True)
+    create_name = serializers.CharField(
+        required=False, allow_null=True, write_only=True
+    )
     sku = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.FelmeresItems
         fields = "__all__"
-        read_only_fields = ['sku']
+        read_only_fields = ["sku"]
 
     def get_name(self, obj):
         try:
@@ -63,7 +80,7 @@ class FelmeresItemsSerializer(serializers.ModelSerializer):
             return obj.name
 
     def create(self, validated_data):
-        name = validated_data.pop('create_name', None)
+        name = validated_data.pop("create_name", None)
         instance = super().create(validated_data)
         if name is not None:
             instance.name = name
@@ -71,16 +88,17 @@ class FelmeresItemsSerializer(serializers.ModelSerializer):
         return instance
 
 
-
 class OffersSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Offers
         fields = "__all__"
 
+
 class QuestionProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.QuestionProducts
         fields = "__all__"
+
 
 class FilterItemsSerializer(serializers.ModelSerializer):
     class Meta:
