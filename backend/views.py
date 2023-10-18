@@ -308,7 +308,12 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, pk):
         adatlap = get_all_adatlap_details(
-            21, 2896, lambda adatlap: adatlap["Felmeresid"] == str(pk)
+            21,
+            criteria=lambda adatlap: adatlap["Felmeresid"] == str(pk)
+            and (
+                adatlap["StatusId"] == "Elfogadott ajánlat"
+                or adatlap["StatusId"] == "Sikeres megrendelés"
+            ),
         )
         if adatlap:
             felmeres = models.Felmeresek.objects.filter(id=pk)
