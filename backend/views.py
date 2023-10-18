@@ -314,13 +314,10 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
             felmeres = models.Felmeresek.objects.filter(id=pk)
             return Response(
                 serializers.FelmeresekSerializer(
-                    [
-                        {
-                            "offer_status": adatlap[0]["StatusId"],
-                            **felmeres.first().__dict__,
-                        }
-                    ],
-                    many=True,
+                    {
+                        "offer_status": adatlap[0]["StatusId"],
+                        **felmeres.first().__dict__,
+                    },
                 ).data
             )
         return super().get(request)
