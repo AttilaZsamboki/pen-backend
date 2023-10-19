@@ -38,7 +38,6 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         status_id = 3023
 
     def criteria(adatlap):
-        print(adatlap)
         if (not cash and adatlap["FizetesiMod2"] != "Átutalás") or (
             cash and adatlap["FizetesiMod2"] == "Átutalás"
         ):
@@ -102,11 +101,12 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                         },
                     )
                     continue
-            contact_id = adatlap["BusinessId"]
-            contact = contact_details(contact_id)["response"]
-            address = billing_address(contact_id)
+            business_contact_id = adatlap["BusinessId"]
+            business_contact = contact_details(business_contact_id)["response"]
+            contact = contact_details(adatlap["ContactId"])["response"]
+            address = billing_address(business_contact_id)
 
-            if contact is None or address is None:
+            if business_contact is None or address is None:
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
@@ -115,12 +115,12 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 )
                 continue
             if None in [
-                contact.get("Name"),
+                business_contact.get("Name"),
                 address.get("PostalCode"),
                 address.get("City"),
                 address.get("Address"),
                 contact.get("Email"),
-                contact.get("VatNumber"),
+                business_contact.get("VatNumber"),
                 adatlap.get("Name"),
                 adatlap.get("Iranyitoszam"),
                 adatlap.get("Telepules"),
@@ -136,6 +136,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 )
                 continue
 
+            print(contact["Email"])
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
             <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
                 <beallitasok>
@@ -186,7 +187,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 </elado>
                 <vevo>
                     <!--Buyer details -->
-                    <nev><![CDATA[{contact["Name"]}]]></nev>
+                    <nev><![CDATA[{business_contact["Name"]}]]></nev>
                     <!-- name -->
                     <irsz><![CDATA[{address["PostalCode"]}]]></irsz>
                     <!-- ZIP code -->
@@ -198,7 +199,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <!-- e-mail address, if given, we will send the invoice to this mail address -->
                     <sendEmail>false</sendEmail>
                     <!-- should we send the e-mail to the customer (by email) -->
-                    <adoszam>{contact["VatNumber"]}</adoszam>
+                    <adoszam>{business_contact["VatNumber"]}</adoszam>
                     <!-- fiscal number/tax number -->
                     <postazasiNev><![CDATA[{adatlap["Name"]}]]></postazasiNev>
                     <!--delivery name/postal name -->
@@ -319,6 +320,6 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         continue
 
 
-create_invoice_or_proform(is_proform=False)
+# create_invoice_or_proform(is_proform=False)
 create_invoice_or_proform(is_proform=True)
-create_invoice_or_proform(is_proform=False, cash=True)
+# create_invoice_or_proform(is_proform=False, cash=True)
