@@ -143,7 +143,6 @@ class ProductsList(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = models.Products.objects.all()
         filter = self.request.query_params.get("filter", None)
-        all = self.request.query_params.get("all", "false")
 
         if filter is not None:
             filter_words = filter.split(" ")
@@ -960,6 +959,13 @@ class FelmeresPicturesList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresPicturesSerializer
     queryset = models.FelmeresPictures.objects.all()
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        if self.request.query_params.get("felmeres_id"):
+            return models.FelmeresPictures.objects.filter(
+                felmeres=self.request.query_params.get("felmeres_id")
+            )
+        return super().get_queryset()
 
 
 class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
