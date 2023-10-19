@@ -15,11 +15,17 @@ class Logs(models.Model):
         db_table = "logs"
 
 
-class FelmeresQuestions(models.Model):
-    question = models.ForeignKey("Questions", models.DO_NOTHING, db_column="question")
+class PenFelmeresQuestions(models.Model):
+    question = models.ForeignKey(
+        "PenQuestions", models.DO_NOTHING, db_column="question"
+    )
     value = models.TextField(blank=True, null=True)
-    adatlap = models.ForeignKey("Felmeresek", models.DO_NOTHING, blank=True, null=True)
-    section = models.TextField(blank=True, null=True)
+    adatlap = models.ForeignKey(
+        "PenFelmeresek", models.DO_NOTHING, blank=True, null=True
+    )
+    product = models.ForeignKey(
+        "PenProducts", models.DO_NOTHING, db_column="product", blank=True, null=True
+    )
 
     class Meta:
         managed = False
