@@ -15,7 +15,7 @@ class Logs(models.Model):
         db_table = "logs"
 
 
-class PenFelmeresQuestions(models.Model):
+class FelmeresQuestions(models.Model):
     question = models.ForeignKey(
         "PenQuestions", models.DO_NOTHING, db_column="question"
     )
