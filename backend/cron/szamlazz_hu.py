@@ -320,6 +320,6 @@ def create_invoice_or_proform(is_proform=True, cash=False):
         continue
 
 
-# create_invoice_or_proform(is_proform=False)
+create_invoice_or_proform(is_proform=False)
 create_invoice_or_proform(is_proform=True)
-# create_invoice_or_proform(is_proform=False, cash=True)
+create_invoice_or_proform(is_proform=False, cash=True)
