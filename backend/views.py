@@ -954,3 +954,15 @@ def upload_file(request):
         except Exception as e:
             return JsonResponse({"success": False}, status=500)
     return JsonResponse({"success": False}, status=400)
+
+
+class FelmeresPicturesList(generics.ListCreateAPIView):
+    serializer_class = serializers.FelmeresPicturesSerializer
+    queryset = models.FelmeresPictures.objects.all()
+    permission_classes = [AllowAny]
+
+
+class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = serializers.FelmeresPicturesSerializer
+    queryset = models.FelmeresPictures.objects.all()
+    permission_classes = [AllowAny]

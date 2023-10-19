@@ -104,3 +104,8 @@ class FilterItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FilterItems
         fields = "__all__"
+
+class FelmeresPicturesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FelmeresPictures
+        fields = "__all__"

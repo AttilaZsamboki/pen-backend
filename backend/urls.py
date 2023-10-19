@@ -32,4 +32,6 @@ urlpatterns = [
     path("filter_items/<int:pk>/", views.FilterItemsDetail.as_view()),
     path("cancel_offer/", views.CancelOffer.as_view()),
     path("save-image/", views.upload_file),
+    path("felmeres-pictures/", views.FelmeresPicturesList.as_view()),
+    path("felmeres-pictures/<int:pk>/", views.FelmeresPicturesDetail.as_view()),
 ]

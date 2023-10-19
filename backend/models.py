@@ -653,3 +653,12 @@ class PaymentMethods(models.Model):
     class Meta:
         managed = False
         db_table = "pen_payment_methods"
+
+
+class FelmeresPictures(models.Model):
+    felmeres = models.ForeignKey("Felmeresek", models.DO_NOTHING)
+    src = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = "pen_felmeres_pictures"
