@@ -972,3 +972,17 @@ class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.FelmeresPicturesSerializer
     queryset = models.FelmeresPictures.objects.all()
     permission_classes = [AllowAny]
+
+    def delete(self, request, pk):
+        file = models.FelmeresPictures.objects.get(id=pk)
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+            region_name=os.environ.get("AWS_REGION"),
+        )
+        s3_client.delete_object(
+            Bucket=os.environ.get("AWS_BUCKET_NAME"), Key=file.src.split("/")[-1]
+        )
+        file.delete()
+        return Response("Sikeresen törlésre került", status=HTTP_200_OK)
