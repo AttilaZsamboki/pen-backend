@@ -34,4 +34,6 @@ urlpatterns = [
     path("save-image/", views.upload_file),
     path("felmeres-pictures/", views.FelmeresPicturesList.as_view()),
     path("felmeres-pictures/<int:pk>/", views.FelmeresPicturesDetail.as_view()),
+    path("felmeres-notes/", views.FelmeresNotesList.as_view()),
+    path("felmeres-notes/<int:pk>/", views.FelmeresNotesDetail.as_view()),
 ]

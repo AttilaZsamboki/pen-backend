@@ -992,3 +992,13 @@ class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
         )
         file.delete()
         return Response("Sikeresen törlésre került", status=HTTP_200_OK)
+
+class FelmeresNotesList(generics.ListCreateAPIView):
+    serializer_class = serializers.FelmeresNotesSerializer
+    queryset = models.FelmeresNotes.objects.all()
+    permission_classes = [AllowAny]
+
+class FelmeresNotesDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = serializers.FelmeresNotesSerializer
+    queryset = models.FelmeresNotes.objects.all()
+    permission_classes = [AllowAny]

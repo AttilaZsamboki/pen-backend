@@ -8,7 +8,7 @@ class FelmeresQuestionsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class FelmeresekNotesSerializer(serializers.ModelSerializer):
+class FelmeresNotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresNotes
         fields = "__all__"
@@ -104,6 +104,7 @@ class FilterItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FilterItems
         fields = "__all__"
+
 
 class FelmeresPicturesSerializer(serializers.ModelSerializer):
     class Meta:
