@@ -28,12 +28,11 @@ class FelmeresQuestions(models.Model):
         db_table = "pen_felmeres_questions"
 
 
-class FelmeresNotes(models.Model):
-    id = models.AutoField(primary_key=True)
-    value = models.TextField()
-    type = models.CharField(max_length=255)
-    created_at = models.DateTimeField()
-    adatlap_id = models.TextField()
+class FelmeresekNotes(models.Model):
+    value = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    adatlap_id = models.TextField(blank=True, null=True)
+    user_id = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
