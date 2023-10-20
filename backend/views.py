@@ -950,7 +950,11 @@ def upload_file(request):
                     ExtraArgs={"ACL": "public-read", "ContentType": file.content_type},
                 )
             return JsonResponse(
-                {"success": True, "async_id_symbol": file.name}, status=200
+                {
+                    "success": True,
+                    "async_id_symbol": json.dumps([file.name for file in files]),
+                },
+                status=200,
             )
         except Exception as e:
             return JsonResponse({"success": False}, status=500)
