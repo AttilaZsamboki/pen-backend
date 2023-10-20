@@ -967,11 +967,7 @@ class FelmeresPicturesList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        if self.request.query_params.get("felmeres_id"):
-            return models.FelmeresPictures.objects.filter(
-                felmeres=self.request.query_params.get("felmeres_id")
-            )
-        return super().get_queryset()
+        return get_queryset_from_felmeres(self, models.FelmeresPictures)
 
 
 class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -993,12 +989,25 @@ class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
         file.delete()
         return Response("Sikeresen törlésre került", status=HTTP_200_OK)
 
+
 class FelmeresNotesList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresNotesSerializer
-    queryset = models.FelmeresNotes.objects.all()
+    queryset = models.FelmeresekNotes.objects.all()
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return get_queryset_from_felmeres(self, models.FelmeresekNotes)
+
 
 class FelmeresNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.FelmeresNotesSerializer
-    queryset = models.FelmeresNotes.objects.all()
+    queryset = models.FelmeresekNotes.objects.all()
     permission_classes = [AllowAny]
+
+
+def get_queryset_from_felmeres(self, model):
+    if self.request.query_params.get("felmeres_id"):
+        return model.objects.filter(
+            felmeres_id=self.request.query_params.get("felmeres_id")
+        )
+    return model.objects.all()

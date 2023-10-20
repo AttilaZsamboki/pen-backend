@@ -10,7 +10,7 @@ class FelmeresQuestionsSerializer(serializers.ModelSerializer):
 
 class FelmeresNotesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.FelmeresNotes
+        model = models.FelmeresekNotes
         fields = "__all__"
 
 

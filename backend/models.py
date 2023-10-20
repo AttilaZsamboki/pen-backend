@@ -31,7 +31,7 @@ class FelmeresQuestions(models.Model):
 class FelmeresekNotes(models.Model):
     value = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
-    adatlap_id = models.TextField(blank=True, null=True)
+    felmeres_id = models.TextField(blank=True, null=True)
     user_id = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=50, blank=True, null=True)
 
