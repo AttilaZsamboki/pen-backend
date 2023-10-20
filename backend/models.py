@@ -34,6 +34,7 @@ class FelmeresNotes(models.Model):
     type = models.CharField(max_length=255)
     created_at = models.DateTimeField()
     adatlap_id = models.TextField()
+    type = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         managed = False
