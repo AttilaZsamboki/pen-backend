@@ -196,8 +196,6 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <cim><![CDATA[{address["Address"]}]]></cim>
                     <!-- address -->
                     <email><![CDATA[{contact["Email"]}]]></email>
-                    <!-- e-mail address, if given, we will send the invoice to this mail address -->
-                    <sendEmail>false</sendEmail>
                     <!-- should we send the e-mail to the customer (by email) -->
                     <adoszam>{business_contact["VatNumber"]}</adoszam>
                     <!-- fiscal number/tax number -->

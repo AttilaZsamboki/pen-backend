@@ -548,7 +548,9 @@ class UnasLogin(APIView):
 
 
 def get_unas_order_data():
-    adatlapok = get_all_adatlap(category_id=29, status_id=3008)["Results"].values()
+    adatlapok = get_all_adatlap(category_id=29, status_id=3008)
+    if adatlapok == "Error":
+        return ""
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
                             <Orders>
