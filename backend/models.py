@@ -187,7 +187,7 @@ class Products(models.Model):
         blank=True,
         null=True,
     )  # Field name made lowercase. Field renamed because it contained more than one '_' in a row.
-    price_list_alapertelmezett_formula = models.FloatField(
+    price_list_alapertelmezett_formula = models.TextField(
         db_column="Price_List___alapertelmezett___Formula", blank=True, null=True
     )  # Field name made lowercase. Field renamed because it contained more than one '_' in a row.
     price_list_alapertelmezett_price_type = models.TextField(
