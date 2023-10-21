@@ -563,6 +563,7 @@ def get_unas_order_data():
         order_data = get_order(
             models.Orders.objects.get(adatlap_id=adatlap["Id"]).order_id
         )["response"]
+        print(order_data)
         adatlap_details = get_adatlap_details(id=adatlap["Id"])["response"]
         kapcsolat = contact_details(contact_id=adatlap["ContactId"])["response"]
         try:

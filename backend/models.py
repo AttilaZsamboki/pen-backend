@@ -35,6 +35,7 @@ class FelmeresekNotes(models.Model):
     user_id = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=50, blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
+    seen = models.BooleanField(blank=True, null=True)
 
     class Meta:
         managed = False
