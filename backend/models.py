@@ -88,7 +88,7 @@ class Products(models.Model):
     images = models.BigIntegerField(
         db_column="Images", blank=True, null=True
     )  # Field name made lowercase.
-    unit = models.FloatField(
+    unit = models.TextField(
         db_column="Unit", blank=True, null=True
     )  # Field name made lowercase.
     moq = models.FloatField(
