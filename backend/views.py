@@ -999,6 +999,12 @@ class FelmeresNotesList(generics.ListCreateAPIView):
     def get_queryset(self):
         return get_queryset_from_felmeres(self, models.FelmeresekNotes)
 
+    def patch(self, request):
+        data = request.data
+        felmeres_id = request.query_params.get("felmeres_id")
+        models.FelmeresekNotes.objects.filter(felmeres_id=felmeres_id).update(**data)
+        return Response(status=HTTP_200_OK)
+
 
 class FelmeresNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.FelmeresNotesSerializer
