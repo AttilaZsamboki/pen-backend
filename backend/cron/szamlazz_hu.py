@@ -136,7 +136,6 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 )
                 continue
 
-            print(contact["Email"])
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
             <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
                 <beallitasok>

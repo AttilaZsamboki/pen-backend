@@ -1,53 +1,48 @@
-from .utils.minicrm import (
-    get_all_adatlap_details,
-    get_order,
-    get_adatlap_details,
-    contact_details,
-    address_list,
-    get_all_adatlap,
-    update_offer_order,
-)
-from .utils.logs import log
-from .utils.utils import replace_self_closing_tags
-from .utils.calculate_distance import process_data
+import datetime
+import json
+import uuid
+import os
+import random
+import re
+import string
+import traceback
+import xml.etree.ElementTree as ET
 
-from . import models
-from . import serializers
-
-from rest_framework.views import APIView
+import boto3
+from django.db import connection
+from django.db.models import CharField, F, Q, Value
+from django.db.models.functions import Coalesce
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
-    HTTP_404_NOT_FOUND,
     HTTP_201_CREATED,
-    HTTP_401_UNAUTHORIZED,
     HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_404_NOT_FOUND,
 )
-from rest_framework.permissions import AllowAny
-from rest_framework.pagination import PageNumberPagination
-from rest_framework import generics
-
+from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
 
-from django.http import JsonResponse
-from django.db import connection
-from django.http import HttpResponse
-from django.db.models import Q, F, Value, CharField
-from django.db.models.functions import Coalesce
-from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-
-import json
-import os
-import random
-import string
-import datetime
-import re
-import boto3
-import traceback
-
-import xml.etree.ElementTree as ET
+from . import models, serializers
+from .utils.calculate_distance import process_data
+from .utils.logs import log
+from .utils.minicrm import (
+    address_list,
+    contact_details,
+    get_adatlap_details,
+    get_all_adatlap,
+    get_all_adatlap_details,
+    get_order,
+    update_offer_order,
+)
+from .utils.utils import replace_self_closing_tags
 
 # Create your views here.
 
@@ -547,7 +542,7 @@ class UnasLogin(APIView):
             return Response("Hibás API kulcs", status=HTTP_401_UNAUTHORIZED)
 
 
-def get_unas_order_data():
+def get_unas_order_data(type):
     adatlapok = get_all_adatlap(category_id=29, status_id=3008)
     if adatlapok == "Error":
         return ""
@@ -563,7 +558,6 @@ def get_unas_order_data():
         order_data = get_order(
             models.Orders.objects.get(adatlap_id=adatlap["Id"]).order_id
         )["response"]
-        print(order_data)
         adatlap_details = get_adatlap_details(id=adatlap["Id"])["response"]
         kapcsolat = contact_details(contact_id=adatlap["ContactId"])["response"]
         try:
@@ -594,7 +588,7 @@ def get_unas_order_data():
         + "\n".join(
             [
                 f"""<Order>
-            <Key>{data["OrderData"]["Id"]}</Key>
+            <Key>{data["OrderData"]["Id"] if type != "development" else str(uuid.uuid4())}</Key>
             <Date>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</Date>
             <DateMod>{data["AdatlapDetails"]["UpdatedAt"].replace("-", ".")}</DateMod>
             <Lang>hu</Lang>
@@ -655,7 +649,7 @@ def get_unas_order_data():
                     [
                         f"""<Item>
                     <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] and i["SKU"] != "null" and i["SKU"] != "undefined" else "discount-amount"}</Id>
-                    <Sku>{i["SKU"] if i["SKU"] else "discount-amount"}</Sku>
+                    <Sku>{i["SKU"] if i["SKU"] and i["SKU"] != "null" else "discount-amount"}</Sku>
                     <Name>{i["Name"]}</Name>
                     <Unit>{i["Unit"]}</Unit>
                     <Quantity>{i["Quantity"]}</Quantity>
@@ -689,7 +683,8 @@ def get_unas_order_data():
                 + """
             </Params>
         </Order> """
-                for data in datas
+                for index, data in enumerate(datas)
+                if type != "development" or index == 0
             ]
         )
         + """
@@ -715,7 +710,7 @@ class UnasGetOrder(APIView):
                 token = auth_header[7:]
                 token = models.ErpAuthTokens.objects.get(token=token)
                 if token.expire > datetime.datetime.now():
-                    response = get_unas_order_data()
+                    response = get_unas_order_data(os.environ.get("ENVIRONMENT"))
                     return HttpResponse(response, status=HTTP_200_OK)
                 else:
                     return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
@@ -739,8 +734,8 @@ class UnasGetOrder(APIView):
                 "pen_unas_get_order_dev",
                 request.body.decode("utf-8"),
             )
-            response = get_unas_order_data()
-            return Response(response, HTTP_200_OK)
+            response = get_unas_order_data(os.environ.get("ENVIRONMENT"))
+            return HttpResponse(response, HTTP_200_OK)
         log(
             "Unas rendelések lekérdezése sikertelen",
             "ERROR",
