@@ -588,9 +588,9 @@ def get_unas_order_data(type):
         + "\n".join(
             [
                 f"""<Order>
-            <Key>{data["OrderData"]["Id"] if type != "development" else str(uuid.uuid4())}</Key>
+            <Key>{data["OrderData"]["Id"] if type != "dev" else str(uuid.uuid4())}</Key>
             <Date>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</Date>
-            <DateMod>{data["AdatlapDetails"]["UpdatedAt"].replace("-", ".")}</DateMod>
+            <DateMod>{data["AdatlapDetails"]["DateTime1953"].replace("-", ".")}</DateMod>
             <Lang>hu</Lang>
             <Customer>
                 <Id>{data["Kapcsolat"]["Id"]}</Id>
@@ -684,7 +684,7 @@ def get_unas_order_data(type):
             </Params>
         </Order> """
                 for index, data in enumerate(datas)
-                if type != "development" or index == 0
+                if type != "dev" or index == 0
             ]
         )
         + """
@@ -697,7 +697,7 @@ class UnasGetOrder(APIView):
     parser_classes = (XMLParser,)
     renderer_classes = (XMLRenderer,)
 
-    def post(self, request):
+    def post(self, request, type):
         log(
             "Unas rendelések lekérdezése meghívva",
             "INFO",
@@ -710,7 +710,7 @@ class UnasGetOrder(APIView):
                 token = auth_header[7:]
                 token = models.ErpAuthTokens.objects.get(token=token)
                 if token.expire > datetime.datetime.now():
-                    response = get_unas_order_data(os.environ.get("ENVIRONMENT"))
+                    response = get_unas_order_data(type)
                     return HttpResponse(response, status=HTTP_200_OK)
                 else:
                     return Response("Token lejárt", status=HTTP_401_UNAUTHORIZED)
@@ -726,7 +726,7 @@ class UnasGetOrder(APIView):
                 return Response(str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
-    def get(self, request):
+    def get(self, request, type):
         if os.environ.get("ENVIRONMENT") == "development":
             log(
                 "Unas rendelések lekérdezése meghívva",
@@ -734,7 +734,7 @@ class UnasGetOrder(APIView):
                 "pen_unas_get_order_dev",
                 request.body.decode("utf-8"),
             )
-            response = get_unas_order_data(os.environ.get("ENVIRONMENT"))
+            response = get_unas_order_data(type)
             return HttpResponse(response, HTTP_200_OK)
         log(
             "Unas rendelések lekérdezése sikertelen",

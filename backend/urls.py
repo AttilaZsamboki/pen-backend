@@ -26,7 +26,7 @@ urlpatterns = [
     path("question_products/", views.QuestionProductsList.as_view()),
     path("question_products/<int:pk>/", views.QuestionProductsDetail.as_view()),
     path("erp_sync/login", views.UnasLogin.as_view(), name="unas_login"),
-    path("erp_sync/getOrder", views.UnasGetOrder.as_view()),
+    path("<type>/erp_sync/getOrder", views.UnasGetOrder.as_view()),
     path("erp_sync/setProduct", views.UnasSetProduct.as_view()),
     path("filter_items/", views.FilterItemsList.as_view()),
     path("filter_items/<int:pk>/", views.FilterItemsDetail.as_view()),
