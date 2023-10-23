@@ -589,7 +589,7 @@ def get_unas_order_data(type):
             [
                 f"""<Order>
             <Key>{data["OrderData"]["Id"] if type != "dev" else str(uuid.uuid4())}</Key>
-            <Date>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</Date>
+            <Date>{data["AdatlapDetails"]["DateTime1953"].replace("-", ".")}</Date>
             <DateMod>{data["AdatlapDetails"]["DateTime1953"].replace("-", ".")}</DateMod>
             <Lang>hu</Lang>
             <Customer>
