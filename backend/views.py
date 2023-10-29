@@ -24,7 +24,6 @@ from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
-    HTTP_404_NOT_FOUND,
 )
 from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
@@ -41,6 +40,7 @@ from .utils.minicrm import (
     get_all_adatlap_details,
     get_order,
     update_offer_order,
+    status_map,
 )
 from .utils.utils import replace_self_closing_tags
 
@@ -301,25 +301,27 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, pk):
-        adatlap = get_all_adatlap_details(
-            21,
-            criteria=lambda adatlap: adatlap["Felmeresid"] == str(pk)
-            and (
-                adatlap["StatusId"] == "Elfogadott ajánlat"
-                or adatlap["StatusId"] == "Sikeres megrendelés"
-            ),
-        )
-        if adatlap:
+        try:
             felmeres = models.Felmeresek.objects.filter(id=pk)
-            return Response(
-                serializers.FelmeresekSerializer(
-                    {
-                        "offer_status": adatlap[0]["StatusId"],
-                        **felmeres.first().__dict__,
-                    },
-                ).data
+            offer = models.Offers.objects.filter(felmeres_id=pk)
+            if offer.first():
+                return Response(
+                    serializers.FelmeresekSerializer(
+                        {
+                            "offer_status": status_map[offer.first().status_id],
+                            **felmeres.first().__dict__,
+                        },
+                    ).data
+                )
+            return Response(serializers.FelmeresekSerializer(felmeres, many=True).data)
+        except Exception as e:
+            log(
+                "Felmérés lekérdezése sikertelen",
+                "ERROR",
+                "pen_offer_webhook",
+                details=f"Error: {e}. {traceback.format_exc()}",
             )
-        return super().get(request)
+            return Response("Succesfully received data", status=HTTP_200_OK)
 
 
 class FelmeresItemsList(generics.ListCreateAPIView):
@@ -387,36 +389,28 @@ class OfferWebhook(APIView):
             "pen_offer_webhook",
             request.body,
         )
-        if (
-            data["Data"]["StatusId"] == "2895"
-            and models.Offers.objects.filter(
-                offer_id=data["Head"]["Id"], adatlap=adatlap_id
-            ).count()
-            == 0
-        ):
-            try:
-                models.Offers(offer_id=data["Head"]["Id"], adatlap=adatlap_id).save()
-                log(
-                    "Penészmentesítés rendelés webhook sikeresen lefutott",
-                    "SUCCESS",
-                    "pen_offer_webhook",
-                )
-                return Response("Succesfully received data", status=HTTP_200_OK)
-            except Exception as e:
-                log(
-                    "Penészmentesítés rendelés webhook sikertelen",
-                    "ERROR",
-                    "pen_offer_webhook",
-                    e,
-                )
-                return Response("Succesfully received data", status=HTTP_200_OK)
-        log(
-            "A offer már létezik",
-            "FAILED",
-            "pen_offer_webhook",
-            f"StatusId: {data['Data']['StatusId']}. OfferId: {data['Head']['Id']}. AdatlapId: {adatlap_id}, Offer: {models.Offers.objects.filter(offer_id=data['Head']['Id'], adatlap=adatlap_id)}",
-        )
-        return Response("Succesfully received data", status=HTTP_200_OK)
+        try:
+            models.Offers.objects.filter(adatlap=adatlap_id).delete()
+            models.Offers(
+                offer_id=data["Head"]["Id"],
+                adatlap=adatlap_id,
+                felmeres_id=data["Data"]["Felmeresid"],
+                status_id=data["Data"]["StatusId"],
+            ).save()
+            log(
+                "Penészmentesítés rendelés webhook sikeresen lefutott",
+                "SUCCESS",
+                "pen_offer_webhook",
+            )
+            return Response("Succesfully received data", status=HTTP_200_OK)
+        except Exception as e:
+            log(
+                "Penészmentesítés rendelés webhook sikertelen",
+                "ERROR",
+                "pen_offer_webhook",
+                details=f"Error: {e}. {traceback.format_exc()}",
+            )
+            return Response("Succesfully received data", status=HTTP_200_OK)
 
 
 class QuestionProductsList(generics.ListCreateAPIView):

@@ -337,3 +337,14 @@ def update_order_status(order_id, status="Complete"):
     return update_request(
         id=str(order_id) + "/" + status, method="POST", isR3=False, endpoint="Order"
     )
+
+
+status_map = {
+    2895: "Sikeres megrendelés",
+    2896: "Elfogadott ajánlat",
+    2895: "Elfogadásra vár",
+    2894: "Vázlat",
+    3014: "Elutasítva",
+    2897: "Sztornózva",
+    3112: "Sikeres megrendelés"
+}

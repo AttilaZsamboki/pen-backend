@@ -387,6 +387,8 @@ class Offers(models.Model):
     id = models.AutoField(primary_key=True)
     offer_id = models.IntegerField(blank=True, null=True)
     adatlap = models.IntegerField(db_column="adatlap_id")
+    felmeres_id = models.IntegerField(db_column="Felmeresid", blank=True, null=True)
+    status_id = models.IntegerField(blank=True, null=True, db_column="StatusId")
 
     class Meta:
         managed = False
