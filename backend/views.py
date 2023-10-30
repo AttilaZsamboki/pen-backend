@@ -313,7 +313,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
                         },
                     ).data
                 )
-            return Response(serializers.FelmeresekSerializer(felmeres, many=True).data)
+            return Response(serializers.FelmeresekSerializer(felmeres.first()).data)
         except Exception as e:
             log(
                 "Felmérés lekérdezése sikertelen",
