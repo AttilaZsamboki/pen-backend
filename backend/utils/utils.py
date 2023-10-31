@@ -33,4 +33,5 @@ def map_db_column_to_field(model, data):
     field_names = {
         f.db_column: f.name for f in model._meta.fields if f.db_column is not None
     }
+    print(field_names["ArajanlatMegjegyzes"])
     return {field_names.get(k, k): v for k, v in data.items()}

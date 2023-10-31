@@ -705,7 +705,7 @@ class MinicrmAdatlapok(models.Model):
     statusid = models.TextField(
         db_column="StatusId", blank=True, null=True
     )  # Field name made lowercase.
-    userid = models.TextField(
+    userid = models.BigIntegerField(
         db_column="UserId", blank=True, null=True
     )  # Field name made lowercase.
     name = models.TextField(
@@ -3383,12 +3383,6 @@ class MinicrmAdatlapok(models.Model):
     tipus = models.TextField(
         db_column="Tipus", blank=True, null=True
     )  # Field name made lowercase.
-    ventilatortipusa = models.TextField(
-        db_column="VentilatorTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    keziszamlazas = models.BigIntegerField(
-        db_column="KeziSzamlazas", blank=True, null=True
-    )  # Field name made lowercase.
     rendelesszama = models.TextField(
         db_column="RendelesSzama", blank=True, null=True
     )  # Field name made lowercase.
@@ -3397,6 +3391,45 @@ class MinicrmAdatlapok(models.Model):
     )  # Field name made lowercase.
     felmeresid = models.TextField(
         db_column="Felmeresid", blank=True, null=True
+    )  # Field name made lowercase.
+    felmereslink = models.TextField(
+        db_column="FelmeresLink", blank=True, null=True
+    )  # Field name made lowercase.
+    kimertefel2 = models.TextField(
+        db_column="KiMerteFel2", blank=True, null=True
+    )  # Field name made lowercase.
+    felmeresdatuma2 = models.TextField(
+        db_column="FelmeresDatuma2", blank=True, null=True
+    )  # Field name made lowercase.
+    clouderpmegrendeles = models.TextField(
+        db_column="ClouderpMegrendeles", blank=True, null=True
+    )  # Field name made lowercase.
+    megye2 = models.TextField(
+        db_column="Megye2", blank=True, null=True
+    )  # Field name made lowercase.
+    utcakep = models.TextField(
+        db_column="Utcakep", blank=True, null=True
+    )  # Field name made lowercase.
+    ingatlankepe2 = models.TextField(
+        db_column="IngatlanKepe2", blank=True, null=True
+    )  # Field name made lowercase.
+    fizetesimod3 = models.TextField(
+        db_column="FizetesiMod3", blank=True, null=True
+    )  # Field name made lowercase.
+    ventilatortipusa = models.TextField(
+        db_column="VentilatorTipusa", blank=True, null=True
+    )  # Field name made lowercase.
+    kapcsolodofelmeres = models.TextField(
+        db_column="KapcsolodoFelmeres", blank=True, null=True
+    )  # Field name made lowercase.
+    arajanlatmegjegyzes = models.TextField(
+        db_column="ArajanlatMegjegyzes", blank=True, null=True
+    )  # Field name made lowercase.
+    tervezettfelmresidopont = models.TextField(
+        db_column="TervezettFelmresIdopont", blank=True, null=True
+    )  # Field name made lowercase.
+    miertmentunkkifeleslegesen = models.BigIntegerField(
+        db_column="MiertMentunkKiFeleslegesen", blank=True, null=True
     )  # Field name made lowercase.
     hash = models.TextField(
         db_column="Hash", blank=True, null=True
