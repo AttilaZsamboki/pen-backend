@@ -25,6 +25,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
+    HTTP_405_METHOD_NOT_ALLOWED,
 )
 from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
@@ -44,7 +45,7 @@ from .utils.minicrm import (
     update_offer_order,
     status_map,
 )
-from .utils.utils import replace_self_closing_tags
+from .utils.utils import replace_self_closing_tags, map_db_column_to_field
 
 # Create your views here.
 
@@ -58,10 +59,22 @@ class CalculateDistance(APIView):
             request.body.decode("utf-8"),
         )
         data = json.loads(request.body.decode("utf-8"))["Data"]
-        response = process_data(data)
-        if response == "Error":
-            return Response({"status": "error"}, status=HTTP_200_OK)
+        if data["StatusId"] == 2927:
+            response = process_data(data)
+            if response == "Error":
+                return Response({"status": "error"}, status=HTTP_200_OK)
+
+        mapped_data = map_db_column_to_field(models.MinicrmAdatlapok, data)
+        models.MinicrmAdatlapok(**mapped_data).save()
         return Response({"status": "success"}, status=HTTP_200_OK)
+
+    def get(self, request):
+        log(
+            "Penészmentesítés webhook meghívva de 'GET' methoddal",
+            "INFO",
+            "pen_calculate_distance",
+        )
+        return Response({"status": "error"}, status=HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class FelmeresQuestionsList(generics.ListCreateAPIView):

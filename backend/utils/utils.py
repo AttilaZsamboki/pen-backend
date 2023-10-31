@@ -27,3 +27,10 @@ def replace_self_closing_tags(match):
         return "<{}{}/>".format(tag, match.group(2))
     else:
         return match.group(0)
+
+
+def map_db_column_to_field(model, data):
+    field_names = {
+        f.db_column: f.name for f in model._meta.fields if f.db_column is not None
+    }
+    return {field_names.get(k, k): v for k, v in data.items()}
