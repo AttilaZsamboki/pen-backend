@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -28,6 +28,7 @@ from rest_framework.status import (
 from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
+from .auth0backend import Auth0JSONWebTokenAuthentication
 
 from . import models, serializers
 from .utils.calculate_distance import process_data
@@ -292,13 +293,15 @@ class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
 class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [Auth0JSONWebTokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [Auth0JSONWebTokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         try:
