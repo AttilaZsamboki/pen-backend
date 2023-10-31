@@ -200,11 +200,18 @@ class FiltersList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        if self.request.query_params.get("type"):
-            return models.Filters.objects.filter(
-                type=self.request.query_params.get("type")
-            )
-        return super().get_queryset()
+        type_param = self.request.query_params.get("type")
+        user_param = self.request.query_params.get("user")
+
+        if type_param or user_param:
+            filters = {}
+            if type_param:
+                filters["type"] = type_param
+            if user_param:
+                filters["user"] = user_param
+            return models.Filters.objects.filter(**filters)
+        else:
+            return models.Filters.objects.all()
 
 
 class FiltersDetail(generics.RetrieveUpdateDestroyAPIView):

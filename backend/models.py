@@ -272,7 +272,7 @@ class Filters(models.Model):
     type = models.CharField(max_length=255, blank=True, null=True)
     sort_by = models.TextField(blank=True, null=True)
     sort_order = models.CharField(blank=True, null=True)
-    user_id = models.TextField(blank=True, null=True)
+    user = models.TextField(db_column="user_id", blank=True, null=True)
 
     class Meta:
         managed = False
