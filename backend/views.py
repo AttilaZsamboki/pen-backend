@@ -1044,3 +1044,16 @@ class MiniCrmAdatlapok(generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
     queryset = models.MiniCrmAdatlapok.objects.all()
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        id = self.request.query_params.get("id")
+        if id:
+            id = id.split(",")
+            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
+        return super().get_queryset()
+
+
+class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
+    serializer_class = serializers.MiniCrmAdatlapokSerializer
+    queryset = models.MiniCrmAdatlapok.objects.all()
+    permission_classes = [AllowAny]

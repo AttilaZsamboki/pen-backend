@@ -38,4 +38,5 @@ urlpatterns = [
     path("felmeres-notes/<int:pk>/", views.FelmeresNotesDetail.as_view()),
     path("user-role/<user>/", views.UserRole.as_view()),
     path("minicrm-adatlapok/", views.MiniCrmAdatlapok.as_view()),
+    path("minicrm-adatlapok/<int:pk>/", views.MiniCrmAdatlapokDetail.as_view()),
 ]
