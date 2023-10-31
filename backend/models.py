@@ -18,7 +18,7 @@ class Logs(models.Model):
 class FelmeresQuestions(models.Model):
     question = models.ForeignKey("Questions", models.DO_NOTHING, db_column="question")
     value = models.TextField(blank=True, null=True)
-    adatlap = models.ForeignKey("Felmeresek", models.DO_NOTHING, blank=True, null=True)
+    adatlap = models.ForeignKey("Felmeresek", models.CASCADE, blank=True, null=True)
     product = models.ForeignKey(
         "Products", models.DO_NOTHING, db_column="product", blank=True, null=True
     )
@@ -358,7 +358,7 @@ class FelmeresItems(models.Model):
     )
     inputValues = models.JSONField(db_column="input_values", blank=True, null=True)
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
-    adatlap = models.ForeignKey("Felmeresek", models.DO_NOTHING, db_column="adatlap_id")
+    adatlap = models.ForeignKey("Felmeresek", models.CASCADE, db_column="adatlap_id")
     type = models.CharField(max_length=255, blank=True, null=True)
     valueType = models.CharField(
         max_length=255, blank=True, null=True, default="fixed", db_column="value_type"
@@ -661,7 +661,7 @@ class PaymentMethods(models.Model):
 
 
 class FelmeresPictures(models.Model):
-    felmeres = models.ForeignKey("Felmeresek", models.DO_NOTHING)
+    felmeres = models.ForeignKey("Felmeresek", models.CASCADE)
     src = models.TextField()
 
     class Meta:
