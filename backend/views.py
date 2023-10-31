@@ -24,6 +24,7 @@ from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
+    HTTP_404_NOT_FOUND,
 )
 from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
@@ -293,15 +294,14 @@ class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
 class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
-    # authentication_classes = [CustomJWTAuthentication]
-    # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]
 
 
 class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
-    permission_classes = [AllowAny]
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         try:
@@ -1010,3 +1010,12 @@ def get_queryset_from_felmeres(self, model):
             felmeres_id=self.request.query_params.get("felmeres_id")
         )
     return model.objects.all()
+
+
+class UserRole(APIView):
+    def get(self, request, user):
+        try:
+            user_role = models.UserRoles.objects.get(user=user).role
+            return Response(serializers.RolesSerializer(user_role).data)
+        except models.UserRoles.DoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND)

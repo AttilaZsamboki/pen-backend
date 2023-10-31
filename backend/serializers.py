@@ -110,3 +110,15 @@ class FelmeresPicturesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresPictures
         fields = "__all__"
+
+
+class UserRolesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.UserRoles
+        fields = "__all__"
+
+
+class RolesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Roles
+        fields = "__all__"

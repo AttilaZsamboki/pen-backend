@@ -36,4 +36,5 @@ urlpatterns = [
     path("felmeres-pictures/<int:pk>/", views.FelmeresPicturesDetail.as_view()),
     path("felmeres-notes/", views.FelmeresNotesList.as_view()),
     path("felmeres-notes/<int:pk>/", views.FelmeresNotesDetail.as_view()),
+    path("user-role/<user>/", views.UserRole.as_view()),
 ]

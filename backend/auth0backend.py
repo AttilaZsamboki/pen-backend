@@ -1,13 +1,30 @@
 import jwt
-import requests
+import os
+
+from .models import UserRoles
+
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from urllib.parse import parse_qs
+
+
+class SimpleUser:
+    def __init__(self, token, is_authenticated):
+        self.token = token
+        self._is_authenticated = is_authenticated
+
+    @property
+    def is_authenticated(self):
+        return self._is_authenticated
 
 
 class CustomJWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
         # Get the token from the request headers or any other location
-        token = self.get_token_from_header(request)
+        if os.environ.get("ENVIRONMENT") == "development":
+            token = request.GET.get("token")
+        else:
+            token = self.get_token_from_header(request)
 
         if token is None:
             return None
@@ -16,7 +33,7 @@ class CustomJWTAuthentication(BaseAuthentication):
             # Decode the token
             decoded_token = jwt.decode(
                 token,
-                "your_secret_key",
+                os.environ.get("SECRET"),
                 algorithms=["HS256"],
                 audience="penész-frontend",
             )
@@ -62,17 +79,8 @@ class CustomJWTAuthentication(BaseAuthentication):
         return True
 
     def get_user_from_token(self, decoded_token):
-        # Implement your logic to retrieve the user information associated with the token
-        # This could involve querying your database or any other data source
-        # Return a user-like object or user information
-
-        url = "https://login.auth0.com/api/v2/roles/:id/users"
-
-        payload = {}
-        headers = {"Accept": "application/json"}
-
-        response = requests.request("GET", url, headers=headers, data=payload)
-
-        print(response.text)
-
-        return None
+        try:
+            UserRoles.objects.get(user=decoded_token["sub"])
+            return SimpleUser(decoded_token, True)
+        except UserRoles.DoesNotExist:
+            return SimpleUser(decoded_token, False)

@@ -666,3 +666,22 @@ class FelmeresPictures(models.Model):
     class Meta:
         managed = False
         db_table = "pen_felmeres_pictures"
+
+
+class UserRoles(models.Model):
+    user = models.TextField(db_column="user_id", blank=True, null=True)
+    role = models.ForeignKey(
+        "Roles", models.DO_NOTHING, blank=True, null=True, db_column="role"
+    )
+
+    class Meta:
+        managed = False
+        db_table = "pen_user_roles"
+
+
+class Roles(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_roles"
