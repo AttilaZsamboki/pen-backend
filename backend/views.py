@@ -64,8 +64,7 @@ class CalculateDistance(APIView):
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
 
-        mapped_data = map_db_column_to_field(models.MinicrmAdatlapok, data)
-        models.MinicrmAdatlapok(**mapped_data).save()
+        models.MiniCrmAdatlapok(**data).save()
         return Response({"status": "success"}, status=HTTP_200_OK)
 
     def get(self, request):
@@ -1039,3 +1038,9 @@ class UserRole(APIView):
             return Response(serializers.RolesSerializer(user_role).data)
         except models.UserRoles.DoesNotExist:
             return Response(status=HTTP_404_NOT_FOUND)
+
+
+class MiniCrmAdatlapok(generics.ListAPIView):
+    serializer_class = serializers.MiniCrmAdatlapokSerializer
+    queryset = models.MiniCrmAdatlapok.objects.all()
+    permission_classes = [AllowAny]

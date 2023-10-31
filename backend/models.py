@@ -689,2769 +689,955 @@ class Roles(models.Model):
         db_table = "pen_roles"
 
 
-class MinicrmAdatlapok(models.Model):
-    id = models.TextField(
-        db_column="Id", primary_key=True
-    )  # Field name made lowercase.
-    categoryid = models.TextField(
-        db_column="CategoryId", blank=True, null=True
-    )  # Field name made lowercase.
-    contactid = models.TextField(
-        db_column="ContactId", blank=True, null=True
-    )  # Field name made lowercase.
-    maincontactid = models.TextField(
-        db_column="MainContactId", blank=True, null=True
-    )  # Field name made lowercase.
-    statusid = models.TextField(
-        db_column="StatusId", blank=True, null=True
-    )  # Field name made lowercase.
-    userid = models.BigIntegerField(
-        db_column="UserId", blank=True, null=True
-    )  # Field name made lowercase.
-    name = models.TextField(
-        db_column="Name", blank=True, null=True
-    )  # Field name made lowercase.
-    statusupdatedat = models.TextField(
-        db_column="StatusUpdatedAt", blank=True, null=True
-    )  # Field name made lowercase.
-    isprivate = models.TextField(
-        db_column="IsPrivate", blank=True, null=True
-    )  # Field name made lowercase.
-    invited = models.TextField(
-        db_column="Invited", blank=True, null=True
-    )  # Field name made lowercase.
-    deleted = models.TextField(
-        db_column="Deleted", blank=True, null=True
-    )  # Field name made lowercase.
-    createdby = models.BigIntegerField(
-        db_column="CreatedBy", blank=True, null=True
-    )  # Field name made lowercase.
-    createdat = models.TextField(
-        db_column="CreatedAt", blank=True, null=True
-    )  # Field name made lowercase.
-    updatedby = models.BigIntegerField(
-        db_column="UpdatedBy", blank=True, null=True
-    )  # Field name made lowercase.
-    updatedat = models.TextField(
-        db_column="UpdatedAt", blank=True, null=True
-    )  # Field name made lowercase.
-    referrer = models.TextField(
-        db_column="Referrer", blank=True, null=True
-    )  # Field name made lowercase.
-    whynotus = models.TextField(
-        db_column="WhyNotUs", blank=True, null=True
-    )  # Field name made lowercase.
-    whyus = models.TextField(
-        db_column="WhyUs", blank=True, null=True
-    )  # Field name made lowercase.
-    importdate = models.TextField(
-        db_column="ImportDate", blank=True, null=True
-    )  # Field name made lowercase.
-    related_businessid = models.TextField(
-        db_column="Related_BusinessId", blank=True, null=True
-    )  # Field name made lowercase.
-    referenceid = models.TextField(
-        db_column="ReferenceId", blank=True, null=True
-    )  # Field name made lowercase.
-    number = models.TextField(
-        db_column="Number", blank=True, null=True
-    )  # Field name made lowercase.
-    issued = models.TextField(
-        db_column="Issued", blank=True, null=True
-    )  # Field name made lowercase.
-    performance = models.TextField(
-        db_column="Performance", blank=True, null=True
-    )  # Field name made lowercase.
-    prompt = models.TextField(
-        db_column="Prompt", blank=True, null=True
-    )  # Field name made lowercase.
-    paid = models.TextField(
-        db_column="Paid", blank=True, null=True
-    )  # Field name made lowercase.
-    amount = models.TextField(
-        db_column="Amount", blank=True, null=True
-    )  # Field name made lowercase.
-    invoicetype = models.TextField(
-        db_column="InvoiceType", blank=True, null=True
-    )  # Field name made lowercase.
-    invoicepdf = models.TextField(
-        db_column="InvoicePdf", blank=True, null=True
-    )  # Field name made lowercase.
-    listsubscriptions = models.BigIntegerField(
-        db_column="ListSubscriptions", blank=True, null=True
-    )  # Field name made lowercase.
-    pushtoken = models.TextField(
-        db_column="PushToken", blank=True, null=True
-    )  # Field name made lowercase.
-    pushdevice = models.TextField(
-        db_column="PushDevice", blank=True, null=True
-    )  # Field name made lowercase.
-    uuid = models.TextField(
-        db_column="UUId", blank=True, null=True
-    )  # Field name made lowercase.
-    uninstalledat = models.TextField(
-        db_column="UninstalledAt", blank=True, null=True
-    )  # Field name made lowercase.
-    phonever = models.TextField(
-        db_column="PhoneVer", blank=True, null=True
-    )  # Field name made lowercase.
-    osver = models.TextField(
-        db_column="OSVer", blank=True, null=True
-    )  # Field name made lowercase.
-    appver = models.TextField(
-        db_column="AppVer", blank=True, null=True
-    )  # Field name made lowercase.
-    autosales_salesstatus = models.TextField(
-        db_column="AutoSales_SalesStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    autosales_qualification = models.TextField(
-        db_column="AutoSales_Qualification", blank=True, null=True
-    )  # Field name made lowercase.
-    autosales_reachedstatus = models.TextField(
-        db_column="AutoSales_ReachedStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    autosales_lasttodomodification = models.TextField(
-        db_column="AutoSales_LastToDoModification", blank=True, null=True
-    )  # Field name made lowercase.
-    satisfactionrating = models.TextField(
-        db_column="SatisfactionRating", blank=True, null=True
-    )  # Field name made lowercase.
-    reachedmobileactivity = models.TextField(
-        db_column="ReachedMobileActivity", blank=True, null=True
-    )  # Field name made lowercase.
-    mobilelastlogin = models.TextField(
-        db_column="MobileLastLogin", blank=True, null=True
-    )  # Field name made lowercase.
-    emailmodule_emailcount = models.TextField(
-        db_column="EmailModule_EmailCount", blank=True, null=True
-    )  # Field name made lowercase.
-    emailmodule_openrate = models.TextField(
-        db_column="EmailModule_OpenRate", blank=True, null=True
-    )  # Field name made lowercase.
-    emailmodule_clickrate = models.TextField(
-        db_column="EmailModule_ClickRate", blank=True, null=True
-    )  # Field name made lowercase.
-    mobileloggedin = models.BigIntegerField(
-        db_column="MobileLoggedIn", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_reachedstatus = models.TextField(
-        db_column="Webshop_ReachedStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lifetimevalue = models.TextField(
-        db_column="Webshop_LifeTimeValue", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_numberoforders = models.TextField(
-        db_column="Webshop_NumberOfOrders", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_numberofproducts = models.TextField(
-        db_column="Webshop_NumberOfProducts", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_firstorderdate = models.TextField(
-        db_column="Webshop_FirstOrderDate", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lastorderdate = models.TextField(
-        db_column="Webshop_LastOrderDate", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lastorderamount = models.TextField(
-        db_column="Webshop_LastOrderAmount", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lastorderstatus = models.TextField(
-        db_column="Webshop_LastOrderStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_disabled = models.BigIntegerField(
-        db_column="Webshop_Disabled", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_registrationdate = models.TextField(
-        db_column="Webshop_RegistrationDate", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lostbasketcontent = models.TextField(
-        db_column="Webshop_LostBasketContent", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lostbasketdate = models.TextField(
-        db_column="Webshop_LostBasketDate", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_lostbasketvalue = models.TextField(
-        db_column="Webshop_LostBasketValue", blank=True, null=True
-    )  # Field name made lowercase.
-    webshop_alllostbasket = models.TextField(
-        db_column="Webshop_AllLostBasket", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv2_qualification = models.TextField(
-        db_column="AutoSalesV2_Qualification", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv2_rating = models.TextField(
-        db_column="AutoSalesV2_Rating", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv2_salesstatus = models.TextField(
-        db_column="AutoSalesV2_SalesStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    salesstepv2 = models.TextField(
-        db_column="SalesStepV2", blank=True, null=True
-    )  # Field name made lowercase.
-    newsletterv2 = models.BigIntegerField(
-        db_column="NewsletterV2", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv2_reachedstatus = models.TextField(
-        db_column="AutoSalesV2_ReachedStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    emailopen_phone = models.TextField(
-        db_column="EmailOpen_Phone", blank=True, null=True
-    )  # Field name made lowercase.
-    emailopen_tablet = models.TextField(
-        db_column="EmailOpen_Tablet", blank=True, null=True
-    )  # Field name made lowercase.
-    emailopen_iphone = models.TextField(
-        db_column="EmailOpen_iPhone", blank=True, null=True
-    )  # Field name made lowercase.
-    emailopen_ipad = models.TextField(
-        db_column="EmailOpen_iPad", blank=True, null=True
-    )  # Field name made lowercase.
-    emailopen_android = models.TextField(
-        db_column="EmailOpen_Android", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_qualification = models.TextField(
-        db_column="AutoSalesV3_Qualification", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_ishot = models.BigIntegerField(
-        db_column="AutoSalesV3_IsHot", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_salesstatus = models.TextField(
-        db_column="AutoSalesV3_SalesStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_reachedstatus = models.TextField(
-        db_column="AutoSalesV3_ReachedStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_reachedstatusgroup = models.TextField(
-        db_column="AutoSalesV3_ReachedStatusGroup", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_leadstep = models.TextField(
-        db_column="AutoSalesV3_LeadStep", blank=True, null=True
-    )  # Field name made lowercase.
-    autosalesv3_customerstep = models.TextField(
-        db_column="AutoSalesV3_CustomerStep", blank=True, null=True
-    )  # Field name made lowercase.
-    write_protected = models.TextField(
-        db_column="Write_Protected", blank=True, null=True
-    )  # Field name made lowercase.
-    navstatus = models.TextField(
-        db_column="NavStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    navstatusmessage = models.TextField(
-        db_column="NavStatusMessage", blank=True, null=True
-    )  # Field name made lowercase.
-    newsletter_subscriber = models.BigIntegerField(
-        db_column="Newsletter_Subscriber", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_activationdate = models.TextField(
-        db_column="CustomerCard_ActivationDate", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_averagepurchase = models.TextField(
-        db_column="CustomerCard_AveragePurchase", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_birthday = models.TextField(
-        db_column="CustomerCard_Birthday", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_cardnumber = models.TextField(
-        db_column="CustomerCard_CardNumber", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_cardstatus = models.TextField(
-        db_column="CustomerCard_CardStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_cardtype = models.TextField(
-        db_column="CustomerCard_CardType", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_comment = models.TextField(
-        db_column="CustomerCard_Comment", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_moneybalance = models.TextField(
-        db_column="CustomerCard_MoneyBalance", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_nameday = models.TextField(
-        db_column="CustomerCard_Nameday", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_pointbalance = models.TextField(
-        db_column="CustomerCard_PointBalance", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_registeredbusiness = models.TextField(
-        db_column="CustomerCard_RegisteredBusiness", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_sex = models.TextField(
-        db_column="CustomerCard_Sex", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_userid = models.TextField(
-        db_column="CustomerCard_UserId", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_validcoupons = models.TextField(
-        db_column="CustomerCard_ValidCoupons", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_validpasses = models.TextField(
-        db_column="CustomerCard_ValidPasses", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_registrationdate = models.TextField(
-        db_column="CustomerCard_RegistrationDate", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_lifetimevalue = models.TextField(
-        db_column="CustomerCard_LifeTimeValue", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_numberoforders = models.TextField(
-        db_column="CustomerCard_NumberOfOrders", blank=True, null=True
-    )  # Field name made lowercase.
-    customercard_lastorderdate = models.TextField(
-        db_column="CustomerCard_LastOrderDate", blank=True, null=True
-    )  # Field name made lowercase.
-    projectmanagement_deadline = models.TextField(
-        db_column="ProjectManagement_Deadline", blank=True, null=True
-    )  # Field name made lowercase.
-    projectmanagement_expectedrevenue = models.TextField(
-        db_column="ProjectManagement_ExpectedRevenue", blank=True, null=True
-    )  # Field name made lowercase.
-    projectmanagement_type = models.TextField(
-        db_column="ProjectManagement_Type", blank=True, null=True
-    )  # Field name made lowercase.
-    projectmanagement_desiredoutcome = models.TextField(
-        db_column="ProjectManagement_DesiredOutcome", blank=True, null=True
-    )  # Field name made lowercase.
-    serial_number = models.TextField(
-        db_column="Serial_Number", blank=True, null=True
-    )  # Field name made lowercase.
-    inboundinvoice_navstatus = models.TextField(
-        db_column="InboundInvoice_NavStatus", blank=True, null=True
-    )  # Field name made lowercase.
-    inboundinvoice_navnumber = models.TextField(
-        db_column="InboundInvoice_NavNumber", blank=True, null=True
-    )  # Field name made lowercase.
-    holiday_start = models.TextField(
-        db_column="Holiday_Start", blank=True, null=True
-    )  # Field name made lowercase.
-    holiday_end = models.TextField(
-        db_column="Holiday_End", blank=True, null=True
-    )  # Field name made lowercase.
-    holiday_substitute = models.TextField(
-        db_column="Holiday_Substitute", blank=True, null=True
-    )  # Field name made lowercase.
-    interests = models.BigIntegerField(
-        db_column="Interests", blank=True, null=True
-    )  # Field name made lowercase.
-    type = models.TextField(
-        db_column="Type", blank=True, null=True
-    )  # Field name made lowercase.
-    category = models.TextField(
-        db_column="Category", blank=True, null=True
-    )  # Field name made lowercase.
-    deadline = models.TextField(
-        db_column="Deadline", blank=True, null=True
-    )  # Field name made lowercase.
-    offerdate = models.TextField(
-        db_column="OfferDate", blank=True, null=True
-    )  # Field name made lowercase.
-    offerprice = models.TextField(
-        db_column="OfferPrice", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime2 = models.TextField(
-        db_column="Datetime2", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox29 = models.BigIntegerField(
-        db_column="Checkbox29", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox31 = models.BigIntegerField(
-        db_column="Checkbox31", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox34 = models.BigIntegerField(
-        db_column="Checkbox34", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox37 = models.BigIntegerField(
-        db_column="Checkbox37", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox38 = models.BigIntegerField(
-        db_column="Checkbox38", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox39 = models.BigIntegerField(
-        db_column="Checkbox39", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox35 = models.BigIntegerField(
-        db_column="Checkbox35", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1 = models.TextField(
-        db_column="Enum1", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime44 = models.TextField(
-        db_column="Datetime44", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime45 = models.TextField(
-        db_column="Datetime45", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime3 = models.TextField(
-        db_column="Datetime3", blank=True, null=True
-    )  # Field name made lowercase.
-    enum5 = models.TextField(
-        db_column="Enum5", blank=True, null=True
-    )  # Field name made lowercase.
-    enum6 = models.TextField(
-        db_column="Enum6", blank=True, null=True
-    )  # Field name made lowercase.
-    enum7 = models.TextField(
-        db_column="Enum7", blank=True, null=True
-    )  # Field name made lowercase.
-    set8 = models.BigIntegerField(
-        db_column="Set8", blank=True, null=True
-    )  # Field name made lowercase.
-    enum9 = models.TextField(
-        db_column="Enum9", blank=True, null=True
-    )  # Field name made lowercase.
-    set10 = models.BigIntegerField(
-        db_column="Set10", blank=True, null=True
-    )  # Field name made lowercase.
-    enum11 = models.TextField(
-        db_column="Enum11", blank=True, null=True
-    )  # Field name made lowercase.
-    set12 = models.BigIntegerField(
-        db_column="Set12", blank=True, null=True
-    )  # Field name made lowercase.
-    int14 = models.TextField(
-        db_column="Int14", blank=True, null=True
-    )  # Field name made lowercase.
-    int15 = models.TextField(
-        db_column="Int15", blank=True, null=True
-    )  # Field name made lowercase.
-    int16 = models.TextField(
-        db_column="Int16", blank=True, null=True
-    )  # Field name made lowercase.
-    int17 = models.TextField(
-        db_column="Int17", blank=True, null=True
-    )  # Field name made lowercase.
-    varchar18 = models.TextField(
-        db_column="Varchar18", blank=True, null=True
-    )  # Field name made lowercase.
-    enum19 = models.TextField(
-        db_column="Enum19", blank=True, null=True
-    )  # Field name made lowercase.
-    enum20 = models.TextField(
-        db_column="Enum20", blank=True, null=True
-    )  # Field name made lowercase.
-    enum21 = models.TextField(
-        db_column="Enum21", blank=True, null=True
-    )  # Field name made lowercase.
-    enum22 = models.TextField(
-        db_column="Enum22", blank=True, null=True
-    )  # Field name made lowercase.
-    enum23 = models.TextField(
-        db_column="Enum23", blank=True, null=True
-    )  # Field name made lowercase.
-    set25 = models.BigIntegerField(
-        db_column="Set25", blank=True, null=True
-    )  # Field name made lowercase.
-    int26 = models.TextField(
-        db_column="Int26", blank=True, null=True
-    )  # Field name made lowercase.
-    set27 = models.BigIntegerField(
-        db_column="Set27", blank=True, null=True
-    )  # Field name made lowercase.
-    int40 = models.TextField(
-        db_column="Int40", blank=True, null=True
-    )  # Field name made lowercase.
-    checkbox42 = models.BigIntegerField(
-        db_column="Checkbox42", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1098 = models.TextField(
-        db_column="Enum1098", blank=True, null=True
-    )  # Field name made lowercase.
-    text1099 = models.TextField(
-        db_column="Text1099", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1100 = models.TextField(
-        db_column="DateTime1100", blank=True, null=True
-    )  # Field name made lowercase.
-    text1101 = models.TextField(
-        db_column="Text1101", blank=True, null=True
-    )  # Field name made lowercase.
-    text1102 = models.TextField(
-        db_column="Text1102", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1103 = models.TextField(
-        db_column="Enum1103", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1104 = models.TextField(
-        db_column="Enum1104", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1105 = models.TextField(
-        db_column="Enum1105", blank=True, null=True
-    )  # Field name made lowercase.
-    text1106 = models.TextField(
-        db_column="Text1106", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1107 = models.TextField(
-        db_column="Enum1107", blank=True, null=True
-    )  # Field name made lowercase.
-    alaprajzfeltoltese = models.TextField(
-        db_column="AlaprajzFeltoltese", blank=True, null=True
-    )  # Field name made lowercase.
-    lapraszereltszellozo = models.BigIntegerField(
-        db_column="LapraszereltSzellozo", blank=True, null=True
-    )  # Field name made lowercase.
-    kapcsolatfelvetelokanakrovidleirasa = models.TextField(
-        db_column="KapcsolatfelvetelOkanakRovidLeirasa", blank=True, null=True
-    )  # Field name made lowercase.
-    alakasbantalalhatogazkazancirko = models.BigIntegerField(
-        db_column="ALakasbanTalalhatoGazkazanCirko", blank=True, null=True
-    )  # Field name made lowercase.
-    oknoplastviszontelado = models.TextField(
-        db_column="OknoplastViszontelado", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1115 = models.TextField(
-        db_column="Enum1115", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1116 = models.TextField(
-        db_column="Enum1116", blank=True, null=True
-    )  # Field name made lowercase.
-    int1117 = models.TextField(
-        db_column="Int1117", blank=True, null=True
-    )  # Field name made lowercase.
-    set1118 = models.BigIntegerField(
-        db_column="Set1118", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1119 = models.TextField(
-        db_column="Enum1119", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1121 = models.TextField(
-        db_column="Enum1121", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1122 = models.TextField(
-        db_column="DateTime1122", blank=True, null=True
-    )  # Field name made lowercase.
-    text1124 = models.TextField(
-        db_column="Text1124", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeres = models.TextField(
-        db_column="Felmeres", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresidopontja = models.TextField(
-        db_column="FelmeresIdopontja", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1130 = models.TextField(
-        db_column="Enum1130", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1131 = models.TextField(
-        db_column="Enum1131", blank=True, null=True
-    )  # Field name made lowercase.
-    int1132 = models.TextField(
-        db_column="Int1132", blank=True, null=True
-    )  # Field name made lowercase.
-    set1133 = models.BigIntegerField(
-        db_column="Set1133", blank=True, null=True
-    )  # Field name made lowercase.
-    leiras = models.TextField(
-        db_column="Leiras", blank=True, null=True
-    )  # Field name made lowercase.
-    problemak = models.BigIntegerField(
-        db_column="Problemak", blank=True, null=True
-    )  # Field name made lowercase.
-    mitprobaltalmar = models.BigIntegerField(
-        db_column="MitProbaltalMar", blank=True, null=True
-    )  # Field name made lowercase.
-    joinurl = models.TextField(
-        db_column="JoinUrl", blank=True, null=True
-    )  # Field name made lowercase.
-    kovetkezowebinarium = models.TextField(
-        db_column="KovetkezoWebinarium", blank=True, null=True
-    )  # Field name made lowercase.
-    milyenproblemarakeresmegoldast = models.BigIntegerField(
-        db_column="MilyenProblemaraKeresMegoldast", blank=True, null=True
-    )  # Field name made lowercase.
-    mitprobaltmar = models.BigIntegerField(
-        db_column="MitProbaltMar", blank=True, null=True
-    )  # Field name made lowercase.
-    szabadszovegesleiras = models.TextField(
-        db_column="SzabadSzovegesLeiras", blank=True, null=True
-    )  # Field name made lowercase.
-    url = models.TextField(
-        db_column="Url", blank=True, null=True
-    )  # Field name made lowercase.
-    webinariumrajelentkezett = models.BigIntegerField(
-        db_column="WebinariumraJelentkezett", blank=True, null=True
-    )  # Field name made lowercase.
-    resztvett = models.BigIntegerField(
-        db_column="ResztVett", blank=True, null=True
-    )  # Field name made lowercase.
-    webinariummegjegyzes = models.TextField(
-        db_column="WebinariumMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresmegtortent = models.BigIntegerField(
-        db_column="FelmeresMegtortent", blank=True, null=True
-    )  # Field name made lowercase.
-    felmerestkert = models.BigIntegerField(
-        db_column="FelmerestKert", blank=True, null=True
-    )  # Field name made lowercase.
-    kedvezmeny = models.TextField(
-        db_column="Kedvezmeny", blank=True, null=True
-    )  # Field name made lowercase.
-    lakaselhelyezkedese = models.TextField(
-        db_column="LakasElhelyezkedese", blank=True, null=True
-    )  # Field name made lowercase.
-    epitoanyag = models.TextField(
-        db_column="Epitoanyag", blank=True, null=True
-    )  # Field name made lowercase.
-    epitmenykora = models.TextField(
-        db_column="EpitmenyKora", blank=True, null=True
-    )  # Field name made lowercase.
-    apeneszedesparalecsapodasmegjelenese = models.BigIntegerField(
-        db_column="APeneszedesParalecsapodasMegjelenese", blank=True, null=True
-    )  # Field name made lowercase.
-    nyilaszaroktipusa = models.TextField(
-        db_column="NyilaszarokTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    apeneszedesselparalecsapodassalerintetthelyisegek = models.BigIntegerField(
-        db_column="APeneszedesselParalecsapodassalErintettHelyisegek",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    apeneszedeselofordulasafokent = models.TextField(
-        db_column="APeneszedesElofordulasaFokent", blank=True, null=True
-    )  # Field name made lowercase.
-    lakasalapterulete = models.TextField(
-        db_column="LakasAlapterulete", blank=True, null=True
-    )  # Field name made lowercase.
-    lakasbelmagassaga = models.TextField(
-        db_column="LakasBelmagassaga", blank=True, null=True
-    )  # Field name made lowercase.
-    kulsotartofalakvastagsaga = models.TextField(
-        db_column="KulsoTartoFalakVastagsaga", blank=True, null=True
-    )  # Field name made lowercase.
-    kulsoszigetelesvastagsaga = models.TextField(
-        db_column="KulsoSzigetelesVastagsaga", blank=True, null=True
-    )  # Field name made lowercase.
-    alakasfodememennyezete = models.TextField(
-        db_column="ALakasFodemeMennyezete", blank=True, null=True
-    )  # Field name made lowercase.
-    lakohelyisegekszamaszobaknappali = models.TextField(
-        db_column="LakoHelyisegekSzamaSzobakNappali", blank=True, null=True
-    )  # Field name made lowercase.
-    vizeshelyisegekszamafurdowckonyhamosokonyhastb = models.TextField(
-        db_column="VizesHelyisegekSzamaFurdoWcKonyhaMosokonyhaStb",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    egyebhelyisegekszamatarolokamragardrobstb = models.TextField(
-        db_column="EgyebHelyisegekSzamaTaroloKamraGardrobStb", blank=True, null=True
-    )  # Field name made lowercase.
-    kuszobabelteriajtokon = models.TextField(
-        db_column="KuszobABelteriAjtokon", blank=True, null=True
-    )  # Field name made lowercase.
-    lakasfutese = models.TextField(
-        db_column="LakasFutese", blank=True, null=True
-    )  # Field name made lowercase.
-    alakasbantalalhatogazkeszulekek = models.BigIntegerField(
-        db_column="ALakasbanTalalhatoGazkeszulekek", blank=True, null=True
-    )  # Field name made lowercase.
-    alakasbantalalhatoszellozesilehetosegek = models.BigIntegerField(
-        db_column="ALakasbanTalalhatoSzellozesiLehetosegek", blank=True, null=True
-    )  # Field name made lowercase.
-    alakasbanlakoszemelyekszama = models.TextField(
-        db_column="ALakasbanLakoSzemelyekSzama", blank=True, null=True
-    )  # Field name made lowercase.
-    alaprajzfeltoltese2 = models.TextField(
-        db_column="AlaprajzFeltoltese2", blank=True, null=True
-    )  # Field name made lowercase.
-    peneszedesrolfenykep = models.TextField(
-        db_column="PeneszedesrolFenykep", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebhasznoskep = models.TextField(
-        db_column="EgyebHasznosKep", blank=True, null=True
-    )  # Field name made lowercase.
-    fenykepakazanrol = models.TextField(
-        db_column="FenykepAKazanrol", blank=True, null=True
-    )  # Field name made lowercase.
-    acsaladbanvan = models.BigIntegerField(
-        db_column="ACsaladbanVan", blank=True, null=True
-    )  # Field name made lowercase.
-    felmerolapotkitoltotte = models.BigIntegerField(
-        db_column="FelmerolapotKitoltotte", blank=True, null=True
-    )  # Field name made lowercase.
-    mikorkuldtunkajanlatot = models.TextField(
-        db_column="MikorKuldtunkAjanlatot", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1183 = models.TextField(
-        db_column="Enum1183", blank=True, null=True
-    )  # Field name made lowercase.
-    text1184 = models.TextField(
-        db_column="Text1184", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1185 = models.TextField(
-        db_column="Enum1185", blank=True, null=True
-    )  # Field name made lowercase.
-    int1186 = models.TextField(
-        db_column="Int1186", blank=True, null=True
-    )  # Field name made lowercase.
-    file1188 = models.TextField(
-        db_column="File1188", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1189 = models.TextField(
-        db_column="DateTime1189", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1190 = models.TextField(
-        db_column="Enum1190", blank=True, null=True
-    )  # Field name made lowercase.
-    text1191 = models.TextField(
-        db_column="Text1191", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1192 = models.TextField(
-        db_column="DateTime1192", blank=True, null=True
-    )  # Field name made lowercase.
-    afeladatleirasaabeepitoknek = models.TextField(
-        db_column="AFeladatLeirasaABeepitoknek", blank=True, null=True
-    )  # Field name made lowercase.
-    kimertefel = models.BigIntegerField(
-        db_column="KiMerteFel", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresijegyzetek = models.TextField(
-        db_column="FelmeresiJegyzetek", blank=True, null=True
-    )  # Field name made lowercase.
-    beepitesijegyzetek = models.TextField(
-        db_column="BeepitesiJegyzetek", blank=True, null=True
-    )  # Field name made lowercase.
-    kepekabeepitesrol = models.TextField(
-        db_column="KepekABeepitesrol", blank=True, null=True
-    )  # Field name made lowercase.
-    kepekabeepiteshez01 = models.TextField(
-        db_column="KepekABeepiteshez01", blank=True, null=True
-    )  # Field name made lowercase.
-    kepekabeepiteshez02 = models.TextField(
-        db_column="KepekABeepiteshez02", blank=True, null=True
-    )  # Field name made lowercase.
-    kepekabeepiteshez03 = models.TextField(
-        db_column="KepekABeepiteshez03", blank=True, null=True
-    )  # Field name made lowercase.
-    kepekabeepitesrol02 = models.TextField(
-        db_column="KepekABeepitesrol02", blank=True, null=True
-    )  # Field name made lowercase.
-    ventitipus = models.TextField(
-        db_column="VentiTipus", blank=True, null=True
-    )  # Field name made lowercase.
-    hazvlakas = models.TextField(
-        db_column="HazVLakas", blank=True, null=True
-    )  # Field name made lowercase.
-    ablakoslegbevezetok = models.TextField(
-        db_column="AblakosLegbevezetok", blank=True, null=True
-    )  # Field name made lowercase.
-    falilegbevezetok = models.TextField(
-        db_column="FaliLegbevezetok", blank=True, null=True
-    )  # Field name made lowercase.
-    hollesznekalegbevezetok = models.TextField(
-        db_column="HolLesznekALegbevezetok", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszfali = models.TextField(
-        db_column="HolLeszFali", blank=True, null=True
-    )  # Field name made lowercase.
-    hanyajtofuras = models.TextField(
-        db_column="HanyAjtoFuras", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikajtok = models.TextField(
-        db_column="MelyikAjtok", blank=True, null=True
-    )  # Field name made lowercase.
-    szellozoracshelye = models.TextField(
-        db_column="SzellozoRacsHelye", blank=True, null=True
-    )  # Field name made lowercase.
-    hanybelsofalatbontaslesz = models.TextField(
-        db_column="HanyBelsoFalAtbontasLesz", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebkotojelessorkbarendezve = models.TextField(
-        db_column="EgyebKotojelesSorkbaRendezve", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesaventihelyerolabeepitoknek = models.TextField(
-        db_column="MegjegyzesAVentiHelyerolABeepitoknek", blank=True, null=True
-    )  # Field name made lowercase.
-    nettoar = models.TextField(
-        db_column="NettoAr", blank=True, null=True
-    )  # Field name made lowercase.
-    bruttoar = models.TextField(
-        db_column="BruttoAr", blank=True, null=True
-    )  # Field name made lowercase.
-    nettoarft = models.TextField(
-        db_column="NettoArFt", blank=True, null=True
-    )  # Field name made lowercase.
-    bruttoar2 = models.TextField(
-        db_column="BruttoAr2", blank=True, null=True
-    )  # Field name made lowercase.
-    bruttoarbetuvelkiirva = models.TextField(
-        db_column="BruttoArBetuvelKiirva", blank=True, null=True
-    )  # Field name made lowercase.
-    ebbol957 = models.TextField(
-        db_column="Ebbol957", blank=True, null=True
-    )  # Field name made lowercase.
-    ebbol916 = models.TextField(
-        db_column="Ebbol916", blank=True, null=True
-    )  # Field name made lowercase.
-    n780as = models.TextField(
-        db_column="N780as", blank=True, null=True
-    )  # Field name made lowercase.
-    hollesz916os = models.TextField(
-        db_column="HolLesz916os", blank=True, null=True
-    )  # Field name made lowercase.
-    hollesz957es = models.TextField(
-        db_column="HolLesz957es", blank=True, null=True
-    )  # Field name made lowercase.
-    n716os = models.TextField(
-        db_column="N716os", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebmunkakcsakabeepitoklatjak = models.TextField(
-        db_column="EgyebMunkakCsakABeepitokLatjak", blank=True, null=True
-    )  # Field name made lowercase.
-    paraerzekelosbcx = models.TextField(
-        db_column="ParaerzekelosBcx", blank=True, null=True
-    )  # Field name made lowercase.
-    hova = models.TextField(
-        db_column="Hova", blank=True, null=True
-    )  # Field name made lowercase.
-    hollesza = models.TextField(
-        db_column="HolLeszA", blank=True, null=True
-    )  # Field name made lowercase.
-    hova2 = models.TextField(
-        db_column="Hova2", blank=True, null=True
-    )  # Field name made lowercase.
-    paraesmozgaserzekelosbxc = models.TextField(
-        db_column="ParaEsMozgasErzekelosBxc", blank=True, null=True
-    )  # Field name made lowercase.
-    mozgaserzekelosbxc = models.TextField(
-        db_column="MozgaserzekelosBxc", blank=True, null=True
-    )  # Field name made lowercase.
-    hova3 = models.TextField(
-        db_column="Hova3", blank=True, null=True
-    )  # Field name made lowercase.
-    zsirszuro = models.TextField(
-        db_column="Zsirszuro", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszzajcsillapitobetet = models.TextField(
-        db_column="HolLeszZajcsillapitoBetet", blank=True, null=True
-    )  # Field name made lowercase.
-    zajcsillapitobetetfali = models.TextField(
-        db_column="ZajcsillapitoBetetFali", blank=True, null=True
-    )  # Field name made lowercase.
-    v2av4avamtipusa = models.TextField(
-        db_column="V2aV4aVamTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaventieshogyleszkialakitvaajanlatonezlatszik = models.TextField(
-        db_column="HolLeszAVentiEsHogyLeszKialakitvaAjanlatonEzLatszik",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    kialakitasrolegyebinfoabeepitoknek = models.TextField(
-        db_column="KialakitasrolEgyebInfoABeepitoknek", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesakabelezeshezabeepitoknek = models.TextField(
-        db_column="MegjegyzesAKabelezeshezABeepitoknek", blank=True, null=True
-    )  # Field name made lowercase.
-    cim = models.TextField(
-        db_column="Cim", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesacimmelkapcsolatban = models.TextField(
-        db_column="MegjegyzesACimmelKapcsolatban", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszear201es = models.TextField(
-        db_column="HolLeszEar201es", blank=True, null=True
-    )  # Field name made lowercase.
-    ear201db = models.TextField(
-        db_column="Ear201Db", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszear200as = models.TextField(
-        db_column="HolLeszEar200as", blank=True, null=True
-    )  # Field name made lowercase.
-    ear200asdb = models.TextField(
-        db_column="Ear200asDb", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszredonytokos = models.TextField(
-        db_column="HolLeszRedonytokos", blank=True, null=True
-    )  # Field name made lowercase.
-    redonytokoslegbevezetodb = models.TextField(
-        db_column="RedonytokosLegbevezetoDb", blank=True, null=True
-    )  # Field name made lowercase.
-    megjalegbevezetokhozszinesovedostb = models.TextField(
-        db_column="MegjALegbevezetokhozSzinEsovedoStb", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebinfoalegbevezetokbeepitesehez = models.TextField(
-        db_column="EgyebInfoALegbevezetokBeepitesehez", blank=True, null=True
-    )  # Field name made lowercase.
-    kulonlegesszinhelyesovedostb = models.TextField(
-        db_column="KulonlegesSzinHelyEsovedoStb", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebinfoaredonytokosbeepitesehez = models.TextField(
-        db_column="EgyebInfoARedonytokosBeepitesehez", blank=True, null=True
-    )  # Field name made lowercase.
-    osszesenhanydb201200mind = models.TextField(
-        db_column="OsszesenHanyDb201200Mind", blank=True, null=True
-    )  # Field name made lowercase.
-    ajtoszellozokarikaszine = models.TextField(
-        db_column="AjtoszellozoKarikaSzine", blank=True, null=True
-    )  # Field name made lowercase.
-    n716osszine = models.TextField(
-        db_column="N716osSzine", blank=True, null=True
-    )  # Field name made lowercase.
-    n916osszine = models.TextField(
-        db_column="N916osSzine", blank=True, null=True
-    )  # Field name made lowercase.
-    hakellcsoveznimibolmennyikell2 = models.TextField(
-        db_column="HaKellCsovezniMibolMennyiKell2", blank=True, null=True
-    )  # Field name made lowercase.
-    garanciavalarralkapcsolatosmegjegyzes = models.TextField(
-        db_column="GaranciavalArralKapcsolatosMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    pluszvisszaaramlasgatlokdb = models.TextField(
-        db_column="PluszVisszaaramlasGatlokDb", blank=True, null=True
-    )  # Field name made lowercase.
-    hovakellaplusszvisszaaramlasgatlo = models.TextField(
-        db_column="HovaKellAPlusszVisszaaramlasGatlo", blank=True, null=True
-    )  # Field name made lowercase.
-    int1320 = models.TextField(
-        db_column="Int1320", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1322 = models.TextField(
-        db_column="Enum1322", blank=True, null=True
-    )  # Field name made lowercase.
-    text1323 = models.TextField(
-        db_column="Text1323", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1326 = models.TextField(
-        db_column="Enum1326", blank=True, null=True
-    )  # Field name made lowercase.
-    text1335 = models.TextField(
-        db_column="Text1335", blank=True, null=True
-    )  # Field name made lowercase.
-    legutolsoajanlat = models.TextField(
-        db_column="LegutolsoAjanlat", blank=True, null=True
-    )  # Field name made lowercase.
-    kepapeneszesfalszakaszrol = models.TextField(
-        db_column="KepAPeneszesFalszakaszrol", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesapeneszedesselkapcsolatba = models.TextField(
-        db_column="MegjegyzesAPeneszedesselKapcsolatba", blank=True, null=True
-    )  # Field name made lowercase.
-    ablakokajtokkulsobelsoszine = models.TextField(
-        db_column="AblakokAjtokKulsoBelsoSzine", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesazablakokkalajtokkalkapcsolatba = models.TextField(
-        db_column="MegjegyzesAzAblakokkalAjtokkalKapcsolatba", blank=True, null=True
-    )  # Field name made lowercase.
-    azalaprajznaktartalmazniakell = models.BigIntegerField(
-        db_column="AzAlaprajznakTartalmazniaKell", blank=True, null=True
-    )  # Field name made lowercase.
-    nemkapgariszerzodest = models.BigIntegerField(
-        db_column="NemKapGariSzerzodest", blank=True, null=True
-    )  # Field name made lowercase.
-    holvanaram2 = models.TextField(
-        db_column="HolVanAram2", blank=True, null=True
-    )  # Field name made lowercase.
-    ventilatorkapcsolasanakkialakitasa2 = models.TextField(
-        db_column="VentilatorKapcsolasanakKialakitasa2", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez04 = models.TextField(
-        db_column="KepABeepiteshez04", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1361 = models.TextField(
-        db_column="Enum1361", blank=True, null=True
-    )  # Field name made lowercase.
-    text1362 = models.TextField(
-        db_column="Text1362", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1363 = models.TextField(
-        db_column="Enum1363", blank=True, null=True
-    )  # Field name made lowercase.
-    file1365 = models.TextField(
-        db_column="File1365", blank=True, null=True
-    )  # Field name made lowercase.
-    text1367 = models.TextField(
-        db_column="Text1367", blank=True, null=True
-    )  # Field name made lowercase.
-    text1368 = models.TextField(
-        db_column="Text1368", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1370 = models.TextField(
-        db_column="Enum1370", blank=True, null=True
-    )  # Field name made lowercase.
-    tervrajzfeltoltes = models.TextField(
-        db_column="TervrajzFeltoltes", blank=True, null=True
-    )  # Field name made lowercase.
-    hirlevelrefeliratkozas = models.BigIntegerField(
-        db_column="HirlevelreFeliratkozas", blank=True, null=True
-    )  # Field name made lowercase.
-    gdprnyilatkozat = models.BigIntegerField(
-        db_column="GdprNyilatkozat", blank=True, null=True
-    )  # Field name made lowercase.
-    mikorraterveziafelujitast = models.TextField(
-        db_column="MikorraTerveziAFelujitast", blank=True, null=True
-    )  # Field name made lowercase.
-    miazugyfelfoszempontja = models.TextField(
-        db_column="MiAzUgyfelFoSzempontja", blank=True, null=True
-    )  # Field name made lowercase.
-    ilyenvoltkep1 = models.TextField(
-        db_column="IlyenVoltKep1", blank=True, null=True
-    )  # Field name made lowercase.
-    ilyenvoltkep2 = models.TextField(
-        db_column="IlyenVoltKep2", blank=True, null=True
-    )  # Field name made lowercase.
-    kivitelezesinfo = models.TextField(
-        db_column="KivitelezesInfo", blank=True, null=True
-    )  # Field name made lowercase.
-    ilyenlettkep1 = models.TextField(
-        db_column="IlyenLettKep1", blank=True, null=True
-    )  # Field name made lowercase.
-    ilyenlettkep2 = models.TextField(
-        db_column="IlyenLettKep2", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikbrigadvolt = models.TextField(
-        db_column="MelyikBrigadVolt", blank=True, null=True
-    )  # Field name made lowercase.
-    elszamolasdatum = models.TextField(
-        db_column="ElszamolasDatum", blank=True, null=True
-    )  # Field name made lowercase.
-    elszamolasiosszeg = models.TextField(
-        db_column="ElszamolasiOsszeg", blank=True, null=True
-    )  # Field name made lowercase.
-    penzugyimegjegyzes = models.TextField(
-        db_column="PenzugyiMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    anyagkoltseg = models.TextField(
-        db_column="AnyagKoltseg", blank=True, null=True
-    )  # Field name made lowercase.
-    reklamacioinfo = models.TextField(
-        db_column="ReklamacioInfo", blank=True, null=True
-    )  # Field name made lowercase.
-    reklamaciokoltsege = models.TextField(
-        db_column="ReklamacioKoltsege", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresdatuma = models.TextField(
-        db_column="FelmeresDatuma", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebszempontok = models.BigIntegerField(
-        db_column="EgyebSzempontok", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1415 = models.TextField(
-        db_column="DateTime1415", blank=True, null=True
-    )  # Field name made lowercase.
-    text1416 = models.TextField(
-        db_column="Text1416", blank=True, null=True
-    )  # Field name made lowercase.
-    int1417 = models.TextField(
-        db_column="Int1417", blank=True, null=True
-    )  # Field name made lowercase.
-    set1418 = models.BigIntegerField(
-        db_column="Set1418", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1419 = models.TextField(
-        db_column="Enum1419", blank=True, null=True
-    )  # Field name made lowercase.
-    set1420 = models.BigIntegerField(
-        db_column="Set1420", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1421 = models.TextField(
-        db_column="DateTime1421", blank=True, null=True
-    )  # Field name made lowercase.
-    file1422 = models.TextField(
-        db_column="File1422", blank=True, null=True
-    )  # Field name made lowercase.
-    file1423 = models.TextField(
-        db_column="File1423", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1424 = models.TextField(
-        db_column="Enum1424", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1425 = models.TextField(
-        db_column="Enum1425", blank=True, null=True
-    )  # Field name made lowercase.
-    set1426 = models.BigIntegerField(
-        db_column="Set1426", blank=True, null=True
-    )  # Field name made lowercase.
-    file1427 = models.TextField(
-        db_column="File1427", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1428 = models.TextField(
-        db_column="DateTime1428", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1429 = models.TextField(
-        db_column="Enum1429", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1430 = models.TextField(
-        db_column="DateTime1430", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1431 = models.TextField(
-        db_column="Enum1431", blank=True, null=True
-    )  # Field name made lowercase.
-    text1432 = models.TextField(
-        db_column="Text1432", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1433 = models.TextField(
-        db_column="DateTime1433", blank=True, null=True
-    )  # Field name made lowercase.
-    file1434 = models.TextField(
-        db_column="File1434", blank=True, null=True
-    )  # Field name made lowercase.
-    set1435 = models.BigIntegerField(
-        db_column="Set1435", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1436 = models.TextField(
-        db_column="DateTime1436", blank=True, null=True
-    )  # Field name made lowercase.
-    parkolasilehetosegek = models.BigIntegerField(
-        db_column="ParkolasiLehetosegek", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresijegyzetek2 = models.TextField(
-        db_column="FelmeresiJegyzetek2", blank=True, null=True
-    )  # Field name made lowercase.
-    ventitipusa = models.TextField(
-        db_column="VentiTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbenleszaventilista = models.TextField(
-        db_column="Melyikhelyisegbenleszaventilista", blank=True, null=True
-    )  # Field name made lowercase.
-    hogyleszkialakitvaaventi = models.TextField(
-        db_column="Hogyleszkialakitvaaventi", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesacsovezeshez = models.TextField(
-        db_column="MegjegyzesACsovezeshez", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesaventihelyerolabeepitoknek_0 = models.TextField(
-        db_column="Megjegyzesaventihelyerolabeepitoknek", blank=True, null=True
-    )  # Field name made lowercase. Field renamed because of name conflict.
-    n780as2 = models.TextField(
-        db_column="N780as2", blank=True, null=True
-    )  # Field name made lowercase.
-    hovakerula780as = models.TextField(
-        db_column="HovaKerulA780as", blank=True, null=True
-    )  # Field name made lowercase.
-    n957esdb = models.TextField(
-        db_column="N957esDb", blank=True, null=True
-    )  # Field name made lowercase.
-    hovakerula957es = models.TextField(
-        db_column="HovaKerulA957es", blank=True, null=True
-    )  # Field name made lowercase.
-    zajcsillapitobetetfalidb = models.TextField(
-        db_column="ZajcsillapitoBetetFaliDb", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszzajcsillapitobetet2 = models.TextField(
-        db_column="HolLeszZajcsillapitoBetet2", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebinfoalegbevezetokbeepitesehez2 = models.TextField(
-        db_column="EgyebInfoALegbevezetokBeepitesehez2", blank=True, null=True
-    )  # Field name made lowercase.
-    rajzabeepiteshez = models.TextField(
-        db_column="RajzABeepiteshez", blank=True, null=True
-    )  # Field name made lowercase.
-    ujszovegdobozafeladatleirasaabeepitoknek = models.TextField(
-        db_column="UjSzovegdobozAFeladatLeirasaABeepitoknek", blank=True, null=True
-    )  # Field name made lowercase.
-    parkolasilehetosegek2 = models.BigIntegerField(
-        db_column="ParkolasiLehetosegek2", blank=True, null=True
-    )  # Field name made lowercase.
-    miazugyfelfoszempontja2 = models.TextField(
-        db_column="MiAzUgyfelFoSzempontja2", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebszempontok2 = models.BigIntegerField(
-        db_column="EgyebSzempontok2", blank=True, null=True
-    )  # Field name made lowercase.
-    ertekesitesiinfok = models.TextField(
-        db_column="ErtekesitesiInfok", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez05 = models.TextField(
-        db_column="KepABeepiteshez05", blank=True, null=True
-    )  # Field name made lowercase.
-    ingatlanhasznalat2 = models.TextField(
-        db_column="IngatlanHasznalat2", blank=True, null=True
-    )  # Field name made lowercase.
-    kivitelezescime = models.TextField(
-        db_column="KivitelezesCime", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesacimmelkapcsolatban2 = models.TextField(
-        db_column="MegjegyzesACimmelKapcsolatban2", blank=True, null=True
-    )  # Field name made lowercase.
-    projektleiras = models.TextField(
-        db_column="ProjektLeiras", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresteljesosszeg = models.TextField(
-        db_column="FelmeresTeljesOsszeg", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeres18000 = models.BigIntegerField(
-        db_column="Felmeres18000", blank=True, null=True
-    )  # Field name made lowercase.
-    szervezetiterulet = models.TextField(
-        db_column="SzervezetiTerulet", blank=True, null=True
-    )  # Field name made lowercase.
-    projektstart = models.TextField(
-        db_column="ProjektStart", blank=True, null=True
-    )  # Field name made lowercase.
-    projektvege = models.TextField(
-        db_column="ProjektVege", blank=True, null=True
-    )  # Field name made lowercase.
-    projektkoltsegenetto = models.TextField(
-        db_column="ProjektKoltsegeNetto", blank=True, null=True
-    )  # Field name made lowercase.
-    havikoltsegnetto = models.TextField(
-        db_column="HaviKoltsegNetto", blank=True, null=True
-    )  # Field name made lowercase.
-    kapcsolodolink1 = models.TextField(
-        db_column="KapcsolodoLink1", blank=True, null=True
-    )  # Field name made lowercase.
-    kapcsolodolink2 = models.TextField(
-        db_column="KapcsolodoLink2", blank=True, null=True
-    )  # Field name made lowercase.
-    ingatlanhasznalata = models.TextField(
-        db_column="IngatlanHasznalata", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzescimmelkapcsolatban = models.TextField(
-        db_column="MegjegyzesCimmelKapcsolatban", blank=True, null=True
-    )  # Field name made lowercase.
-    nemkapszgariszerzodest = models.BigIntegerField(
-        db_column="NemKapszGariSzerzodest", blank=True, null=True
-    )  # Field name made lowercase.
-    beepitesdatuma = models.TextField(
-        db_column="BeepitesDatuma", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez01 = models.TextField(
-        db_column="KepABeepiteshez01", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez02 = models.TextField(
-        db_column="KepABeepiteshez02", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez03 = models.TextField(
-        db_column="KepABeepiteshez03", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez06 = models.TextField(
-        db_column="KepABeepiteshez06", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez07 = models.TextField(
-        db_column="KepABeepiteshez07", blank=True, null=True
-    )  # Field name made lowercase.
-    hovakerul716os = models.TextField(
-        db_column="HovaKerul716os", blank=True, null=True
-    )  # Field name made lowercase.
-    n716osszinehanemfeher = models.TextField(
-        db_column="N716osSzineHaNemFeher", blank=True, null=True
-    )  # Field name made lowercase.
-    hovakerul916os = models.TextField(
-        db_column="HovaKerul916os", blank=True, null=True
-    )  # Field name made lowercase.
-    n916osszinehanemfeher = models.TextField(
-        db_column="N916osSzineHaNemFeher", blank=True, null=True
-    )  # Field name made lowercase.
-    kulonlegesszinhelyesovedostb2 = models.TextField(
-        db_column="KulonlegesSzinHelyEsovedoStb2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszear201es2 = models.TextField(
-        db_column="HolLeszEar201es2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszear200as2 = models.TextField(
-        db_column="HolLeszEar200as2", blank=True, null=True
-    )  # Field name made lowercase.
-    kulonlegesszinhelyesovedostb3 = models.TextField(
-        db_column="KulonlegesSzinHelyEsovedoStb3", blank=True, null=True
-    )  # Field name made lowercase.
-    osszesfalilegbevezetok2 = models.TextField(
-        db_column="OsszesFaliLegbevezetok2", blank=True, null=True
-    )  # Field name made lowercase.
-    osszesenhanydb716916mind2 = models.TextField(
-        db_column="OsszesenHanyDb716916Mind2", blank=True, null=True
-    )  # Field name made lowercase.
-    n716osdb2 = models.TextField(
-        db_column="N716osDb2", blank=True, null=True
-    )  # Field name made lowercase.
-    n916osdb3 = models.TextField(
-        db_column="N916osDb3", blank=True, null=True
-    )  # Field name made lowercase.
-    osszesenhanydb201200mind3 = models.TextField(
-        db_column="OsszesenHanyDb201200Mind3", blank=True, null=True
-    )  # Field name made lowercase.
-    ear201esdb2 = models.TextField(
-        db_column="Ear201esDb2", blank=True, null=True
-    )  # Field name made lowercase.
-    ear200asdb3 = models.TextField(
-        db_column="Ear200asDb3", blank=True, null=True
-    )  # Field name made lowercase.
-    hanyajtofuras_0 = models.TextField(
-        db_column="HanyAjtofuras", blank=True, null=True
-    )  # Field name made lowercase. Field renamed because of name conflict.
-    melyikajtok2 = models.TextField(
-        db_column="MelyikAjtok2", blank=True, null=True
-    )  # Field name made lowercase.
-    ajtoszellozokarikaszinehanemfeher = models.TextField(
-        db_column="AjtoszellozoKarikaSzineHaNemFeher", blank=True, null=True
-    )  # Field name made lowercase.
-    pluszvisszaaramlasgatlokdb2 = models.TextField(
-        db_column="PluszVisszaaramlasGatlokDb2", blank=True, null=True
-    )  # Field name made lowercase.
-    hovakellapluszvisszaaramlasgatlo = models.TextField(
-        db_column="HovaKellAPluszVisszaaramlasGatlo", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebmunkakarajanlatonisrajtalesz = models.TextField(
-        db_column="EgyebMunkakArajanlatonIsRajtaLesz", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebmunkakcsakabeepitoklatjak2 = models.TextField(
-        db_column="EgyebMunkakCsakABeepitokLatjak2", blank=True, null=True
-    )  # Field name made lowercase.
-    nyiltkazanjavan2 = models.BigIntegerField(
-        db_column="NyiltKazanjaVan2", blank=True, null=True
-    )  # Field name made lowercase.
-    ahaznakkozpontiszellozoventilatoravan = models.BigIntegerField(
-        db_column="AHaznakKozpontiSzellozoVentilatoraVan", blank=True, null=True
-    )  # Field name made lowercase.
-    hanyorasmunkaalapbeallitas36 = models.TextField(
-        db_column="HanyOrasMunkaAlapBeallitas36", blank=True, null=True
-    )  # Field name made lowercase.
-    garanciavalarralkapcsolatosmegjegyzes2 = models.TextField(
-        db_column="GaranciavalArralKapcsolatosMegjegyzes2", blank=True, null=True
-    )  # Field name made lowercase.
-    idoponttemaja = models.TextField(
-        db_column="IdopontTemaja", blank=True, null=True
-    )  # Field name made lowercase.
-    file1590 = models.TextField(
-        db_column="File1590", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1591 = models.TextField(
-        db_column="DateTime1591", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1592 = models.TextField(
-        db_column="Enum1592", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1593 = models.TextField(
-        db_column="DateTime1593", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1594 = models.TextField(
-        db_column="DateTime1594", blank=True, null=True
-    )  # Field name made lowercase.
-    text1595 = models.TextField(
-        db_column="Text1595", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1596 = models.TextField(
-        db_column="Enum1596", blank=True, null=True
-    )  # Field name made lowercase.
-    string1597 = models.TextField(
-        db_column="String1597", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1598 = models.TextField(
-        db_column="DateTime1598", blank=True, null=True
-    )  # Field name made lowercase.
-    float1599 = models.TextField(
-        db_column="Float1599", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1600 = models.TextField(
-        db_column="DateTime1600", blank=True, null=True
-    )  # Field name made lowercase.
-    file1601 = models.TextField(
-        db_column="File1601", blank=True, null=True
-    )  # Field name made lowercase.
-    text1602 = models.TextField(
-        db_column="Text1602", blank=True, null=True
-    )  # Field name made lowercase.
-    elolegosszege = models.TextField(
-        db_column="ElolegOsszege", blank=True, null=True
-    )  # Field name made lowercase.
-    elolegfizetvedatum = models.TextField(
-        db_column="ElolegFizetveDatum", blank=True, null=True
-    )  # Field name made lowercase.
-    vegszamlaosszege = models.TextField(
-        db_column="VegszamlaOsszege", blank=True, null=True
-    )  # Field name made lowercase.
-    vegszamlafizetvedatum = models.TextField(
-        db_column="VegszamlaFizetveDatum", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresdijbekerokikuldve = models.TextField(
-        db_column="FelmeresDijbekeroKikuldve", blank=True, null=True
-    )  # Field name made lowercase.
-    mitvett = models.TextField(
-        db_column="MitVett", blank=True, null=True
-    )  # Field name made lowercase.
-    feladatleirasabeepitoknek = models.TextField(
-        db_column="FeladatLeirasaBeepitoknek", blank=True, null=True
-    )  # Field name made lowercase.
-    feladatleirasabeepitoknek2 = models.TextField(
-        db_column="FeladatLeirasaBeepitoknek2", blank=True, null=True
-    )  # Field name made lowercase.
-    beepitesutanijegyzet = models.TextField(
-        db_column="BeepitesUtaniJegyzet", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaventieshogyleszkialakitvaajanlatonezlatszik2 = models.TextField(
-        db_column="HolLeszAVentiEsHogyLeszKialakitvaAjanlatonEzLatszik2",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    kialakitasrolegyebinfoabeepitoknek2 = models.TextField(
-        db_column="KialakitasrolEgyebInfoABeepitoknek2", blank=True, null=True
-    )  # Field name made lowercase.
-    hakellcsoveznimibolmennyikell = models.TextField(
-        db_column="HaKellCsovezniMibolMennyiKell", blank=True, null=True
-    )  # Field name made lowercase.
-    paraerzekelosbcx2 = models.TextField(
-        db_column="ParaerzekelosBcx2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaparaerzekelosbcx = models.TextField(
-        db_column="HolLeszAParaerzekelosBcx", blank=True, null=True
-    )  # Field name made lowercase.
-    mozgaserzekelosbxc2 = models.TextField(
-        db_column="MozgaserzekelosBxc2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszamozgaserzekelosbxc = models.TextField(
-        db_column="HolLeszAMozgaserzekelosBxc", blank=True, null=True
-    )  # Field name made lowercase.
-    paraesmozgaserzekelosbxc2 = models.TextField(
-        db_column="ParaEsMozgasErzekelosBxc2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaparaesmozgaserzekelosbxc = models.TextField(
-        db_column="HolLeszAParaEsMozgaserzekelosBxc", blank=True, null=True
-    )  # Field name made lowercase.
-    zsirszuro2 = models.TextField(
-        db_column="Zsirszuro2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazsirszuro = models.TextField(
-        db_column="HolLeszAZsirszuro", blank=True, null=True
-    )  # Field name made lowercase.
-    garanciavalarralkapcsolatosmegjegyzes3 = models.TextField(
-        db_column="GaranciavalArralKapcsolatosMegjegyzes3", blank=True, null=True
-    )  # Field name made lowercase.
-    hogyleszkialakitva = models.TextField(
-        db_column="HogyLeszKialakitva", blank=True, null=True
-    )  # Field name made lowercase.
-    egyedikialakitas = models.TextField(
-        db_column="EgyediKialakitas", blank=True, null=True
-    )  # Field name made lowercase.
-    hanydarabmfo = models.TextField(
-        db_column="HanyDarabMfo", blank=True, null=True
-    )  # Field name made lowercase.
-    mfokivezeteshollesz = models.TextField(
-        db_column="MfoKivezetesHolLesz", blank=True, null=True
-    )  # Field name made lowercase.
-    mashelyenbontas = models.TextField(
-        db_column="MasHelyenBontas", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeres2 = models.TextField(
-        db_column="Felmeres2", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulub = models.TextField(
-        db_column="MelyikHelyisegbeKerulUb", blank=True, null=True
-    )  # Field name made lowercase.
-    masodlagosventilatortipusa = models.TextField(
-        db_column="MasodlagosVentilatorTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    masodlagosventilatorinfob = models.TextField(
-        db_column="MasodlagosVentilatorInfoB", blank=True, null=True
-    )  # Field name made lowercase.
-    ajanlatertekenettohuf = models.TextField(
-        db_column="AjanlatErtekeNettoHuf", blank=True, null=True
-    )  # Field name made lowercase.
-    ajanlatertekebrutto = models.TextField(
-        db_column="AjanlatErtekeBrutto", blank=True, null=True
-    )  # Field name made lowercase.
-    emelet = models.TextField(
-        db_column="Emelet", blank=True, null=True
-    )  # Field name made lowercase.
-    nyiltegesterukemenyesgazkazan2 = models.TextField(
-        db_column="NyiltEgesteruKemenyesGazkazan2", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez08 = models.TextField(
-        db_column="KepABeepiteshez08", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez09 = models.TextField(
-        db_column="KepABeepiteshez09", blank=True, null=True
-    )  # Field name made lowercase.
-    masodlagosventilatorhelyeub = models.BigIntegerField(
-        db_column="MasodlagosVentilatorHelyeUb", blank=True, null=True
-    )  # Field name made lowercase.
-    kozpontiventilatortipusa = models.TextField(
-        db_column="KozpontiVentilatorTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaventi = models.TextField(
-        db_column="HolLeszAVenti", blank=True, null=True
-    )  # Field name made lowercase.
-    afalatbontashelyeu = models.BigIntegerField(
-        db_column="AFalAtbontasHelyeU", blank=True, null=True
-    )  # Field name made lowercase.
-    falatbontasdbu = models.TextField(
-        db_column="FalAtbontasDbU", blank=True, null=True
-    )  # Field name made lowercase.
-    karikaszine = models.TextField(
-        db_column="KarikaSzine", blank=True, null=True
-    )  # Field name made lowercase.
-    pluszvisszaaramlasgatlo = models.TextField(
-        db_column="PluszVisszaaramlasGatlo", blank=True, null=True
-    )  # Field name made lowercase.
-    javitasdatum = models.TextField(
-        db_column="JavitasDatum", blank=True, null=True
-    )  # Field name made lowercase.
-    tetoszellozocserep = models.BigIntegerField(
-        db_column="TetoszellozoCserep", blank=True, null=True
-    )  # Field name made lowercase.
-    lemondtaabeepitest = models.BigIntegerField(
-        db_column="LemondtaABeepitest", blank=True, null=True
-    )  # Field name made lowercase.
-    ajanlatafatartalma = models.TextField(
-        db_column="AjanlatAfaTartalma", blank=True, null=True
-    )  # Field name made lowercase.
-    ajanlatsablontipusa = models.TextField(
-        db_column="AjanlatSablonTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    emailsorozatotkert = models.BigIntegerField(
-        db_column="EmailSorozatotKert", blank=True, null=True
-    )  # Field name made lowercase.
-    ajanlonevekampany = models.TextField(
-        db_column="AjanloNeveKampany", blank=True, null=True
-    )  # Field name made lowercase.
-    string1679 = models.TextField(
-        db_column="String1679", blank=True, null=True
-    )  # Field name made lowercase.
-    fizetendonetto18eft = models.TextField(
-        db_column="FizetendoNetto18eFt", blank=True, null=True
-    )  # Field name made lowercase.
-    fizetendobrutto = models.TextField(
-        db_column="FizetendoBrutto", blank=True, null=True
-    )  # Field name made lowercase.
-    passzivrendszer = models.BigIntegerField(
-        db_column="PasszivRendszer", blank=True, null=True
-    )  # Field name made lowercase.
-    nyiltkazanjavan = models.BigIntegerField(
-        db_column="NyiltKazanjaVan", blank=True, null=True
-    )  # Field name made lowercase.
-    ahaznakkoszpontiszellozoventilatoravan = models.BigIntegerField(
-        db_column="Ahaznakkoszpontiszellozoventilatoravan", blank=True, null=True
-    )  # Field name made lowercase.
-    hirlevelrefeliratkozas2 = models.BigIntegerField(
-        db_column="HirlevelreFeliratkozas2", blank=True, null=True
-    )  # Field name made lowercase.
-    gdprnyilatkozat2 = models.BigIntegerField(
-        db_column="GdprNyilatkozat2", blank=True, null=True
-    )  # Field name made lowercase.
-    hogyantalaltrankajanloneve = models.TextField(
-        db_column="HogyanTalaltRankAjanloNeve", blank=True, null=True
-    )  # Field name made lowercase.
-    kiepitettebe = models.BigIntegerField(
-        db_column="KiEpitetteBe", blank=True, null=True
-    )  # Field name made lowercase.
-    nettobeepitesidij = models.TextField(
-        db_column="NettoBeepitesiDij", blank=True, null=True
-    )  # Field name made lowercase.
-    penzugyilegrendezett = models.BigIntegerField(
-        db_column="PenzugyilegRendezett", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez010 = models.TextField(
-        db_column="KepABeepiteshez010", blank=True, null=True
-    )  # Field name made lowercase.
-    set1698 = models.BigIntegerField(
-        db_column="Set1698", blank=True, null=True
-    )  # Field name made lowercase.
-    hanyadikemelthanincslift = models.TextField(
-        db_column="HanyadikEmeltHaNincsLift", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulu = models.TextField(
-        db_column="MelyikHelyisegbeKerulU", blank=True, null=True
-    )  # Field name made lowercase.
-    hogyleszkialakitvau = models.TextField(
-        db_column="HogyLeszKialakitvaU", blank=True, null=True
-    )  # Field name made lowercase.
-    egyedikialakitasu = models.TextField(
-        db_column="EgyediKialakitasU", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesacsovezeshez2 = models.TextField(
-        db_column="MegjegyzesACsovezeshez2", blank=True, null=True
-    )  # Field name made lowercase.
-    qfahelye = models.TextField(
-        db_column="QfaHelye", blank=True, null=True
-    )  # Field name made lowercase.
-    aram = models.TextField(
-        db_column="Aram", blank=True, null=True
-    )  # Field name made lowercase.
-    aramegyedi = models.TextField(
-        db_column="AramEgyedi", blank=True, null=True
-    )  # Field name made lowercase.
-    ventilatortipusau = models.TextField(
-        db_column="VentilatorTipusaU", blank=True, null=True
-    )  # Field name made lowercase.
-    hanydarabventilatoru = models.TextField(
-        db_column="HanyDarabVentilatorU", blank=True, null=True
-    )  # Field name made lowercase.
-    masodlagosventilatorhelyeu = models.BigIntegerField(
-        db_column="MasodlagosVentilatorHelyeU", blank=True, null=True
-    )  # Field name made lowercase.
-    hogyleszkialakitvau2 = models.TextField(
-        db_column="HogyLeszKialakitvaU2", blank=True, null=True
-    )  # Field name made lowercase.
-    egyedikialakitasu2 = models.TextField(
-        db_column="EgyediKialakitasU2", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesamasodlagosventilatorbeepitesehez = models.TextField(
-        db_column="MegjegyzesAMasodlagosVentilatorBeepitesehez", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaventilatoru = models.TextField(
-        db_column="HolLeszAVentilatorU", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszaventilatoregyediu = models.TextField(
-        db_column="HolLeszAVentilatorEgyediU", blank=True, null=True
-    )  # Field name made lowercase.
-    falatbontashelyeu = models.BigIntegerField(
-        db_column="FalAtbontasHelyeU", blank=True, null=True
-    )  # Field name made lowercase.
-    falatbontashelyeegyediu = models.TextField(
-        db_column="FalAtbontasHelyeEgyediU", blank=True, null=True
-    )  # Field name made lowercase.
-    tetoszellozocserep2 = models.BigIntegerField(
-        db_column="TetoszellozoCserep2", blank=True, null=True
-    )  # Field name made lowercase.
-    emeletilakas = models.BigIntegerField(
-        db_column="EmeletiLakas", blank=True, null=True
-    )  # Field name made lowercase.
-    hirlevelneltobbinfotkert = models.BigIntegerField(
-        db_column="HirlevelnelTobbInfotKert", blank=True, null=True
-    )  # Field name made lowercase.
-    emailsorozat = models.BigIntegerField(
-        db_column="EmailSorozat", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebindok = models.TextField(
-        db_column="EgyebIndok", blank=True, null=True
-    )  # Field name made lowercase.
-    fizetesimod = models.TextField(
-        db_column="FizetesiMod", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresszamlas = models.BigIntegerField(
-        db_column="FelmeresSzamlas", blank=True, null=True
-    )  # Field name made lowercase.
-    beepitesfizetesimod = models.TextField(
-        db_column="BeepitesFizetesiMod", blank=True, null=True
-    )  # Field name made lowercase.
-    beepitesszamlas = models.BigIntegerField(
-        db_column="BeepitesSzamlas", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresosszegeegyeb = models.TextField(
-        db_column="FelmeresOsszegeEgyeb", blank=True, null=True
-    )  # Field name made lowercase.
-    bruttobeepitesidij = models.TextField(
-        db_column="BruttoBeepitesiDij", blank=True, null=True
-    )  # Field name made lowercase.
-    garanciajavitasidopontja = models.TextField(
-        db_column="GaranciaJavitasIdopontja", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez011 = models.TextField(
-        db_column="KepABeepiteshez011", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez012 = models.TextField(
-        db_column="KepABeepiteshez012", blank=True, null=True
-    )  # Field name made lowercase.
-    kepabeepiteshez10 = models.TextField(
-        db_column="KepABeepiteshez10", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1740 = models.TextField(
-        db_column="Enum1740", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1741 = models.TextField(
-        db_column="Enum1741", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1742 = models.TextField(
-        db_column="Enum1742", blank=True, null=True
-    )  # Field name made lowercase.
-    text1743 = models.TextField(
-        db_column="Text1743", blank=True, null=True
-    )  # Field name made lowercase.
-    milyenproblemavalfordulthozzank = models.TextField(
-        db_column="MilyenProblemavalFordultHozzank", blank=True, null=True
-    )  # Field name made lowercase.
-    file1763 = models.TextField(
-        db_column="File1763", blank=True, null=True
-    )  # Field name made lowercase.
-    int1764 = models.TextField(
-        db_column="Int1764", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1765 = models.TextField(
-        db_column="DateTime1765", blank=True, null=True
-    )  # Field name made lowercase.
-    float1766 = models.TextField(
-        db_column="Float1766", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1767 = models.TextField(
-        db_column="Enum1767", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1768 = models.TextField(
-        db_column="DateTime1768", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1769 = models.TextField(
-        db_column="Enum1769", blank=True, null=True
-    )  # Field name made lowercase.
-    text1770 = models.TextField(
-        db_column="Text1770", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1771 = models.TextField(
-        db_column="DateTime1771", blank=True, null=True
-    )  # Field name made lowercase.
-    set1772 = models.BigIntegerField(
-        db_column="Set1772", blank=True, null=True
-    )  # Field name made lowercase.
-    set1773 = models.BigIntegerField(
-        db_column="Set1773", blank=True, null=True
-    )  # Field name made lowercase.
-    set1774 = models.BigIntegerField(
-        db_column="Set1774", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1775 = models.TextField(
-        db_column="Enum1775", blank=True, null=True
-    )  # Field name made lowercase.
-    text1776 = models.TextField(
-        db_column="Text1776", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1777 = models.TextField(
-        db_column="Enum1777", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1778 = models.TextField(
-        db_column="Enum1778", blank=True, null=True
-    )  # Field name made lowercase.
-    set1779 = models.BigIntegerField(
-        db_column="Set1779", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1780 = models.TextField(
-        db_column="Enum1780", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1781 = models.TextField(
-        db_column="Enum1781", blank=True, null=True
-    )  # Field name made lowercase.
-    file1782 = models.TextField(
-        db_column="File1782", blank=True, null=True
-    )  # Field name made lowercase.
-    int1783 = models.TextField(
-        db_column="Int1783", blank=True, null=True
-    )  # Field name made lowercase.
-    float1784 = models.TextField(
-        db_column="Float1784", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1785 = models.TextField(
-        db_column="DateTime1785", blank=True, null=True
-    )  # Field name made lowercase.
-    string1786 = models.TextField(
-        db_column="String1786", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1787 = models.TextField(
-        db_column="Enum1787", blank=True, null=True
-    )  # Field name made lowercase.
-    set1788 = models.BigIntegerField(
-        db_column="Set1788", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1789 = models.TextField(
-        db_column="Enum1789", blank=True, null=True
-    )  # Field name made lowercase.
-    int1790 = models.TextField(
-        db_column="Int1790", blank=True, null=True
-    )  # Field name made lowercase.
-    text1791 = models.TextField(
-        db_column="Text1791", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1792 = models.TextField(
-        db_column="DateTime1792", blank=True, null=True
-    )  # Field name made lowercase.
-    set1793 = models.BigIntegerField(
-        db_column="Set1793", blank=True, null=True
-    )  # Field name made lowercase.
-    int1794 = models.TextField(
-        db_column="Int1794", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1795 = models.TextField(
-        db_column="Enum1795", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1796 = models.TextField(
-        db_column="Enum1796", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1797 = models.TextField(
-        db_column="Enum1797", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1798 = models.TextField(
-        db_column="Enum1798", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1799 = models.TextField(
-        db_column="Enum1799", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1800 = models.TextField(
-        db_column="DateTime1800", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1801 = models.TextField(
-        db_column="Enum1801", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1802 = models.TextField(
-        db_column="Enum1802", blank=True, null=True
-    )  # Field name made lowercase.
-    text1803 = models.TextField(
-        db_column="Text1803", blank=True, null=True
-    )  # Field name made lowercase.
-    int1804 = models.TextField(
-        db_column="Int1804", blank=True, null=True
-    )  # Field name made lowercase.
-    int1805 = models.TextField(
-        db_column="Int1805", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1806 = models.TextField(
-        db_column="Enum1806", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1807 = models.TextField(
-        db_column="Enum1807", blank=True, null=True
-    )  # Field name made lowercase.
-    file1808 = models.TextField(
-        db_column="File1808", blank=True, null=True
-    )  # Field name made lowercase.
-    text1809 = models.TextField(
-        db_column="Text1809", blank=True, null=True
-    )  # Field name made lowercase.
-    string1810 = models.TextField(
-        db_column="String1810", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1811 = models.TextField(
-        db_column="DateTime1811", blank=True, null=True
-    )  # Field name made lowercase.
-    file1812 = models.TextField(
-        db_column="File1812", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1813 = models.TextField(
-        db_column="Enum1813", blank=True, null=True
-    )  # Field name made lowercase.
-    string1814 = models.TextField(
-        db_column="String1814", blank=True, null=True
-    )  # Field name made lowercase.
-    float1815 = models.TextField(
-        db_column="Float1815", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1816 = models.TextField(
-        db_column="DateTime1816", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1817 = models.TextField(
-        db_column="DateTime1817", blank=True, null=True
-    )  # Field name made lowercase.
-    file1818 = models.TextField(
-        db_column="File1818", blank=True, null=True
-    )  # Field name made lowercase.
-    file1819 = models.TextField(
-        db_column="File1819", blank=True, null=True
-    )  # Field name made lowercase.
-    file1820 = models.TextField(
-        db_column="File1820", blank=True, null=True
-    )  # Field name made lowercase.
-    file1821 = models.TextField(
-        db_column="File1821", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1822 = models.TextField(
-        db_column="Enum1822", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1823 = models.TextField(
-        db_column="Enum1823", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1824 = models.TextField(
-        db_column="Enum1824", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1825 = models.TextField(
-        db_column="Enum1825", blank=True, null=True
-    )  # Field name made lowercase.
-    text1826 = models.TextField(
-        db_column="Text1826", blank=True, null=True
-    )  # Field name made lowercase.
-    text1827 = models.TextField(
-        db_column="Text1827", blank=True, null=True
-    )  # Field name made lowercase.
-    text1828 = models.TextField(
-        db_column="Text1828", blank=True, null=True
-    )  # Field name made lowercase.
-    file1829 = models.TextField(
-        db_column="File1829", blank=True, null=True
-    )  # Field name made lowercase.
-    text1830 = models.TextField(
-        db_column="Text1830", blank=True, null=True
-    )  # Field name made lowercase.
-    text1831 = models.TextField(
-        db_column="Text1831", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1832 = models.TextField(
-        db_column="Enum1832", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1833 = models.TextField(
-        db_column="Enum1833", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1834 = models.TextField(
-        db_column="DateTime1834", blank=True, null=True
-    )  # Field name made lowercase.
-    int1835 = models.TextField(
-        db_column="Int1835", blank=True, null=True
-    )  # Field name made lowercase.
-    float1836 = models.TextField(
-        db_column="Float1836", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1837 = models.TextField(
-        db_column="Enum1837", blank=True, null=True
-    )  # Field name made lowercase.
-    text1838 = models.TextField(
-        db_column="Text1838", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1839 = models.TextField(
-        db_column="Enum1839", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1840 = models.TextField(
-        db_column="Enum1840", blank=True, null=True
-    )  # Field name made lowercase.
-    file1841 = models.TextField(
-        db_column="File1841", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1842 = models.TextField(
-        db_column="Enum1842", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1843 = models.TextField(
-        db_column="DateTime1843", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1844 = models.TextField(
-        db_column="DateTime1844", blank=True, null=True
-    )  # Field name made lowercase.
-    file1845 = models.TextField(
-        db_column="File1845", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1846 = models.TextField(
-        db_column="Enum1846", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1847 = models.TextField(
-        db_column="Enum1847", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1848 = models.TextField(
-        db_column="Enum1848", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1849 = models.TextField(
-        db_column="Enum1849", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1850 = models.TextField(
-        db_column="Enum1850", blank=True, null=True
-    )  # Field name made lowercase.
-    file1851 = models.TextField(
-        db_column="File1851", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1852 = models.TextField(
-        db_column="Enum1852", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1853 = models.TextField(
-        db_column="Enum1853", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1854 = models.TextField(
-        db_column="Enum1854", blank=True, null=True
-    )  # Field name made lowercase.
-    file1855 = models.TextField(
-        db_column="File1855", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1856 = models.TextField(
-        db_column="Enum1856", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1857 = models.TextField(
-        db_column="Enum1857", blank=True, null=True
-    )  # Field name made lowercase.
-    int1858 = models.TextField(
-        db_column="Int1858", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1859 = models.TextField(
-        db_column="DateTime1859", blank=True, null=True
-    )  # Field name made lowercase.
-    int1860 = models.TextField(
-        db_column="Int1860", blank=True, null=True
-    )  # Field name made lowercase.
-    float1861 = models.TextField(
-        db_column="Float1861", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1862 = models.TextField(
-        db_column="Enum1862", blank=True, null=True
-    )  # Field name made lowercase.
-    file1863 = models.TextField(
-        db_column="File1863", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1864 = models.TextField(
-        db_column="DateTime1864", blank=True, null=True
-    )  # Field name made lowercase.
-    string1865 = models.TextField(
-        db_column="String1865", blank=True, null=True
-    )  # Field name made lowercase.
-    string1866 = models.TextField(
-        db_column="String1866", blank=True, null=True
-    )  # Field name made lowercase.
-    file1867 = models.TextField(
-        db_column="File1867", blank=True, null=True
-    )  # Field name made lowercase.
-    file1868 = models.TextField(
-        db_column="File1868", blank=True, null=True
-    )  # Field name made lowercase.
-    text1869 = models.TextField(
-        db_column="Text1869", blank=True, null=True
-    )  # Field name made lowercase.
-    file1870 = models.TextField(
-        db_column="File1870", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1871 = models.TextField(
-        db_column="Enum1871", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1872 = models.TextField(
-        db_column="Enum1872", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1873 = models.TextField(
-        db_column="DateTime1873", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1874 = models.TextField(
-        db_column="DateTime1874", blank=True, null=True
-    )  # Field name made lowercase.
-    set1875 = models.BigIntegerField(
-        db_column="Set1875", blank=True, null=True
-    )  # Field name made lowercase.
-    text1876 = models.TextField(
-        db_column="Text1876", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1877 = models.TextField(
-        db_column="DateTime1877", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1878 = models.TextField(
-        db_column="DateTime1878", blank=True, null=True
-    )  # Field name made lowercase.
-    int1879 = models.TextField(
-        db_column="Int1879", blank=True, null=True
-    )  # Field name made lowercase.
-    float1880 = models.TextField(
-        db_column="Float1880", blank=True, null=True
-    )  # Field name made lowercase.
-    file1881 = models.TextField(
-        db_column="File1881", blank=True, null=True
-    )  # Field name made lowercase.
-    file1882 = models.TextField(
-        db_column="File1882", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1883 = models.TextField(
-        db_column="Enum1883", blank=True, null=True
-    )  # Field name made lowercase.
-    float1884 = models.TextField(
-        db_column="Float1884", blank=True, null=True
-    )  # Field name made lowercase.
-    float1885 = models.TextField(
-        db_column="Float1885", blank=True, null=True
-    )  # Field name made lowercase.
-    string1886 = models.TextField(
-        db_column="String1886", blank=True, null=True
-    )  # Field name made lowercase.
-    file1887 = models.TextField(
-        db_column="File1887", blank=True, null=True
-    )  # Field name made lowercase.
-    text1888 = models.TextField(
-        db_column="Text1888", blank=True, null=True
-    )  # Field name made lowercase.
-    text1889 = models.TextField(
-        db_column="Text1889", blank=True, null=True
-    )  # Field name made lowercase.
-    set1890 = models.BigIntegerField(
-        db_column="Set1890", blank=True, null=True
-    )  # Field name made lowercase.
-    set1891 = models.BigIntegerField(
-        db_column="Set1891", blank=True, null=True
-    )  # Field name made lowercase.
-    file1892 = models.TextField(
-        db_column="File1892", blank=True, null=True
-    )  # Field name made lowercase.
-    file1893 = models.TextField(
-        db_column="File1893", blank=True, null=True
-    )  # Field name made lowercase.
-    file1894 = models.TextField(
-        db_column="File1894", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1895 = models.TextField(
-        db_column="Enum1895", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1896 = models.TextField(
-        db_column="Enum1896", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1897 = models.TextField(
-        db_column="DateTime1897", blank=True, null=True
-    )  # Field name made lowercase.
-    int1898 = models.TextField(
-        db_column="Int1898", blank=True, null=True
-    )  # Field name made lowercase.
-    float1899 = models.TextField(
-        db_column="Float1899", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1900 = models.TextField(
-        db_column="Enum1900", blank=True, null=True
-    )  # Field name made lowercase.
-    file1901 = models.TextField(
-        db_column="File1901", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1902 = models.TextField(
-        db_column="DateTime1902", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1903 = models.TextField(
-        db_column="DateTime1903", blank=True, null=True
-    )  # Field name made lowercase.
-    string1904 = models.TextField(
-        db_column="String1904", blank=True, null=True
-    )  # Field name made lowercase.
-    file1905 = models.TextField(
-        db_column="File1905", blank=True, null=True
-    )  # Field name made lowercase.
-    text1906 = models.TextField(
-        db_column="Text1906", blank=True, null=True
-    )  # Field name made lowercase.
-    file1907 = models.TextField(
-        db_column="File1907", blank=True, null=True
-    )  # Field name made lowercase.
-    file1908 = models.TextField(
-        db_column="File1908", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1909 = models.TextField(
-        db_column="DateTime1909", blank=True, null=True
-    )  # Field name made lowercase.
-    string1910 = models.TextField(
-        db_column="String1910", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1911 = models.TextField(
-        db_column="Enum1911", blank=True, null=True
-    )  # Field name made lowercase.
-    int1912 = models.TextField(
-        db_column="Int1912", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1913 = models.TextField(
-        db_column="Enum1913", blank=True, null=True
-    )  # Field name made lowercase.
-    file1914 = models.TextField(
-        db_column="File1914", blank=True, null=True
-    )  # Field name made lowercase.
-    float1915 = models.TextField(
-        db_column="Float1915", blank=True, null=True
-    )  # Field name made lowercase.
-    float1916 = models.TextField(
-        db_column="Float1916", blank=True, null=True
-    )  # Field name made lowercase.
-    float1917 = models.TextField(
-        db_column="Float1917", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1918 = models.TextField(
-        db_column="Enum1918", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1919 = models.TextField(
-        db_column="Enum1919", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1920 = models.TextField(
-        db_column="Enum1920", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1921 = models.TextField(
-        db_column="Enum1921", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1922 = models.TextField(
-        db_column="Enum1922", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1923 = models.TextField(
-        db_column="DateTime1923", blank=True, null=True
-    )  # Field name made lowercase.
-    string1924 = models.TextField(
-        db_column="String1924", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1925 = models.TextField(
-        db_column="Enum1925", blank=True, null=True
-    )  # Field name made lowercase.
-    float1926 = models.TextField(
-        db_column="Float1926", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1927 = models.TextField(
-        db_column="DateTime1927", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1928 = models.TextField(
-        db_column="Enum1928", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1929 = models.TextField(
-        db_column="DateTime1929", blank=True, null=True
-    )  # Field name made lowercase.
-    file1930 = models.TextField(
-        db_column="File1930", blank=True, null=True
-    )  # Field name made lowercase.
-    file1931 = models.TextField(
-        db_column="File1931", blank=True, null=True
-    )  # Field name made lowercase.
-    file1932 = models.TextField(
-        db_column="File1932", blank=True, null=True
-    )  # Field name made lowercase.
-    int1933 = models.TextField(
-        db_column="Int1933", blank=True, null=True
-    )  # Field name made lowercase.
-    float1934 = models.TextField(
-        db_column="Float1934", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1935 = models.TextField(
-        db_column="Enum1935", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1936 = models.TextField(
-        db_column="Enum1936", blank=True, null=True
-    )  # Field name made lowercase.
-    float1937 = models.TextField(
-        db_column="Float1937", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1938 = models.TextField(
-        db_column="DateTime1938", blank=True, null=True
-    )  # Field name made lowercase.
-    float1939 = models.TextField(
-        db_column="Float1939", blank=True, null=True
-    )  # Field name made lowercase.
-    float1940 = models.TextField(
-        db_column="Float1940", blank=True, null=True
-    )  # Field name made lowercase.
-    file1941 = models.TextField(
-        db_column="File1941", blank=True, null=True
-    )  # Field name made lowercase.
-    text1942 = models.TextField(
-        db_column="Text1942", blank=True, null=True
-    )  # Field name made lowercase.
-    float1944 = models.TextField(
-        db_column="Float1944", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1945 = models.TextField(
-        db_column="DateTime1945", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1951 = models.TextField(
-        db_column="Enum1951", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime1953 = models.TextField(
-        db_column="DateTime1953", blank=True, null=True
-    )  # Field name made lowercase.
-    elutasitasoka = models.BigIntegerField(
-        db_column="ElutasitasOka", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesleiras = models.TextField(
-        db_column="MegjegyzesLeiras", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresikepek = models.TextField(
-        db_column="FelmeresiKepek", blank=True, null=True
-    )  # Field name made lowercase.
-    enum1969 = models.TextField(
-        db_column="Enum1969", blank=True, null=True
-    )  # Field name made lowercase.
-    text1970 = models.TextField(
-        db_column="Text1970", blank=True, null=True
-    )  # Field name made lowercase.
-    milyenmasproblema = models.BigIntegerField(
-        db_column="MilyenMasProblema", blank=True, null=True
-    )  # Field name made lowercase.
-    tavolsag = models.TextField(
-        db_column="Tavolsag", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresidij = models.TextField(
-        db_column="FelmeresiDij", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresidopontja2 = models.TextField(
-        db_column="FelmeresIdopontja2", blank=True, null=True
-    )  # Field name made lowercase.
-    miazugyfelfoszempontja3 = models.TextField(
-        db_column="MiAzUgyfelFoSzempontja3", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebszempontok3 = models.BigIntegerField(
-        db_column="EgyebSzempontok3", blank=True, null=True
-    )  # Field name made lowercase.
-    cim2 = models.TextField(
-        db_column="Cim2", blank=True, null=True
-    )  # Field name made lowercase.
-    utazasiidokozponttol = models.TextField(
-        db_column="UtazasiIdoKozponttol", blank=True, null=True
-    )  # Field name made lowercase.
-    mehetadijbekero = models.TextField(
-        db_column="MehetADijbekero", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekeromegjegyzes = models.TextField(
-        db_column="DijbekeroMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekeroszama = models.TextField(
-        db_column="DijbekeroSzama", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekeropdf = models.TextField(
-        db_column="DijbekeroPdf", blank=True, null=True
-    )  # Field name made lowercase.
-    felmero = models.TextField(
-        db_column="Felmero", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesamunkalapra = models.TextField(
-        db_column="MegjegyzesAMunkalapra", blank=True, null=True
-    )  # Field name made lowercase.
-    szovegesertekeles = models.TextField(
-        db_column="SzovegesErtekeles", blank=True, null=True
-    )  # Field name made lowercase.
-    pontszam = models.TextField(
-        db_column="Pontszam", blank=True, null=True
-    )  # Field name made lowercase.
-    szovegesertekeles2 = models.TextField(
-        db_column="SzovegesErtekeles2", blank=True, null=True
-    )  # Field name made lowercase.
-    text2006 = models.TextField(
-        db_column="Text2006", blank=True, null=True
-    )  # Field name made lowercase.
-    enum2007 = models.TextField(
-        db_column="Enum2007", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime2008 = models.TextField(
-        db_column="DateTime2008", blank=True, null=True
-    )  # Field name made lowercase.
-    enum2009 = models.TextField(
-        db_column="Enum2009", blank=True, null=True
-    )  # Field name made lowercase.
-    beepitok = models.BigIntegerField(
-        db_column="Beepitok", blank=True, null=True
-    )  # Field name made lowercase.
-    enum2016 = models.TextField(
-        db_column="Enum2016", blank=True, null=True
-    )  # Field name made lowercase.
-    text2017 = models.TextField(
-        db_column="Text2017", blank=True, null=True
-    )  # Field name made lowercase.
-    file2018 = models.TextField(
-        db_column="File2018", blank=True, null=True
-    )  # Field name made lowercase.
-    enum2019 = models.TextField(
-        db_column="Enum2019", blank=True, null=True
-    )  # Field name made lowercase.
-    set2020 = models.BigIntegerField(
-        db_column="Set2020", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime2021 = models.TextField(
-        db_column="DateTime2021", blank=True, null=True
-    )  # Field name made lowercase.
-    datetime2022 = models.TextField(
-        db_column="DateTime2022", blank=True, null=True
-    )  # Field name made lowercase.
-    enum2023 = models.TextField(
-        db_column="Enum2023", blank=True, null=True
-    )  # Field name made lowercase.
-    file2024 = models.TextField(
-        db_column="File2024", blank=True, null=True
-    )  # Field name made lowercase.
-    miertlettsikertelenabeepites = models.TextField(
-        db_column="MiertLettSikertelenABeepites", blank=True, null=True
-    )  # Field name made lowercase.
-    miertlettsikertelenabeepitesszovegesen = models.TextField(
-        db_column="MiertLettSikertelenABeepitesSzovegesen", blank=True, null=True
-    )  # Field name made lowercase.
-    mennyirevoltmegelegedve = models.TextField(
-        db_column="MennyireVoltMegelegedve", blank=True, null=True
-    )  # Field name made lowercase.
-    pontszam2 = models.TextField(
-        db_column="Pontszam2", blank=True, null=True
-    )  # Field name made lowercase.
-    szovegesertekeles3 = models.TextField(
-        db_column="SzovegesErtekeles3", blank=True, null=True
-    )  # Field name made lowercase.
-    alaprajz = models.TextField(
-        db_column="Alaprajz", blank=True, null=True
-    )  # Field name made lowercase.
-    lezarasoka = models.BigIntegerField(
-        db_column="LezarasOka", blank=True, null=True
-    )  # Field name made lowercase.
-    lezarasszovegesen = models.TextField(
-        db_column="LezarasSzovegesen", blank=True, null=True
-    )  # Field name made lowercase.
-    telepules = models.TextField(
-        db_column="Telepules", blank=True, null=True
-    )  # Field name made lowercase.
-    iranyitoszam = models.TextField(
-        db_column="Iranyitoszam", blank=True, null=True
-    )  # Field name made lowercase.
-    forras = models.TextField(
-        db_column="Forras", blank=True, null=True
-    )  # Field name made lowercase.
-    megye = models.TextField(
-        db_column="Megye", blank=True, null=True
-    )  # Field name made lowercase.
-    orszag = models.TextField(
-        db_column="Orszag", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresidopontja3 = models.TextField(
-        db_column="FelmeresIdopontja3", blank=True, null=True
-    )  # Field name made lowercase.
-    milyenrendszerttervezel = models.TextField(
-        db_column="MilyenRendszertTervezel", blank=True, null=True
-    )  # Field name made lowercase.
-    milyenventilatorttervezel = models.TextField(
-        db_column="MilyenVentilatortTervezel", blank=True, null=True
-    )  # Field name made lowercase.
-    hanydarabventilatorttervezel = models.TextField(
-        db_column="HanyDarabVentilatortTervezel", blank=True, null=True
-    )  # Field name made lowercase.
-    qfahelye2 = models.TextField(
-        db_column="QfaHelye2", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulhelyi = models.TextField(
-        db_column="MelyikHelyisegbeKerulHelyi", blank=True, null=True
-    )  # Field name made lowercase.
-    elektromosbekotes = models.TextField(
-        db_column="ElektromosBekotes", blank=True, null=True
-    )  # Field name made lowercase.
-    milyenventillatorttervezel = models.TextField(
-        db_column="MilyenVentillatortTervezel", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulkozpontifalattoreses = models.TextField(
-        db_column="MelyikHelyisegbeKerulKozpontiFalattoreses", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulkozpontimeglevoventilatorhelyere = models.TextField(
-        db_column="MelyikHelyisegbeKerulKozpontiMeglevoVentilatorHelyere",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulkozpontituzfalonkivezetve = models.TextField(
-        db_column="MelyikHelyisegbeKerulKozpontiTuzfalonKivezetve",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulkozpontimennyezetre = models.TextField(
-        db_column="MelyikHelyisegbeKerulKozpontiMennyezetre", blank=True, null=True
-    )  # Field name made lowercase.
-    elektromosbekoteskozponti = models.TextField(
-        db_column="ElektromosBekotesKozponti", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzeskozponti = models.TextField(
-        db_column="MegjegyzesKozponti", blank=True, null=True
-    )  # Field name made lowercase.
-    tipusdbvorticemfo = models.TextField(
-        db_column="TipusdbVorticeMfo", blank=True, null=True
-    )  # Field name made lowercase.
-    tipusdbawentakw100t = models.TextField(
-        db_column="TipusdbAwentaKw100t", blank=True, null=True
-    )  # Field name made lowercase.
-    tipusdbvents100 = models.TextField(
-        db_column="TipusdbVents100", blank=True, null=True
-    )  # Field name made lowercase.
-    tipusdbsor6 = models.TextField(
-        db_column="TipusdbSor6", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulmasodlagosfalattoreses = models.TextField(
-        db_column="MelyikHelyisegbeKerulMasodlagosFalattoreses", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulmasodlagosmeglevoszellozohelyere = models.TextField(
-        db_column="MelyikHelyisegbeKerulMasodlagosMeglevoSzellozoHelyere",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulmasodlagosmeglevoventilator = models.TextField(
-        db_column="MelyikHelyisegbeKerulMasodlagosMeglevoVentilator",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulmasodlagostetonkeresztulkivezetve = models.TextField(
-        db_column="MelyikHelyisegbeKerulMasodlagosTetonKeresztulKivezetve",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulmasodlagostuzfalonkivezetve = models.TextField(
-        db_column="MelyikHelyisegbeKerulMasodlagosTuzfalonKivezetve",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulmasodlagosmennyezetre = models.TextField(
-        db_column="MelyikHelyisegbeKerulMasodlagosMennyezetre", blank=True, null=True
-    )  # Field name made lowercase.
-    elektromosbekotesmasodlagos = models.TextField(
-        db_column="ElektromosBekotesMasodlagos", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzesmasodlagos = models.TextField(
-        db_column="MegjegyzesMasodlagos", blank=True, null=True
-    )  # Field name made lowercase.
-    helyefurdoszoba = models.TextField(
-        db_column="HelyeFurdoszoba", blank=True, null=True
-    )  # Field name made lowercase.
-    helyekonyha = models.TextField(
-        db_column="HelyeKonyha", blank=True, null=True
-    )  # Field name made lowercase.
-    helyewc = models.TextField(
-        db_column="HelyeWc", blank=True, null=True
-    )  # Field name made lowercase.
-    helyemosokonyha = models.TextField(
-        db_column="HelyeMosokonyha", blank=True, null=True
-    )  # Field name made lowercase.
-    helyekisebbfurdoszoba = models.TextField(
-        db_column="HelyeKisebbFurdoszoba", blank=True, null=True
-    )  # Field name made lowercase.
-    helyenagyobbfurdoszoba = models.TextField(
-        db_column="HelyeNagyobbFurdoszoba", blank=True, null=True
-    )  # Field name made lowercase.
-    helyeemeletifurdoszoba = models.TextField(
-        db_column="HelyeEmeletiFurdoszoba", blank=True, null=True
-    )  # Field name made lowercase.
-    helyefoldszintifurdoszoba = models.TextField(
-        db_column="HelyeFoldszintiFurdoszoba", blank=True, null=True
-    )  # Field name made lowercase.
-    helye2furdoszobaba = models.TextField(
-        db_column="Helye2Furdoszobaba", blank=True, null=True
-    )  # Field name made lowercase.
-    helye3furdoszobaba = models.TextField(
-        db_column="Helye3Furdoszobaba", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebmegjegyzeslegelvezeto = models.TextField(
-        db_column="EgyebMegjegyzesLegelvezeto", blank=True, null=True
-    )  # Field name made lowercase.
-    d100pvc = models.TextField(
-        db_column="D100Pvc", blank=True, null=True
-    )  # Field name made lowercase.
-    d125pvc = models.TextField(
-        db_column="D125Pvc", blank=True, null=True
-    )  # Field name made lowercase.
-    d100sono = models.TextField(
-        db_column="D100Sono", blank=True, null=True
-    )  # Field name made lowercase.
-    d125sono = models.TextField(
-        db_column="D125Sono", blank=True, null=True
-    )  # Field name made lowercase.
-    idomok90 = models.TextField(
-        db_column="Idomok90", blank=True, null=True
-    )  # Field name made lowercase.
-    idomok45 = models.TextField(
-        db_column="Idomok45", blank=True, null=True
-    )  # Field name made lowercase.
-    idomoktoldo = models.TextField(
-        db_column="IdomokToldo", blank=True, null=True
-    )  # Field name made lowercase.
-    idomoktidom = models.TextField(
-        db_column="IdomokTIdom", blank=True, null=True
-    )  # Field name made lowercase.
-    idomokyidom = models.TextField(
-        db_column="IdomokYIdom", blank=True, null=True
-    )  # Field name made lowercase.
-    megjegyzescsovezes = models.TextField(
-        db_column="MegjegyzesCsovezes", blank=True, null=True
-    )  # Field name made lowercase.
-    emm716db = models.TextField(
-        db_column="Emm716Db", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazemm716 = models.TextField(
-        db_column="HolLeszAzEmm716", blank=True, null=True
-    )  # Field name made lowercase.
-    emm916db = models.TextField(
-        db_column="Emm916Db", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazemm916 = models.TextField(
-        db_column="HolLeszAzEmm916", blank=True, null=True
-    )  # Field name made lowercase.
-    ear201db2 = models.TextField(
-        db_column="Ear201Db2", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazear201 = models.TextField(
-        db_column="HolLeszAzEar201", blank=True, null=True
-    )  # Field name made lowercase.
-    ear202gazosdb = models.TextField(
-        db_column="Ear202GazosDb", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazear202 = models.TextField(
-        db_column="HolLeszAzEar202", blank=True, null=True
-    )  # Field name made lowercase.
-    ablakoslegbevezetokemm716 = models.TextField(
-        db_column="AblakosLegbevezetokEmm716", blank=True, null=True
-    )  # Field name made lowercase.
-    ablakoslegbevezetokemm916 = models.TextField(
-        db_column="AblakosLegbevezetokEmm916", blank=True, null=True
-    )  # Field name made lowercase.
-    ablakoslegbevezetokear201 = models.TextField(
-        db_column="AblakosLegbevezetokEar201", blank=True, null=True
-    )  # Field name made lowercase.
-    ablakoslegbevezetokear202 = models.TextField(
-        db_column="AblakosLegbevezetokEar202", blank=True, null=True
-    )  # Field name made lowercase.
-    eth1853db = models.TextField(
-        db_column="Eth1853Db", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazeth1853 = models.TextField(
-        db_column="HolLeszAzEth1853", blank=True, null=True
-    )  # Field name made lowercase.
-    eth1858gazosdb = models.TextField(
-        db_column="Eth1858GazosDb", blank=True, null=True
-    )  # Field name made lowercase.
-    holleszazeth1858gazos = models.TextField(
-        db_column="HolLeszAzEth1858Gazos", blank=True, null=True
-    )  # Field name made lowercase.
-    egyebkiegeszitokinfo = models.TextField(
-        db_column="EgyebKiegeszitokInfo", blank=True, null=True
-    )  # Field name made lowercase.
-    ajtoszellozodb = models.TextField(
-        db_column="AjtoszellozoDb", blank=True, null=True
-    )  # Field name made lowercase.
-    ajtogyuruszine = models.TextField(
-        db_column="AjtogyuruSzine", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikajtok3 = models.TextField(
-        db_column="MelyikAjtok3", blank=True, null=True
-    )  # Field name made lowercase.
-    szellozoracskialakitasadb = models.TextField(
-        db_column="SzellozoRacsKialakitasaDb", blank=True, null=True
-    )  # Field name made lowercase.
-    szellozoracshelye2 = models.TextField(
-        db_column="SzellozoracsHelye2", blank=True, null=True
-    )  # Field name made lowercase.
-    tetoszellozocsereptipusszin = models.TextField(
-        db_column="TetoszellozoCserepTipusszin", blank=True, null=True
-    )  # Field name made lowercase.
-    visszaaramlasgatlodb1db = models.TextField(
-        db_column="VisszaaramlasGatloDb1Db", blank=True, null=True
-    )  # Field name made lowercase.
-    visszaaramlasgatlodb2db = models.TextField(
-        db_column="VisszaaramlasGatloDb2Db", blank=True, null=True
-    )  # Field name made lowercase.
-    visszaaramlasgatlodb3db = models.TextField(
-        db_column="VisszaaramlasGatloDb3Db", blank=True, null=True
-    )  # Field name made lowercase.
-    visszaaramlasgatlohelye = models.TextField(
-        db_column="VisszaaramlasGatloHelye", blank=True, null=True
-    )  # Field name made lowercase.
-    keszitsdkepeketestoltsdfeloket = models.TextField(
-        db_column="KeszitsdKepeketEsToltsdFelOket", blank=True, null=True
-    )  # Field name made lowercase.
-    keszitsvideotestoltsdfel = models.TextField(
-        db_column="KeszitsVideotEsToltsdFel", blank=True, null=True
-    )  # Field name made lowercase.
-    keszitsszovegesleirastabeepitesselkapcsolatban = models.TextField(
-        db_column="KeszitsSzovegesLeirastABeepitesselKapcsolatban",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    garanciaravonatkozomegjegyzes = models.TextField(
-        db_column="GaranciaraVonatkozoMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulkozpontimeglevoszellozohelyere = models.TextField(
-        db_column="MelyikHelyisegbeKerulKozpontiMeglevoSzellozoHelyere",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    melyikhelyisegbekerulkozpontitetonkeresztulkivezetve = models.TextField(
-        db_column="MelyikHelyisegbeKerulKozpontiTetonKeresztulKivezetve",
-        blank=True,
-        null=True,
-    )  # Field name made lowercase.
-    felmero2 = models.TextField(
-        db_column="Felmero2", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekeropdf2 = models.TextField(
-        db_column="DijbekeroPdf2", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekeroszama2 = models.TextField(
-        db_column="DijbekeroSzama2", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekeromegjegyzes2 = models.TextField(
-        db_column="DijbekeroMegjegyzes2", blank=True, null=True
-    )  # Field name made lowercase.
-    dijbekerouzenetek = models.TextField(
-        db_column="DijbekeroUzenetek", blank=True, null=True
-    )  # Field name made lowercase.
-    fizetesimod2 = models.TextField(
-        db_column="FizetesiMod2", blank=True, null=True
-    )  # Field name made lowercase.
-    kiallitasdatuma = models.TextField(
-        db_column="KiallitasDatuma", blank=True, null=True
-    )  # Field name made lowercase.
-    fizetesihatarido = models.TextField(
-        db_column="FizetesiHatarido", blank=True, null=True
-    )  # Field name made lowercase.
-    mennyirevoltmegelegedve2 = models.TextField(
-        db_column="MennyireVoltMegelegedve2", blank=True, null=True
-    )  # Field name made lowercase.
-    pontszam3 = models.TextField(
-        db_column="Pontszam3", blank=True, null=True
-    )  # Field name made lowercase.
-    szovegesertekeles4 = models.TextField(
-        db_column="SzovegesErtekeles4", blank=True, null=True
-    )  # Field name made lowercase.
-    ingatlankepe = models.TextField(
-        db_column="IngatlanKepe", blank=True, null=True
-    )  # Field name made lowercase.
-    munkalap = models.TextField(
-        db_column="Munkalap", blank=True, null=True
-    )  # Field name made lowercase.
-    bruttofelmeresidij = models.TextField(
-        db_column="BruttoFelmeresiDij", blank=True, null=True
-    )  # Field name made lowercase.
-    munkalapmegjegyzes = models.TextField(
-        db_column="MunkalapMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresvisszaigazolva = models.TextField(
-        db_column="FelmeresVisszaigazolva", blank=True, null=True
-    )  # Field name made lowercase.
-    szamlapdf = models.TextField(
-        db_column="SzamlaPdf", blank=True, null=True
-    )  # Field name made lowercase.
-    szamlasorszama2 = models.TextField(
-        db_column="SzamlaSorszama2", blank=True, null=True
-    )  # Field name made lowercase.
-    kiallitasdatuma2 = models.TextField(
-        db_column="KiallitasDatuma2", blank=True, null=True
-    )  # Field name made lowercase.
-    szamlauzenetek = models.TextField(
-        db_column="SzamlaUzenetek", blank=True, null=True
-    )  # Field name made lowercase.
-    kerdesazajanlattalkapcsolatban = models.TextField(
-        db_column="KerdesAzAjanlattalKapcsolatban", blank=True, null=True
-    )  # Field name made lowercase.
-    ajanlatpdf = models.TextField(
-        db_column="AjanlatPdf", blank=True, null=True
-    )  # Field name made lowercase.
-    szamlamegjegyzes = models.TextField(
-        db_column="SzamlaMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresadatok = models.TextField(
-        db_column="FelmeresAdatok", blank=True, null=True
-    )  # Field name made lowercase.
-    utvonalakozponttol = models.TextField(
-        db_column="UtvonalAKozponttol", blank=True, null=True
-    )  # Field name made lowercase.
-    streetviewurl = models.TextField(
-        db_column="StreetViewUrl", blank=True, null=True
-    )  # Field name made lowercase.
-    tipus = models.TextField(
-        db_column="Tipus", blank=True, null=True
-    )  # Field name made lowercase.
-    rendelesszama = models.TextField(
-        db_column="RendelesSzama", blank=True, null=True
-    )  # Field name made lowercase.
-    munkalap2 = models.TextField(
-        db_column="Munkalap2", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresid = models.TextField(
-        db_column="Felmeresid", blank=True, null=True
-    )  # Field name made lowercase.
-    felmereslink = models.TextField(
-        db_column="FelmeresLink", blank=True, null=True
-    )  # Field name made lowercase.
-    kimertefel2 = models.TextField(
-        db_column="KiMerteFel2", blank=True, null=True
-    )  # Field name made lowercase.
-    felmeresdatuma2 = models.TextField(
-        db_column="FelmeresDatuma2", blank=True, null=True
-    )  # Field name made lowercase.
-    clouderpmegrendeles = models.TextField(
-        db_column="ClouderpMegrendeles", blank=True, null=True
-    )  # Field name made lowercase.
-    megye2 = models.TextField(
-        db_column="Megye2", blank=True, null=True
-    )  # Field name made lowercase.
-    utcakep = models.TextField(
-        db_column="Utcakep", blank=True, null=True
-    )  # Field name made lowercase.
-    ingatlankepe2 = models.TextField(
-        db_column="IngatlanKepe2", blank=True, null=True
-    )  # Field name made lowercase.
-    fizetesimod3 = models.TextField(
-        db_column="FizetesiMod3", blank=True, null=True
-    )  # Field name made lowercase.
-    ventilatortipusa = models.TextField(
-        db_column="VentilatorTipusa", blank=True, null=True
-    )  # Field name made lowercase.
-    kapcsolodofelmeres = models.TextField(
-        db_column="KapcsolodoFelmeres", blank=True, null=True
-    )  # Field name made lowercase.
-    arajanlatmegjegyzes = models.TextField(
-        db_column="ArajanlatMegjegyzes", blank=True, null=True
-    )  # Field name made lowercase.
-    tervezettfelmresidopont = models.TextField(
-        db_column="TervezettFelmresIdopont", blank=True, null=True
-    )  # Field name made lowercase.
-    miertmentunkkifeleslegesen = models.BigIntegerField(
-        db_column="MiertMentunkKiFeleslegesen", blank=True, null=True
-    )  # Field name made lowercase.
-    hash = models.TextField(
-        db_column="Hash", blank=True, null=True
-    )  # Field name made lowercase.
-    nextaction = models.TextField(
-        db_column="NextAction", blank=True, null=True
-    )  # Field name made lowercase.
-    nextactionuserid = models.TextField(
-        db_column="NextActionUserId", blank=True, null=True
-    )  # Field name made lowercase.
-    nextactiontodotype = models.TextField(
-        db_column="NextActionToDoType", blank=True, null=True
-    )  # Field name made lowercase.
-    internalurl = models.TextField(
-        db_column="InternalUrl", blank=True, null=True
-    )  # Field name made lowercase.
-    lastevent = models.TextField(
-        db_column="LastEvent", blank=True, null=True
-    )  # Field name made lowercase.
-    statusgroup = models.TextField(
-        db_column="StatusGroup", blank=True, null=True
-    )  # Field name made lowercase.
+class MiniCrmAdatlapok(models.Model):
+    Id = models.TextField(primary_key=True)
+    CategoryId = models.TextField(blank=True, null=True)
+    ContactId = models.TextField(blank=True, null=True)
+    MainContactId = models.TextField(blank=True, null=True)
+    StatusId = models.TextField(blank=True, null=True)
+    UserId = models.BigIntegerField(blank=True, null=True)
+    Name = models.TextField(blank=True, null=True)
+    StatusUpdatedAt = models.TextField(blank=True, null=True)
+    IsPrivate = models.TextField(blank=True, null=True)
+    Invited = models.TextField(blank=True, null=True)
+    Deleted = models.TextField(blank=True, null=True)
+    CreatedBy = models.BigIntegerField(blank=True, null=True)
+    CreatedAt = models.TextField(blank=True, null=True)
+    UpdatedBy = models.BigIntegerField(blank=True, null=True)
+    UpdatedAt = models.TextField(blank=True, null=True)
+    Referrer = models.TextField(blank=True, null=True)
+    WhyNotUs = models.TextField(blank=True, null=True)
+    WhyUs = models.TextField(blank=True, null=True)
+    ImportDate = models.TextField(blank=True, null=True)
+    Related_BusinessId = models.TextField(blank=True, null=True)
+    ReferenceId = models.TextField(blank=True, null=True)
+    Number = models.TextField(blank=True, null=True)
+    Issued = models.TextField(blank=True, null=True)
+    Performance = models.TextField(blank=True, null=True)
+    Prompt = models.TextField(blank=True, null=True)
+    Paid = models.TextField(blank=True, null=True)
+    Amount = models.TextField(blank=True, null=True)
+    InvoiceType = models.TextField(blank=True, null=True)
+    InvoicePdf = models.TextField(blank=True, null=True)
+    ListSubscriptions = models.BigIntegerField(blank=True, null=True)
+    PushToken = models.TextField(blank=True, null=True)
+    PushDevice = models.TextField(blank=True, null=True)
+    UUId = models.TextField(blank=True, null=True)
+    UninstalledAt = models.TextField(blank=True, null=True)
+    PhoneVer = models.TextField(blank=True, null=True)
+    OSVer = models.TextField(blank=True, null=True)
+    AppVer = models.TextField(blank=True, null=True)
+    AutoSales_SalesStatus = models.TextField(blank=True, null=True)
+    AutoSales_Qualification = models.TextField(blank=True, null=True)
+    AutoSales_ReachedStatus = models.TextField(blank=True, null=True)
+    AutoSales_LastToDoModification = models.TextField(blank=True, null=True)
+    SatisfactionRating = models.TextField(blank=True, null=True)
+    ReachedMobileActivity = models.TextField(blank=True, null=True)
+    MobileLastLogin = models.TextField(blank=True, null=True)
+    EmailModule_EmailCount = models.TextField(blank=True, null=True)
+    EmailModule_OpenRate = models.TextField(blank=True, null=True)
+    EmailModule_ClickRate = models.TextField(blank=True, null=True)
+    MobileLoggedIn = models.BigIntegerField(blank=True, null=True)
+    Webshop_ReachedStatus = models.TextField(blank=True, null=True)
+    Webshop_LifeTimeValue = models.TextField(blank=True, null=True)
+    Webshop_NumberOfOrders = models.TextField(blank=True, null=True)
+    Webshop_NumberOfProducts = models.TextField(blank=True, null=True)
+    Webshop_FirstOrderDate = models.TextField(blank=True, null=True)
+    Webshop_LastOrderDate = models.TextField(blank=True, null=True)
+    Webshop_LastOrderAmount = models.TextField(blank=True, null=True)
+    Webshop_LastOrderStatus = models.TextField(blank=True, null=True)
+    Webshop_Disabled = models.BigIntegerField(blank=True, null=True)
+    Webshop_RegistrationDate = models.TextField(blank=True, null=True)
+    Webshop_LostBasketContent = models.TextField(blank=True, null=True)
+    Webshop_LostBasketDate = models.TextField(blank=True, null=True)
+    Webshop_LostBasketValue = models.TextField(blank=True, null=True)
+    Webshop_AllLostBasket = models.TextField(blank=True, null=True)
+    AutoSalesV2_Qualification = models.TextField(blank=True, null=True)
+    AutoSalesV2_Rating = models.TextField(blank=True, null=True)
+    AutoSalesV2_SalesStatus = models.TextField(blank=True, null=True)
+    SalesStepV2 = models.TextField(blank=True, null=True)
+    NewsletterV2 = models.BigIntegerField(blank=True, null=True)
+    AutoSalesV2_ReachedStatus = models.TextField(blank=True, null=True)
+    EmailOpen_Phone = models.TextField(blank=True, null=True)
+    EmailOpen_Tablet = models.TextField(blank=True, null=True)
+    EmailOpen_iPhone = models.TextField(blank=True, null=True)
+    EmailOpen_iPad = models.TextField(blank=True, null=True)
+    EmailOpen_Android = models.TextField(blank=True, null=True)
+    AutoSalesV3_Qualification = models.TextField(blank=True, null=True)
+    AutoSalesV3_IsHot = models.BigIntegerField(blank=True, null=True)
+    AutoSalesV3_SalesStatus = models.TextField(blank=True, null=True)
+    AutoSalesV3_ReachedStatus = models.TextField(blank=True, null=True)
+    AutoSalesV3_ReachedStatusGroup = models.TextField(blank=True, null=True)
+    AutoSalesV3_LeadStep = models.TextField(blank=True, null=True)
+    AutoSalesV3_CustomerStep = models.TextField(blank=True, null=True)
+    Write_Protected = models.TextField(blank=True, null=True)
+    NavStatus = models.TextField(blank=True, null=True)
+    NavStatusMessage = models.TextField(blank=True, null=True)
+    Newsletter_Subscriber = models.BigIntegerField(blank=True, null=True)
+    CustomerCard_ActivationDate = models.TextField(blank=True, null=True)
+    CustomerCard_AveragePurchase = models.TextField(blank=True, null=True)
+    CustomerCard_Birthday = models.TextField(blank=True, null=True)
+    CustomerCard_CardNumber = models.TextField(blank=True, null=True)
+    CustomerCard_CardStatus = models.TextField(blank=True, null=True)
+    CustomerCard_CardType = models.TextField(blank=True, null=True)
+    CustomerCard_Comment = models.TextField(blank=True, null=True)
+    CustomerCard_MoneyBalance = models.TextField(blank=True, null=True)
+    CustomerCard_Nameday = models.TextField(blank=True, null=True)
+    CustomerCard_PointBalance = models.TextField(blank=True, null=True)
+    CustomerCard_RegisteredBusiness = models.TextField(blank=True, null=True)
+    CustomerCard_Sex = models.TextField(blank=True, null=True)
+    CustomerCard_UserId = models.TextField(blank=True, null=True)
+    CustomerCard_ValidCoupons = models.TextField(blank=True, null=True)
+    CustomerCard_ValidPasses = models.TextField(blank=True, null=True)
+    CustomerCard_RegistrationDate = models.TextField(blank=True, null=True)
+    CustomerCard_LifeTimeValue = models.TextField(blank=True, null=True)
+    CustomerCard_NumberOfOrders = models.TextField(blank=True, null=True)
+    CustomerCard_LastOrderDate = models.TextField(blank=True, null=True)
+    ProjectManagement_Deadline = models.TextField(blank=True, null=True)
+    ProjectManagement_ExpectedRevenue = models.TextField(blank=True, null=True)
+    ProjectManagement_Type = models.TextField(blank=True, null=True)
+    ProjectManagement_DesiredOutcome = models.TextField(blank=True, null=True)
+    Serial_Number = models.TextField(blank=True, null=True)
+    InboundInvoice_NavStatus = models.TextField(blank=True, null=True)
+    InboundInvoice_NavNumber = models.TextField(blank=True, null=True)
+    Holiday_Start = models.TextField(blank=True, null=True)
+    Holiday_End = models.TextField(blank=True, null=True)
+    Holiday_Substitute = models.TextField(blank=True, null=True)
+    Interests = models.BigIntegerField(blank=True, null=True)
+    Type = models.TextField(blank=True, null=True)
+    Category = models.TextField(blank=True, null=True)
+    Deadline = models.TextField(blank=True, null=True)
+    OfferDate = models.TextField(blank=True, null=True)
+    OfferPrice = models.TextField(blank=True, null=True)
+    Datetime2 = models.TextField(blank=True, null=True)
+    Checkbox29 = models.BigIntegerField(blank=True, null=True)
+    Checkbox31 = models.BigIntegerField(blank=True, null=True)
+    Checkbox34 = models.BigIntegerField(blank=True, null=True)
+    Checkbox37 = models.BigIntegerField(blank=True, null=True)
+    Checkbox38 = models.BigIntegerField(blank=True, null=True)
+    Checkbox39 = models.BigIntegerField(blank=True, null=True)
+    Checkbox35 = models.BigIntegerField(blank=True, null=True)
+    Enum1 = models.TextField(blank=True, null=True)
+    Datetime44 = models.TextField(blank=True, null=True)
+    Datetime45 = models.TextField(blank=True, null=True)
+    Datetime3 = models.TextField(blank=True, null=True)
+    Enum5 = models.TextField(blank=True, null=True)
+    Enum6 = models.TextField(blank=True, null=True)
+    Enum7 = models.TextField(blank=True, null=True)
+    Set8 = models.BigIntegerField(blank=True, null=True)
+    Enum9 = models.TextField(blank=True, null=True)
+    Set10 = models.BigIntegerField(blank=True, null=True)
+    Enum11 = models.TextField(blank=True, null=True)
+    Set12 = models.BigIntegerField(blank=True, null=True)
+    Int14 = models.TextField(blank=True, null=True)
+    Int15 = models.TextField(blank=True, null=True)
+    Int16 = models.TextField(blank=True, null=True)
+    Int17 = models.TextField(blank=True, null=True)
+    Varchar18 = models.TextField(blank=True, null=True)
+    Enum19 = models.TextField(blank=True, null=True)
+    Enum20 = models.TextField(blank=True, null=True)
+    Enum21 = models.TextField(blank=True, null=True)
+    Enum22 = models.TextField(blank=True, null=True)
+    Enum23 = models.TextField(blank=True, null=True)
+    Set25 = models.BigIntegerField(blank=True, null=True)
+    Int26 = models.TextField(blank=True, null=True)
+    Set27 = models.BigIntegerField(blank=True, null=True)
+    Int40 = models.TextField(blank=True, null=True)
+    Checkbox42 = models.BigIntegerField(blank=True, null=True)
+    Enum1098 = models.TextField(blank=True, null=True)
+    Text1099 = models.TextField(blank=True, null=True)
+    DateTime1100 = models.TextField(blank=True, null=True)
+    Text1101 = models.TextField(blank=True, null=True)
+    Text1102 = models.TextField(blank=True, null=True)
+    Enum1103 = models.TextField(blank=True, null=True)
+    Enum1104 = models.TextField(blank=True, null=True)
+    Enum1105 = models.TextField(blank=True, null=True)
+    Text1106 = models.TextField(blank=True, null=True)
+    Enum1107 = models.TextField(blank=True, null=True)
+    AlaprajzFeltoltese = models.TextField(blank=True, null=True)
+    LapraszereltSzellozo = models.BigIntegerField(blank=True, null=True)
+    KapcsolatfelvetelOkanakRovidLeirasa = models.TextField(blank=True, null=True)
+    ALakasbanTalalhatoGazkazanCirko = models.BigIntegerField(blank=True, null=True)
+    OknoplastViszontelado = models.TextField(blank=True, null=True)
+    Enum1115 = models.TextField(blank=True, null=True)
+    Enum1116 = models.TextField(blank=True, null=True)
+    Int1117 = models.TextField(blank=True, null=True)
+    Set1118 = models.BigIntegerField(blank=True, null=True)
+    Enum1119 = models.TextField(blank=True, null=True)
+    Enum1121 = models.TextField(blank=True, null=True)
+    DateTime1122 = models.TextField(blank=True, null=True)
+    Text1124 = models.TextField(blank=True, null=True)
+    Felmeres = models.TextField(blank=True, null=True)
+    FelmeresIdopontja = models.TextField(blank=True, null=True)
+    Enum1130 = models.TextField(blank=True, null=True)
+    Enum1131 = models.TextField(blank=True, null=True)
+    Int1132 = models.TextField(blank=True, null=True)
+    Set1133 = models.BigIntegerField(blank=True, null=True)
+    Leiras = models.TextField(blank=True, null=True)
+    Problemak = models.BigIntegerField(blank=True, null=True)
+    MitProbaltalMar = models.BigIntegerField(blank=True, null=True)
+    JoinUrl = models.TextField(blank=True, null=True)
+    KovetkezoWebinarium = models.TextField(blank=True, null=True)
+    MilyenProblemaraKeresMegoldast = models.BigIntegerField(blank=True, null=True)
+    MitProbaltMar = models.BigIntegerField(blank=True, null=True)
+    SzabadSzovegesLeiras = models.TextField(blank=True, null=True)
+    Url = models.TextField(blank=True, null=True)
+    WebinariumraJelentkezett = models.BigIntegerField(blank=True, null=True)
+    ResztVett = models.BigIntegerField(blank=True, null=True)
+    WebinariumMegjegyzes = models.TextField(blank=True, null=True)
+    FelmeresMegtortent = models.BigIntegerField(blank=True, null=True)
+    FelmerestKert = models.BigIntegerField(blank=True, null=True)
+    Kedvezmeny = models.TextField(blank=True, null=True)
+    LakasElhelyezkedese = models.TextField(blank=True, null=True)
+    Epitoanyag = models.TextField(blank=True, null=True)
+    EpitmenyKora = models.TextField(blank=True, null=True)
+    APeneszedesParalecsapodasMegjelenese = models.BigIntegerField(blank=True, null=True)
+    NyilaszarokTipusa = models.TextField(blank=True, null=True)
+    APeneszedesselParalecsapodassalErintettHelyisegek = models.BigIntegerField(
+        blank=True, null=True
+    )
+    APeneszedesElofordulasaFokent = models.TextField(blank=True, null=True)
+    LakasAlapterulete = models.TextField(blank=True, null=True)
+    LakasBelmagassaga = models.TextField(blank=True, null=True)
+    KulsoTartoFalakVastagsaga = models.TextField(blank=True, null=True)
+    KulsoSzigetelesVastagsaga = models.TextField(blank=True, null=True)
+    ALakasFodemeMennyezete = models.TextField(blank=True, null=True)
+    LakoHelyisegekSzamaSzobakNappali = models.TextField(blank=True, null=True)
+    VizesHelyisegekSzamaFurdoWcKonyhaMosokonyhaStb = models.TextField(
+        blank=True, null=True
+    )
+    EgyebHelyisegekSzamaTaroloKamraGardrobStb = models.TextField(blank=True, null=True)
+    KuszobABelteriAjtokon = models.TextField(blank=True, null=True)
+    LakasFutese = models.TextField(blank=True, null=True)
+    ALakasbanTalalhatoGazkeszulekek = models.BigIntegerField(blank=True, null=True)
+    ALakasbanTalalhatoSzellozesiLehetosegek = models.BigIntegerField(
+        blank=True, null=True
+    )
+    ALakasbanLakoSzemelyekSzama = models.TextField(blank=True, null=True)
+    AlaprajzFeltoltese2 = models.TextField(blank=True, null=True)
+    PeneszedesrolFenykep = models.TextField(blank=True, null=True)
+    EgyebHasznosKep = models.TextField(blank=True, null=True)
+    FenykepAKazanrol = models.TextField(blank=True, null=True)
+    ACsaladbanVan = models.BigIntegerField(blank=True, null=True)
+    FelmerolapotKitoltotte = models.BigIntegerField(blank=True, null=True)
+    MikorKuldtunkAjanlatot = models.TextField(blank=True, null=True)
+    Enum1183 = models.TextField(blank=True, null=True)
+    Text1184 = models.TextField(blank=True, null=True)
+    Enum1185 = models.TextField(blank=True, null=True)
+    Int1186 = models.TextField(blank=True, null=True)
+    File1188 = models.TextField(blank=True, null=True)
+    DateTime1189 = models.TextField(blank=True, null=True)
+    Enum1190 = models.TextField(blank=True, null=True)
+    Text1191 = models.TextField(blank=True, null=True)
+    DateTime1192 = models.TextField(blank=True, null=True)
+    AFeladatLeirasaABeepitoknek = models.TextField(blank=True, null=True)
+    KiMerteFel = models.BigIntegerField(blank=True, null=True)
+    FelmeresiJegyzetek = models.TextField(blank=True, null=True)
+    BeepitesiJegyzetek = models.TextField(blank=True, null=True)
+    KepekABeepitesrol = models.TextField(blank=True, null=True)
+    KepekABeepiteshez01 = models.TextField(blank=True, null=True)
+    KepekABeepiteshez02 = models.TextField(blank=True, null=True)
+    KepekABeepiteshez03 = models.TextField(blank=True, null=True)
+    KepekABeepitesrol02 = models.TextField(blank=True, null=True)
+    VentiTipus = models.TextField(blank=True, null=True)
+    HazVLakas = models.TextField(blank=True, null=True)
+    AblakosLegbevezetok = models.TextField(blank=True, null=True)
+    FaliLegbevezetok = models.TextField(blank=True, null=True)
+    HolLesznekALegbevezetok = models.TextField(blank=True, null=True)
+    HolLeszFali = models.TextField(blank=True, null=True)
+    HanyAjtoFuras = models.TextField(blank=True, null=True)
+    MelyikAjtok = models.TextField(blank=True, null=True)
+    SzellozoRacsHelye = models.TextField(blank=True, null=True)
+    HanyBelsoFalAtbontasLesz = models.TextField(blank=True, null=True)
+    EgyebKotojelesSorkbaRendezve = models.TextField(blank=True, null=True)
+    MegjegyzesAVentiHelyerolABeepitoknek = models.TextField(blank=True, null=True)
+    NettoAr = models.TextField(blank=True, null=True)
+    BruttoAr = models.TextField(blank=True, null=True)
+    NettoArFt = models.TextField(blank=True, null=True)
+    BruttoAr2 = models.TextField(blank=True, null=True)
+    BruttoArBetuvelKiirva = models.TextField(blank=True, null=True)
+    Ebbol957 = models.TextField(blank=True, null=True)
+    Ebbol916 = models.TextField(blank=True, null=True)
+    N780as = models.TextField(blank=True, null=True)
+    HolLesz916os = models.TextField(blank=True, null=True)
+    HolLesz957es = models.TextField(blank=True, null=True)
+    N716os = models.TextField(blank=True, null=True)
+    EgyebMunkakCsakABeepitokLatjak = models.TextField(blank=True, null=True)
+    ParaerzekelosBcx = models.TextField(blank=True, null=True)
+    Hova = models.TextField(blank=True, null=True)
+    HolLeszA = models.TextField(blank=True, null=True)
+    Hova2 = models.TextField(blank=True, null=True)
+    ParaEsMozgasErzekelosBxc = models.TextField(blank=True, null=True)
+    MozgaserzekelosBxc = models.TextField(blank=True, null=True)
+    Hova3 = models.TextField(blank=True, null=True)
+    Zsirszuro = models.TextField(blank=True, null=True)
+    HolLeszZajcsillapitoBetet = models.TextField(blank=True, null=True)
+    ZajcsillapitoBetetFali = models.TextField(blank=True, null=True)
+    V2aV4aVamTipusa = models.TextField(blank=True, null=True)
+    HolLeszAVentiEsHogyLeszKialakitvaAjanlatonEzLatszik = models.TextField(
+        blank=True, null=True
+    )
+    KialakitasrolEgyebInfoABeepitoknek = models.TextField(blank=True, null=True)
+    MegjegyzesAKabelezeshezABeepitoknek = models.TextField(blank=True, null=True)
+    Cim = models.TextField(blank=True, null=True)
+    MegjegyzesACimmelKapcsolatban = models.TextField(blank=True, null=True)
+    HolLeszEar201es = models.TextField(blank=True, null=True)
+    Ear201Db = models.TextField(blank=True, null=True)
+    HolLeszEar200as = models.TextField(blank=True, null=True)
+    Ear200asDb = models.TextField(blank=True, null=True)
+    HolLeszRedonytokos = models.TextField(blank=True, null=True)
+    RedonytokosLegbevezetoDb = models.TextField(blank=True, null=True)
+    MegjALegbevezetokhozSzinEsovedoStb = models.TextField(blank=True, null=True)
+    EgyebInfoALegbevezetokBeepitesehez = models.TextField(blank=True, null=True)
+    KulonlegesSzinHelyEsovedoStb = models.TextField(blank=True, null=True)
+    EgyebInfoARedonytokosBeepitesehez = models.TextField(blank=True, null=True)
+    OsszesenHanyDb201200Mind = models.TextField(blank=True, null=True)
+    AjtoszellozoKarikaSzine = models.TextField(blank=True, null=True)
+    N716osSzine = models.TextField(blank=True, null=True)
+    N916osSzine = models.TextField(blank=True, null=True)
+    HaKellCsovezniMibolMennyiKell2 = models.TextField(blank=True, null=True)
+    GaranciavalArralKapcsolatosMegjegyzes = models.TextField(blank=True, null=True)
+    PluszVisszaaramlasGatlokDb = models.TextField(blank=True, null=True)
+    HovaKellAPlusszVisszaaramlasGatlo = models.TextField(blank=True, null=True)
+    Int1320 = models.TextField(blank=True, null=True)
+    Enum1322 = models.TextField(blank=True, null=True)
+    Text1323 = models.TextField(blank=True, null=True)
+    Enum1326 = models.TextField(blank=True, null=True)
+    Text1335 = models.TextField(blank=True, null=True)
+    LegutolsoAjanlat = models.TextField(blank=True, null=True)
+    KepAPeneszesFalszakaszrol = models.TextField(blank=True, null=True)
+    MegjegyzesAPeneszedesselKapcsolatba = models.TextField(blank=True, null=True)
+    AblakokAjtokKulsoBelsoSzine = models.TextField(blank=True, null=True)
+    MegjegyzesAzAblakokkalAjtokkalKapcsolatba = models.TextField(blank=True, null=True)
+    AzAlaprajznakTartalmazniaKell = models.BigIntegerField(blank=True, null=True)
+    NemKapGariSzerzodest = models.BigIntegerField(blank=True, null=True)
+    HolVanAram2 = models.TextField(blank=True, null=True)
+    VentilatorKapcsolasanakKialakitasa2 = models.TextField(blank=True, null=True)
+    KepABeepiteshez04 = models.TextField(blank=True, null=True)
+    Enum1361 = models.TextField(blank=True, null=True)
+    Text1362 = models.TextField(blank=True, null=True)
+    Enum1363 = models.TextField(blank=True, null=True)
+    File1365 = models.TextField(blank=True, null=True)
+    Text1367 = models.TextField(blank=True, null=True)
+    Text1368 = models.TextField(blank=True, null=True)
+    Enum1370 = models.TextField(blank=True, null=True)
+    TervrajzFeltoltes = models.TextField(blank=True, null=True)
+    HirlevelreFeliratkozas = models.BigIntegerField(blank=True, null=True)
+    GdprNyilatkozat = models.BigIntegerField(blank=True, null=True)
+    MikorraTerveziAFelujitast = models.TextField(blank=True, null=True)
+    MiAzUgyfelFoSzempontja = models.TextField(blank=True, null=True)
+    IlyenVoltKep1 = models.TextField(blank=True, null=True)
+    IlyenVoltKep2 = models.TextField(blank=True, null=True)
+    KivitelezesInfo = models.TextField(blank=True, null=True)
+    IlyenLettKep1 = models.TextField(blank=True, null=True)
+    IlyenLettKep2 = models.TextField(blank=True, null=True)
+    MelyikBrigadVolt = models.TextField(blank=True, null=True)
+    ElszamolasDatum = models.TextField(blank=True, null=True)
+    ElszamolasiOsszeg = models.TextField(blank=True, null=True)
+    PenzugyiMegjegyzes = models.TextField(blank=True, null=True)
+    AnyagKoltseg = models.TextField(blank=True, null=True)
+    ReklamacioInfo = models.TextField(blank=True, null=True)
+    ReklamacioKoltsege = models.TextField(blank=True, null=True)
+    FelmeresDatuma = models.TextField(blank=True, null=True)
+    EgyebSzempontok = models.BigIntegerField(blank=True, null=True)
+    DateTime1415 = models.TextField(blank=True, null=True)
+    Text1416 = models.TextField(blank=True, null=True)
+    Int1417 = models.TextField(blank=True, null=True)
+    Set1418 = models.BigIntegerField(blank=True, null=True)
+    Enum1419 = models.TextField(blank=True, null=True)
+    Set1420 = models.BigIntegerField(blank=True, null=True)
+    DateTime1421 = models.TextField(blank=True, null=True)
+    File1422 = models.TextField(blank=True, null=True)
+    File1423 = models.TextField(blank=True, null=True)
+    Enum1424 = models.TextField(blank=True, null=True)
+    Enum1425 = models.TextField(blank=True, null=True)
+    Set1426 = models.BigIntegerField(blank=True, null=True)
+    File1427 = models.TextField(blank=True, null=True)
+    DateTime1428 = models.TextField(blank=True, null=True)
+    Enum1429 = models.TextField(blank=True, null=True)
+    DateTime1430 = models.TextField(blank=True, null=True)
+    Enum1431 = models.TextField(blank=True, null=True)
+    Text1432 = models.TextField(blank=True, null=True)
+    DateTime1433 = models.TextField(blank=True, null=True)
+    File1434 = models.TextField(blank=True, null=True)
+    Set1435 = models.BigIntegerField(blank=True, null=True)
+    DateTime1436 = models.TextField(blank=True, null=True)
+    ParkolasiLehetosegek = models.BigIntegerField(blank=True, null=True)
+    FelmeresiJegyzetek2 = models.TextField(blank=True, null=True)
+    VentiTipusa = models.TextField(blank=True, null=True)
+    Melyikhelyisegbenleszaventilista = models.TextField(blank=True, null=True)
+    Hogyleszkialakitvaaventi = models.TextField(blank=True, null=True)
+    MegjegyzesACsovezeshez = models.TextField(blank=True, null=True)
+    Megjegyzesaventihelyerolabeepitoknek = models.TextField(blank=True, null=True)
+    N780as2 = models.TextField(blank=True, null=True)
+    HovaKerulA780as = models.TextField(blank=True, null=True)
+    N957esDb = models.TextField(blank=True, null=True)
+    HovaKerulA957es = models.TextField(blank=True, null=True)
+    ZajcsillapitoBetetFaliDb = models.TextField(blank=True, null=True)
+    HolLeszZajcsillapitoBetet2 = models.TextField(blank=True, null=True)
+    EgyebInfoALegbevezetokBeepitesehez2 = models.TextField(blank=True, null=True)
+    RajzABeepiteshez = models.TextField(blank=True, null=True)
+    UjSzovegdobozAFeladatLeirasaABeepitoknek = models.TextField(blank=True, null=True)
+    ParkolasiLehetosegek2 = models.BigIntegerField(blank=True, null=True)
+    MiAzUgyfelFoSzempontja2 = models.TextField(blank=True, null=True)
+    EgyebSzempontok2 = models.BigIntegerField(blank=True, null=True)
+    ErtekesitesiInfok = models.TextField(blank=True, null=True)
+    KepABeepiteshez05 = models.TextField(blank=True, null=True)
+    IngatlanHasznalat2 = models.TextField(blank=True, null=True)
+    KivitelezesCime = models.TextField(blank=True, null=True)
+    MegjegyzesACimmelKapcsolatban2 = models.TextField(blank=True, null=True)
+    ProjektLeiras = models.TextField(blank=True, null=True)
+    FelmeresTeljesOsszeg = models.TextField(blank=True, null=True)
+    Felmeres18000 = models.BigIntegerField(blank=True, null=True)
+    SzervezetiTerulet = models.TextField(blank=True, null=True)
+    ProjektStart = models.TextField(blank=True, null=True)
+    ProjektVege = models.TextField(blank=True, null=True)
+    ProjektKoltsegeNetto = models.TextField(blank=True, null=True)
+    HaviKoltsegNetto = models.TextField(blank=True, null=True)
+    KapcsolodoLink1 = models.TextField(blank=True, null=True)
+    KapcsolodoLink2 = models.TextField(blank=True, null=True)
+    IngatlanHasznalata = models.TextField(blank=True, null=True)
+    MegjegyzesCimmelKapcsolatban = models.TextField(blank=True, null=True)
+    NemKapszGariSzerzodest = models.BigIntegerField(blank=True, null=True)
+    BeepitesDatuma = models.TextField(blank=True, null=True)
+    KepABeepiteshez01 = models.TextField(blank=True, null=True)
+    KepABeepiteshez02 = models.TextField(blank=True, null=True)
+    KepABeepiteshez03 = models.TextField(blank=True, null=True)
+    KepABeepiteshez06 = models.TextField(blank=True, null=True)
+    KepABeepiteshez07 = models.TextField(blank=True, null=True)
+    HovaKerul716os = models.TextField(blank=True, null=True)
+    N716osSzineHaNemFeher = models.TextField(blank=True, null=True)
+    HovaKerul916os = models.TextField(blank=True, null=True)
+    N916osSzineHaNemFeher = models.TextField(blank=True, null=True)
+    KulonlegesSzinHelyEsovedoStb2 = models.TextField(blank=True, null=True)
+    HolLeszEar201es2 = models.TextField(blank=True, null=True)
+    HolLeszEar200as2 = models.TextField(blank=True, null=True)
+    KulonlegesSzinHelyEsovedoStb3 = models.TextField(blank=True, null=True)
+    OsszesFaliLegbevezetok2 = models.TextField(blank=True, null=True)
+    OsszesenHanyDb716916Mind2 = models.TextField(blank=True, null=True)
+    N716osDb2 = models.TextField(blank=True, null=True)
+    N916osDb3 = models.TextField(blank=True, null=True)
+    OsszesenHanyDb201200Mind3 = models.TextField(blank=True, null=True)
+    Ear201esDb2 = models.TextField(blank=True, null=True)
+    Ear200asDb3 = models.TextField(blank=True, null=True)
+    HanyAjtofuras = models.TextField(blank=True, null=True)
+    MelyikAjtok2 = models.TextField(blank=True, null=True)
+    AjtoszellozoKarikaSzineHaNemFeher = models.TextField(blank=True, null=True)
+    PluszVisszaaramlasGatlokDb2 = models.TextField(blank=True, null=True)
+    HovaKellAPluszVisszaaramlasGatlo = models.TextField(blank=True, null=True)
+    EgyebMunkakArajanlatonIsRajtaLesz = models.TextField(blank=True, null=True)
+    EgyebMunkakCsakABeepitokLatjak2 = models.TextField(blank=True, null=True)
+    NyiltKazanjaVan2 = models.BigIntegerField(blank=True, null=True)
+    AHaznakKozpontiSzellozoVentilatoraVan = models.BigIntegerField(
+        blank=True, null=True
+    )
+    HanyOrasMunkaAlapBeallitas36 = models.TextField(blank=True, null=True)
+    GaranciavalArralKapcsolatosMegjegyzes2 = models.TextField(blank=True, null=True)
+    IdopontTemaja = models.TextField(blank=True, null=True)
+    File1590 = models.TextField(blank=True, null=True)
+    DateTime1591 = models.TextField(blank=True, null=True)
+    Enum1592 = models.TextField(blank=True, null=True)
+    DateTime1593 = models.TextField(blank=True, null=True)
+    DateTime1594 = models.TextField(blank=True, null=True)
+    Text1595 = models.TextField(blank=True, null=True)
+    Enum1596 = models.TextField(blank=True, null=True)
+    String1597 = models.TextField(blank=True, null=True)
+    DateTime1598 = models.TextField(blank=True, null=True)
+    Float1599 = models.TextField(blank=True, null=True)
+    DateTime1600 = models.TextField(blank=True, null=True)
+    File1601 = models.TextField(blank=True, null=True)
+    Text1602 = models.TextField(blank=True, null=True)
+    ElolegOsszege = models.TextField(blank=True, null=True)
+    ElolegFizetveDatum = models.TextField(blank=True, null=True)
+    VegszamlaOsszege = models.TextField(blank=True, null=True)
+    VegszamlaFizetveDatum = models.TextField(blank=True, null=True)
+    FelmeresDijbekeroKikuldve = models.TextField(blank=True, null=True)
+    MitVett = models.TextField(blank=True, null=True)
+    FeladatLeirasaBeepitoknek = models.TextField(blank=True, null=True)
+    FeladatLeirasaBeepitoknek2 = models.TextField(blank=True, null=True)
+    BeepitesUtaniJegyzet = models.TextField(blank=True, null=True)
+    HolLeszAVentiEsHogyLeszKialakitvaAjanlatonEzLatszik2 = models.TextField(
+        blank=True, null=True
+    )
+    KialakitasrolEgyebInfoABeepitoknek2 = models.TextField(blank=True, null=True)
+    HaKellCsovezniMibolMennyiKell = models.TextField(blank=True, null=True)
+    ParaerzekelosBcx2 = models.TextField(blank=True, null=True)
+    HolLeszAParaerzekelosBcx = models.TextField(blank=True, null=True)
+    MozgaserzekelosBxc2 = models.TextField(blank=True, null=True)
+    HolLeszAMozgaserzekelosBxc = models.TextField(blank=True, null=True)
+    ParaEsMozgasErzekelosBxc2 = models.TextField(blank=True, null=True)
+    HolLeszAParaEsMozgaserzekelosBxc = models.TextField(blank=True, null=True)
+    Zsirszuro2 = models.TextField(blank=True, null=True)
+    HolLeszAZsirszuro = models.TextField(blank=True, null=True)
+    GaranciavalArralKapcsolatosMegjegyzes3 = models.TextField(blank=True, null=True)
+    HogyLeszKialakitva = models.TextField(blank=True, null=True)
+    EgyediKialakitas = models.TextField(blank=True, null=True)
+    HanyDarabMfo = models.TextField(blank=True, null=True)
+    MfoKivezetesHolLesz = models.TextField(blank=True, null=True)
+    MasHelyenBontas = models.TextField(blank=True, null=True)
+    Felmeres2 = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulUb = models.TextField(blank=True, null=True)
+    MasodlagosVentilatorTipusa = models.TextField(blank=True, null=True)
+    MasodlagosVentilatorInfoB = models.TextField(blank=True, null=True)
+    AjanlatErtekeNettoHuf = models.TextField(blank=True, null=True)
+    AjanlatErtekeBrutto = models.TextField(blank=True, null=True)
+    Emelet = models.TextField(blank=True, null=True)
+    NyiltEgesteruKemenyesGazkazan2 = models.TextField(blank=True, null=True)
+    KepABeepiteshez08 = models.TextField(blank=True, null=True)
+    KepABeepiteshez09 = models.TextField(blank=True, null=True)
+    MasodlagosVentilatorHelyeUb = models.BigIntegerField(blank=True, null=True)
+    KozpontiVentilatorTipusa = models.TextField(blank=True, null=True)
+    HolLeszAVenti = models.TextField(blank=True, null=True)
+    AFalAtbontasHelyeU = models.BigIntegerField(blank=True, null=True)
+    FalAtbontasDbU = models.TextField(blank=True, null=True)
+    KarikaSzine = models.TextField(blank=True, null=True)
+    PluszVisszaaramlasGatlo = models.TextField(blank=True, null=True)
+    JavitasDatum = models.TextField(blank=True, null=True)
+    TetoszellozoCserep = models.BigIntegerField(blank=True, null=True)
+    LemondtaABeepitest = models.BigIntegerField(blank=True, null=True)
+    AjanlatAfaTartalma = models.TextField(blank=True, null=True)
+    AjanlatSablonTipusa = models.TextField(blank=True, null=True)
+    EmailSorozatotKert = models.BigIntegerField(blank=True, null=True)
+    AjanloNeveKampany = models.TextField(blank=True, null=True)
+    String1679 = models.TextField(blank=True, null=True)
+    FizetendoNetto18eFt = models.TextField(blank=True, null=True)
+    FizetendoBrutto = models.TextField(blank=True, null=True)
+    PasszivRendszer = models.BigIntegerField(blank=True, null=True)
+    NyiltKazanjaVan = models.BigIntegerField(blank=True, null=True)
+    Ahaznakkoszpontiszellozoventilatoravan = models.BigIntegerField(
+        blank=True, null=True
+    )
+    HirlevelreFeliratkozas2 = models.BigIntegerField(blank=True, null=True)
+    GdprNyilatkozat2 = models.BigIntegerField(blank=True, null=True)
+    HogyanTalaltRankAjanloNeve = models.TextField(blank=True, null=True)
+    KiEpitetteBe = models.BigIntegerField(blank=True, null=True)
+    NettoBeepitesiDij = models.TextField(blank=True, null=True)
+    PenzugyilegRendezett = models.BigIntegerField(blank=True, null=True)
+    KepABeepiteshez010 = models.TextField(blank=True, null=True)
+    Set1698 = models.BigIntegerField(blank=True, null=True)
+    HanyadikEmeltHaNincsLift = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulU = models.TextField(blank=True, null=True)
+    HogyLeszKialakitvaU = models.TextField(blank=True, null=True)
+    EgyediKialakitasU = models.TextField(blank=True, null=True)
+    MegjegyzesACsovezeshez2 = models.TextField(blank=True, null=True)
+    QfaHelye = models.TextField(blank=True, null=True)
+    Aram = models.TextField(blank=True, null=True)
+    AramEgyedi = models.TextField(blank=True, null=True)
+    VentilatorTipusaU = models.TextField(blank=True, null=True)
+    HanyDarabVentilatorU = models.TextField(blank=True, null=True)
+    MasodlagosVentilatorHelyeU = models.BigIntegerField(blank=True, null=True)
+    HogyLeszKialakitvaU2 = models.TextField(blank=True, null=True)
+    EgyediKialakitasU2 = models.TextField(blank=True, null=True)
+    MegjegyzesAMasodlagosVentilatorBeepitesehez = models.TextField(
+        blank=True, null=True
+    )
+    HolLeszAVentilatorU = models.TextField(blank=True, null=True)
+    HolLeszAVentilatorEgyediU = models.TextField(blank=True, null=True)
+    FalAtbontasHelyeU = models.BigIntegerField(blank=True, null=True)
+    FalAtbontasHelyeEgyediU = models.TextField(blank=True, null=True)
+    TetoszellozoCserep2 = models.BigIntegerField(blank=True, null=True)
+    EmeletiLakas = models.BigIntegerField(blank=True, null=True)
+    HirlevelnelTobbInfotKert = models.BigIntegerField(blank=True, null=True)
+    EmailSorozat = models.BigIntegerField(blank=True, null=True)
+    EgyebIndok = models.TextField(blank=True, null=True)
+    FizetesiMod = models.TextField(blank=True, null=True)
+    FelmeresSzamlas = models.BigIntegerField(blank=True, null=True)
+    BeepitesFizetesiMod = models.TextField(blank=True, null=True)
+    BeepitesSzamlas = models.BigIntegerField(blank=True, null=True)
+    FelmeresOsszegeEgyeb = models.TextField(blank=True, null=True)
+    BruttoBeepitesiDij = models.TextField(blank=True, null=True)
+    GaranciaJavitasIdopontja = models.TextField(blank=True, null=True)
+    KepABeepiteshez011 = models.TextField(blank=True, null=True)
+    KepABeepiteshez012 = models.TextField(blank=True, null=True)
+    KepABeepiteshez10 = models.TextField(blank=True, null=True)
+    Enum1740 = models.TextField(blank=True, null=True)
+    Enum1741 = models.TextField(blank=True, null=True)
+    Enum1742 = models.TextField(blank=True, null=True)
+    Text1743 = models.TextField(blank=True, null=True)
+    MilyenProblemavalFordultHozzank = models.TextField(blank=True, null=True)
+    File1763 = models.TextField(blank=True, null=True)
+    Int1764 = models.TextField(blank=True, null=True)
+    DateTime1765 = models.TextField(blank=True, null=True)
+    Float1766 = models.TextField(blank=True, null=True)
+    Enum1767 = models.TextField(blank=True, null=True)
+    DateTime1768 = models.TextField(blank=True, null=True)
+    Enum1769 = models.TextField(blank=True, null=True)
+    Text1770 = models.TextField(blank=True, null=True)
+    DateTime1771 = models.TextField(blank=True, null=True)
+    Set1772 = models.BigIntegerField(blank=True, null=True)
+    Set1773 = models.BigIntegerField(blank=True, null=True)
+    Set1774 = models.BigIntegerField(blank=True, null=True)
+    Enum1775 = models.TextField(blank=True, null=True)
+    Text1776 = models.TextField(blank=True, null=True)
+    Enum1777 = models.TextField(blank=True, null=True)
+    Enum1778 = models.TextField(blank=True, null=True)
+    Set1779 = models.BigIntegerField(blank=True, null=True)
+    Enum1780 = models.TextField(blank=True, null=True)
+    Enum1781 = models.TextField(blank=True, null=True)
+    File1782 = models.TextField(blank=True, null=True)
+    Int1783 = models.TextField(blank=True, null=True)
+    Float1784 = models.TextField(blank=True, null=True)
+    DateTime1785 = models.TextField(blank=True, null=True)
+    String1786 = models.TextField(blank=True, null=True)
+    Enum1787 = models.TextField(blank=True, null=True)
+    Set1788 = models.BigIntegerField(blank=True, null=True)
+    Enum1789 = models.TextField(blank=True, null=True)
+    Int1790 = models.TextField(blank=True, null=True)
+    Text1791 = models.TextField(blank=True, null=True)
+    DateTime1792 = models.TextField(blank=True, null=True)
+    Set1793 = models.BigIntegerField(blank=True, null=True)
+    Int1794 = models.TextField(blank=True, null=True)
+    Enum1795 = models.TextField(blank=True, null=True)
+    Enum1796 = models.TextField(blank=True, null=True)
+    Enum1797 = models.TextField(blank=True, null=True)
+    Enum1798 = models.TextField(blank=True, null=True)
+    Enum1799 = models.TextField(blank=True, null=True)
+    DateTime1800 = models.TextField(blank=True, null=True)
+    Enum1801 = models.TextField(blank=True, null=True)
+    Enum1802 = models.TextField(blank=True, null=True)
+    Text1803 = models.TextField(blank=True, null=True)
+    Int1804 = models.TextField(blank=True, null=True)
+    Int1805 = models.TextField(blank=True, null=True)
+    Enum1806 = models.TextField(blank=True, null=True)
+    Enum1807 = models.TextField(blank=True, null=True)
+    File1808 = models.TextField(blank=True, null=True)
+    Text1809 = models.TextField(blank=True, null=True)
+    String1810 = models.TextField(blank=True, null=True)
+    DateTime1811 = models.TextField(blank=True, null=True)
+    File1812 = models.TextField(blank=True, null=True)
+    Enum1813 = models.TextField(blank=True, null=True)
+    String1814 = models.TextField(blank=True, null=True)
+    Float1815 = models.TextField(blank=True, null=True)
+    DateTime1816 = models.TextField(blank=True, null=True)
+    DateTime1817 = models.TextField(blank=True, null=True)
+    File1818 = models.TextField(blank=True, null=True)
+    File1819 = models.TextField(blank=True, null=True)
+    File1820 = models.TextField(blank=True, null=True)
+    File1821 = models.TextField(blank=True, null=True)
+    Enum1822 = models.TextField(blank=True, null=True)
+    Enum1823 = models.TextField(blank=True, null=True)
+    Enum1824 = models.TextField(blank=True, null=True)
+    Enum1825 = models.TextField(blank=True, null=True)
+    Text1826 = models.TextField(blank=True, null=True)
+    Text1827 = models.TextField(blank=True, null=True)
+    Text1828 = models.TextField(blank=True, null=True)
+    File1829 = models.TextField(blank=True, null=True)
+    Text1830 = models.TextField(blank=True, null=True)
+    Text1831 = models.TextField(blank=True, null=True)
+    Enum1832 = models.TextField(blank=True, null=True)
+    Enum1833 = models.TextField(blank=True, null=True)
+    DateTime1834 = models.TextField(blank=True, null=True)
+    Int1835 = models.TextField(blank=True, null=True)
+    Float1836 = models.TextField(blank=True, null=True)
+    Enum1837 = models.TextField(blank=True, null=True)
+    Text1838 = models.TextField(blank=True, null=True)
+    Enum1839 = models.TextField(blank=True, null=True)
+    Enum1840 = models.TextField(blank=True, null=True)
+    File1841 = models.TextField(blank=True, null=True)
+    Enum1842 = models.TextField(blank=True, null=True)
+    DateTime1843 = models.TextField(blank=True, null=True)
+    DateTime1844 = models.TextField(blank=True, null=True)
+    File1845 = models.TextField(blank=True, null=True)
+    Enum1846 = models.TextField(blank=True, null=True)
+    Enum1847 = models.TextField(blank=True, null=True)
+    Enum1848 = models.TextField(blank=True, null=True)
+    Enum1849 = models.TextField(blank=True, null=True)
+    Enum1850 = models.TextField(blank=True, null=True)
+    File1851 = models.TextField(blank=True, null=True)
+    Enum1852 = models.TextField(blank=True, null=True)
+    Enum1853 = models.TextField(blank=True, null=True)
+    Enum1854 = models.TextField(blank=True, null=True)
+    File1855 = models.TextField(blank=True, null=True)
+    Enum1856 = models.TextField(blank=True, null=True)
+    Enum1857 = models.TextField(blank=True, null=True)
+    Int1858 = models.TextField(blank=True, null=True)
+    DateTime1859 = models.TextField(blank=True, null=True)
+    Int1860 = models.TextField(blank=True, null=True)
+    Float1861 = models.TextField(blank=True, null=True)
+    Enum1862 = models.TextField(blank=True, null=True)
+    File1863 = models.TextField(blank=True, null=True)
+    DateTime1864 = models.TextField(blank=True, null=True)
+    String1865 = models.TextField(blank=True, null=True)
+    String1866 = models.TextField(blank=True, null=True)
+    File1867 = models.TextField(blank=True, null=True)
+    File1868 = models.TextField(blank=True, null=True)
+    Text1869 = models.TextField(blank=True, null=True)
+    File1870 = models.TextField(blank=True, null=True)
+    Enum1871 = models.TextField(blank=True, null=True)
+    Enum1872 = models.TextField(blank=True, null=True)
+    DateTime1873 = models.TextField(blank=True, null=True)
+    DateTime1874 = models.TextField(blank=True, null=True)
+    Set1875 = models.BigIntegerField(blank=True, null=True)
+    Text1876 = models.TextField(blank=True, null=True)
+    DateTime1877 = models.TextField(blank=True, null=True)
+    DateTime1878 = models.TextField(blank=True, null=True)
+    Int1879 = models.TextField(blank=True, null=True)
+    Float1880 = models.TextField(blank=True, null=True)
+    File1881 = models.TextField(blank=True, null=True)
+    File1882 = models.TextField(blank=True, null=True)
+    Enum1883 = models.TextField(blank=True, null=True)
+    Float1884 = models.TextField(blank=True, null=True)
+    Float1885 = models.TextField(blank=True, null=True)
+    String1886 = models.TextField(blank=True, null=True)
+    File1887 = models.TextField(blank=True, null=True)
+    Text1888 = models.TextField(blank=True, null=True)
+    Text1889 = models.TextField(blank=True, null=True)
+    Set1890 = models.BigIntegerField(blank=True, null=True)
+    Set1891 = models.BigIntegerField(blank=True, null=True)
+    File1892 = models.TextField(blank=True, null=True)
+    File1893 = models.TextField(blank=True, null=True)
+    File1894 = models.TextField(blank=True, null=True)
+    Enum1895 = models.TextField(blank=True, null=True)
+    Enum1896 = models.TextField(blank=True, null=True)
+    DateTime1897 = models.TextField(blank=True, null=True)
+    Int1898 = models.TextField(blank=True, null=True)
+    Float1899 = models.TextField(blank=True, null=True)
+    Enum1900 = models.TextField(blank=True, null=True)
+    File1901 = models.TextField(blank=True, null=True)
+    DateTime1902 = models.TextField(blank=True, null=True)
+    DateTime1903 = models.TextField(blank=True, null=True)
+    String1904 = models.TextField(blank=True, null=True)
+    File1905 = models.TextField(blank=True, null=True)
+    Text1906 = models.TextField(blank=True, null=True)
+    File1907 = models.TextField(blank=True, null=True)
+    File1908 = models.TextField(blank=True, null=True)
+    DateTime1909 = models.TextField(blank=True, null=True)
+    String1910 = models.TextField(blank=True, null=True)
+    Enum1911 = models.TextField(blank=True, null=True)
+    Int1912 = models.TextField(blank=True, null=True)
+    Enum1913 = models.TextField(blank=True, null=True)
+    File1914 = models.TextField(blank=True, null=True)
+    Float1915 = models.TextField(blank=True, null=True)
+    Float1916 = models.TextField(blank=True, null=True)
+    Float1917 = models.TextField(blank=True, null=True)
+    Enum1918 = models.TextField(blank=True, null=True)
+    Enum1919 = models.TextField(blank=True, null=True)
+    Enum1920 = models.TextField(blank=True, null=True)
+    Enum1921 = models.TextField(blank=True, null=True)
+    Enum1922 = models.TextField(blank=True, null=True)
+    DateTime1923 = models.TextField(blank=True, null=True)
+    String1924 = models.TextField(blank=True, null=True)
+    Enum1925 = models.TextField(blank=True, null=True)
+    Float1926 = models.TextField(blank=True, null=True)
+    DateTime1927 = models.TextField(blank=True, null=True)
+    Enum1928 = models.TextField(blank=True, null=True)
+    DateTime1929 = models.TextField(blank=True, null=True)
+    File1930 = models.TextField(blank=True, null=True)
+    File1931 = models.TextField(blank=True, null=True)
+    File1932 = models.TextField(blank=True, null=True)
+    Int1933 = models.TextField(blank=True, null=True)
+    Float1934 = models.TextField(blank=True, null=True)
+    Enum1935 = models.TextField(blank=True, null=True)
+    Enum1936 = models.TextField(blank=True, null=True)
+    Float1937 = models.TextField(blank=True, null=True)
+    DateTime1938 = models.TextField(blank=True, null=True)
+    Float1939 = models.TextField(blank=True, null=True)
+    Float1940 = models.TextField(blank=True, null=True)
+    File1941 = models.TextField(blank=True, null=True)
+    Text1942 = models.TextField(blank=True, null=True)
+    Float1944 = models.TextField(blank=True, null=True)
+    DateTime1945 = models.TextField(blank=True, null=True)
+    Enum1951 = models.TextField(blank=True, null=True)
+    DateTime1953 = models.TextField(blank=True, null=True)
+    ElutasitasOka = models.BigIntegerField(blank=True, null=True)
+    MegjegyzesLeiras = models.TextField(blank=True, null=True)
+    FelmeresiKepek = models.TextField(blank=True, null=True)
+    Enum1969 = models.TextField(blank=True, null=True)
+    Text1970 = models.TextField(blank=True, null=True)
+    MilyenMasProblema = models.BigIntegerField(blank=True, null=True)
+    Tavolsag = models.TextField(blank=True, null=True)
+    FelmeresiDij = models.TextField(blank=True, null=True)
+    FelmeresIdopontja2 = models.TextField(blank=True, null=True)
+    MiAzUgyfelFoSzempontja3 = models.TextField(blank=True, null=True)
+    EgyebSzempontok3 = models.BigIntegerField(blank=True, null=True)
+    Cim2 = models.TextField(blank=True, null=True)
+    UtazasiIdoKozponttol = models.TextField(blank=True, null=True)
+    MehetADijbekero = models.TextField(blank=True, null=True)
+    DijbekeroMegjegyzes = models.TextField(blank=True, null=True)
+    DijbekeroSzama = models.TextField(blank=True, null=True)
+    DijbekeroPdf = models.TextField(blank=True, null=True)
+    Felmero = models.TextField(blank=True, null=True)
+    MegjegyzesAMunkalapra = models.TextField(blank=True, null=True)
+    SzovegesErtekeles = models.TextField(blank=True, null=True)
+    Pontszam = models.TextField(blank=True, null=True)
+    SzovegesErtekeles2 = models.TextField(blank=True, null=True)
+    Text2006 = models.TextField(blank=True, null=True)
+    Enum2007 = models.TextField(blank=True, null=True)
+    DateTime2008 = models.TextField(blank=True, null=True)
+    Enum2009 = models.TextField(blank=True, null=True)
+    Beepitok = models.BigIntegerField(blank=True, null=True)
+    Enum2016 = models.TextField(blank=True, null=True)
+    Text2017 = models.TextField(blank=True, null=True)
+    File2018 = models.TextField(blank=True, null=True)
+    Enum2019 = models.TextField(blank=True, null=True)
+    Set2020 = models.BigIntegerField(blank=True, null=True)
+    DateTime2021 = models.TextField(blank=True, null=True)
+    DateTime2022 = models.TextField(blank=True, null=True)
+    Enum2023 = models.TextField(blank=True, null=True)
+    File2024 = models.TextField(blank=True, null=True)
+    MiertLettSikertelenABeepites = models.TextField(blank=True, null=True)
+    MiertLettSikertelenABeepitesSzovegesen = models.TextField(blank=True, null=True)
+    MennyireVoltMegelegedve = models.TextField(blank=True, null=True)
+    Pontszam2 = models.TextField(blank=True, null=True)
+    SzovegesErtekeles3 = models.TextField(blank=True, null=True)
+    Alaprajz = models.TextField(blank=True, null=True)
+    LezarasOka = models.BigIntegerField(blank=True, null=True)
+    LezarasSzovegesen = models.TextField(blank=True, null=True)
+    Telepules = models.TextField(blank=True, null=True)
+    Iranyitoszam = models.TextField(blank=True, null=True)
+    Forras = models.TextField(blank=True, null=True)
+    Megye = models.TextField(blank=True, null=True)
+    Orszag = models.TextField(blank=True, null=True)
+    FelmeresIdopontja3 = models.TextField(blank=True, null=True)
+    MilyenRendszertTervezel = models.TextField(blank=True, null=True)
+    MilyenVentilatortTervezel = models.TextField(blank=True, null=True)
+    HanyDarabVentilatortTervezel = models.TextField(blank=True, null=True)
+    QfaHelye2 = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulHelyi = models.TextField(blank=True, null=True)
+    ElektromosBekotes = models.TextField(blank=True, null=True)
+    MilyenVentillatortTervezel = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulKozpontiFalattoreses = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulKozpontiMeglevoVentilatorHelyere = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulKozpontiTuzfalonKivezetve = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulKozpontiMennyezetre = models.TextField(blank=True, null=True)
+    ElektromosBekotesKozponti = models.TextField(blank=True, null=True)
+    MegjegyzesKozponti = models.TextField(blank=True, null=True)
+    TipusdbVorticeMfo = models.TextField(blank=True, null=True)
+    TipusdbAwentaKw100t = models.TextField(blank=True, null=True)
+    TipusdbVents100 = models.TextField(blank=True, null=True)
+    TipusdbSor6 = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulMasodlagosFalattoreses = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulMasodlagosMeglevoSzellozoHelyere = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulMasodlagosMeglevoVentilator = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulMasodlagosTetonKeresztulKivezetve = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulMasodlagosTuzfalonKivezetve = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulMasodlagosMennyezetre = models.TextField(blank=True, null=True)
+    ElektromosBekotesMasodlagos = models.TextField(blank=True, null=True)
+    MegjegyzesMasodlagos = models.TextField(blank=True, null=True)
+    HelyeFurdoszoba = models.TextField(blank=True, null=True)
+    HelyeKonyha = models.TextField(blank=True, null=True)
+    HelyeWc = models.TextField(blank=True, null=True)
+    HelyeMosokonyha = models.TextField(blank=True, null=True)
+    HelyeKisebbFurdoszoba = models.TextField(blank=True, null=True)
+    HelyeNagyobbFurdoszoba = models.TextField(blank=True, null=True)
+    HelyeEmeletiFurdoszoba = models.TextField(blank=True, null=True)
+    HelyeFoldszintiFurdoszoba = models.TextField(blank=True, null=True)
+    Helye2Furdoszobaba = models.TextField(blank=True, null=True)
+    Helye3Furdoszobaba = models.TextField(blank=True, null=True)
+    EgyebMegjegyzesLegelvezeto = models.TextField(blank=True, null=True)
+    D100Pvc = models.TextField(blank=True, null=True)
+    D125Pvc = models.TextField(blank=True, null=True)
+    D100Sono = models.TextField(blank=True, null=True)
+    D125Sono = models.TextField(blank=True, null=True)
+    Idomok90 = models.TextField(blank=True, null=True)
+    Idomok45 = models.TextField(blank=True, null=True)
+    IdomokToldo = models.TextField(blank=True, null=True)
+    IdomokTIdom = models.TextField(blank=True, null=True)
+    IdomokYIdom = models.TextField(blank=True, null=True)
+    MegjegyzesCsovezes = models.TextField(blank=True, null=True)
+    Emm716Db = models.TextField(blank=True, null=True)
+    HolLeszAzEmm716 = models.TextField(blank=True, null=True)
+    Emm916Db = models.TextField(blank=True, null=True)
+    HolLeszAzEmm916 = models.TextField(blank=True, null=True)
+    Ear201Db2 = models.TextField(blank=True, null=True)
+    HolLeszAzEar201 = models.TextField(blank=True, null=True)
+    Ear202GazosDb = models.TextField(blank=True, null=True)
+    HolLeszAzEar202 = models.TextField(blank=True, null=True)
+    AblakosLegbevezetokEmm716 = models.TextField(blank=True, null=True)
+    AblakosLegbevezetokEmm916 = models.TextField(blank=True, null=True)
+    AblakosLegbevezetokEar201 = models.TextField(blank=True, null=True)
+    AblakosLegbevezetokEar202 = models.TextField(blank=True, null=True)
+    Eth1853Db = models.TextField(blank=True, null=True)
+    HolLeszAzEth1853 = models.TextField(blank=True, null=True)
+    Eth1858GazosDb = models.TextField(blank=True, null=True)
+    HolLeszAzEth1858Gazos = models.TextField(blank=True, null=True)
+    EgyebKiegeszitokInfo = models.TextField(blank=True, null=True)
+    AjtoszellozoDb = models.TextField(blank=True, null=True)
+    AjtogyuruSzine = models.TextField(blank=True, null=True)
+    MelyikAjtok3 = models.TextField(blank=True, null=True)
+    SzellozoRacsKialakitasaDb = models.TextField(blank=True, null=True)
+    SzellozoracsHelye2 = models.TextField(blank=True, null=True)
+    TetoszellozoCserepTipusszin = models.TextField(blank=True, null=True)
+    VisszaaramlasGatloDb1Db = models.TextField(blank=True, null=True)
+    VisszaaramlasGatloDb2Db = models.TextField(blank=True, null=True)
+    VisszaaramlasGatloDb3Db = models.TextField(blank=True, null=True)
+    VisszaaramlasGatloHelye = models.TextField(blank=True, null=True)
+    KeszitsdKepeketEsToltsdFelOket = models.TextField(blank=True, null=True)
+    KeszitsVideotEsToltsdFel = models.TextField(blank=True, null=True)
+    KeszitsSzovegesLeirastABeepitesselKapcsolatban = models.TextField(
+        blank=True, null=True
+    )
+    GaranciaraVonatkozoMegjegyzes = models.TextField(blank=True, null=True)
+    MelyikHelyisegbeKerulKozpontiMeglevoSzellozoHelyere = models.TextField(
+        blank=True, null=True
+    )
+    MelyikHelyisegbeKerulKozpontiTetonKeresztulKivezetve = models.TextField(
+        blank=True, null=True
+    )
+    Felmero2 = models.TextField(blank=True, null=True)
+    DijbekeroPdf2 = models.TextField(blank=True, null=True)
+    DijbekeroSzama2 = models.TextField(blank=True, null=True)
+    DijbekeroMegjegyzes2 = models.TextField(blank=True, null=True)
+    DijbekeroUzenetek = models.TextField(blank=True, null=True)
+    FizetesiMod2 = models.TextField(blank=True, null=True)
+    KiallitasDatuma = models.TextField(blank=True, null=True)
+    FizetesiHatarido = models.TextField(blank=True, null=True)
+    MennyireVoltMegelegedve2 = models.TextField(blank=True, null=True)
+    Pontszam3 = models.TextField(blank=True, null=True)
+    SzovegesErtekeles4 = models.TextField(blank=True, null=True)
+    IngatlanKepe = models.TextField(blank=True, null=True)
+    Munkalap = models.TextField(blank=True, null=True)
+    BruttoFelmeresiDij = models.TextField(blank=True, null=True)
+    MunkalapMegjegyzes = models.TextField(blank=True, null=True)
+    FelmeresVisszaigazolva = models.TextField(blank=True, null=True)
+    SzamlaPdf = models.TextField(blank=True, null=True)
+    SzamlaSorszama2 = models.TextField(blank=True, null=True)
+    KiallitasDatuma2 = models.TextField(blank=True, null=True)
+    SzamlaUzenetek = models.TextField(blank=True, null=True)
+    KerdesAzAjanlattalKapcsolatban = models.TextField(blank=True, null=True)
+    AjanlatPdf = models.TextField(blank=True, null=True)
+    SzamlaMegjegyzes = models.TextField(blank=True, null=True)
+    FelmeresAdatok = models.TextField(blank=True, null=True)
+    UtvonalAKozponttol = models.TextField(blank=True, null=True)
+    StreetViewUrl = models.TextField(blank=True, null=True)
+    Tipus = models.TextField(blank=True, null=True)
+    RendelesSzama = models.TextField(blank=True, null=True)
+    Munkalap2 = models.TextField(blank=True, null=True)
+    Felmeresid = models.TextField(blank=True, null=True)
+    FelmeresLink = models.TextField(blank=True, null=True)
+    KiMerteFel2 = models.TextField(blank=True, null=True)
+    FelmeresDatuma2 = models.TextField(blank=True, null=True)
+    ClouderpMegrendeles = models.TextField(blank=True, null=True)
+    Megye2 = models.TextField(blank=True, null=True)
+    Utcakep = models.TextField(blank=True, null=True)
+    IngatlanKepe2 = models.TextField(blank=True, null=True)
+    FizetesiMod3 = models.TextField(blank=True, null=True)
+    VentilatorTipusa = models.TextField(blank=True, null=True)
+    KapcsolodoFelmeres = models.TextField(blank=True, null=True)
+    ArajanlatMegjegyzes = models.TextField(blank=True, null=True)
+    TervezettFelmresIdopont = models.TextField(blank=True, null=True)
+    MiertMentunkKiFeleslegesen = models.BigIntegerField(blank=True, null=True)
+    Hash = models.TextField(blank=True, null=True)
+    NextAction = models.TextField(blank=True, null=True)
+    NextActionUserId = models.TextField(blank=True, null=True)
+    NextActionToDoType = models.TextField(blank=True, null=True)
+    InternalUrl = models.TextField(blank=True, null=True)
+    LastEvent = models.TextField(blank=True, null=True)
+    StatusGroup = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -122,3 +122,9 @@ class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Roles
         fields = "__all__"
+
+
+class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.MiniCrmAdatlapok
+        fields = "__all__"
