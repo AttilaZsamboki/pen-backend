@@ -5,7 +5,6 @@ from .models import UserRoles
 
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from urllib.parse import parse_qs
 
 
 class SimpleUser:

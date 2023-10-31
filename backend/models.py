@@ -340,6 +340,7 @@ class Felmeresek(models.Model):
     name = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     subject = models.TextField(blank=True, null=True)
+    created_by = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
