@@ -28,7 +28,7 @@ from rest_framework.status import (
 from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
-from .auth0backend import Auth0JSONWebTokenAuthentication
+from .auth0backend import CustomJWTAuthentication
 
 from . import models, serializers
 from .utils.calculate_distance import process_data
@@ -293,15 +293,15 @@ class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
 class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
-    authentication_classes = [Auth0JSONWebTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [CustomJWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
 
 class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
-    authentication_classes = [Auth0JSONWebTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, pk):
         try:

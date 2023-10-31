@@ -1,59 +1,78 @@
+import jwt
 import requests
-from jose import jwt
-from rest_framework import authentication, exceptions
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
 
-class Auth0JSONWebTokenAuthentication(authentication.BaseAuthentication):
-    www_authenticate_realm = "api"
-
+class CustomJWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
-        auth = authentication.get_authorization_header(request).split()
+        # Get the token from the request headers or any other location
+        token = self.get_token_from_header(request)
 
-        if not auth or auth[0].lower() != b"bearer":
+        if token is None:
             return None
 
-        if len(auth) == 1:
-            msg = "Invalid Authorization header. No credentials provided."
-            raise exceptions.AuthenticationFailed(msg)
-        elif len(auth) > 2:
-            msg = "Invalid Authorization header. Credentials string should not contain spaces."
-            raise exceptions.AuthenticationFailed(msg)
-
         try:
-            token = auth[1].decode()
-        except UnicodeError:
-            msg = "Invalid token. Token string should not contain invalid characters."
-            raise exceptions.AuthenticationFailed(msg)
-
-        return self.authenticate_credentials(token)
-
-    def authenticate_credentials(self, token):
-        # Fetch the public key from Auth0
-        url = "https://dev-1aujvjsopd1xpcyu.us.auth0.com/.well-known/jwks.json"
-        response = requests.get(url)
-        jwks = response.json()
-        rsa_key = {}
-        for key in jwks["keys"]:
-            if key["kid"] == jwt.get_unverified_header(token)["kid"]:
-                rsa_key = {
-                    "kty": key["kty"],
-                    "kid": key["kid"],
-                    "use": key["use"],
-                    "n": key["n"],
-                    "e": key["e"],
-                }
-
-        # Decode the token and verify its validity
-        try:
-            payload = jwt.decode(
+            # Decode the token
+            decoded_token = jwt.decode(
                 token,
-                rsa_key,
-                algorithms=["RS256"],
-                audience="https://pen.dataupload.xyz/felmeresek/",
-                issuer="https://dev-1aujvjsopd1xpcyu.us.auth0.com/",
+                "your_secret_key",
+                algorithms=["HS256"],
+                audience="penész-frontend",
             )
-        except jwt.JWTError:
-            msg = "Invalid token."
-            raise exceptions.AuthenticationFailed(msg)
 
-        return (payload, token)
+            # Validate the claims (e.g., expiration time, audience, issuer)
+            if not self.validate_claims(decoded_token):
+                raise AuthenticationFailed("Invalid token")
+
+            # Retrieve the user information associated with the token
+            user = self.get_user_from_token(decoded_token)
+
+            return (user, token)
+        except jwt.ExpiredSignatureError:
+            # Token has expired
+            print("Token has expired")
+        except jwt.InvalidAudienceError:
+            # Other JWT-related error
+            print("Invalid audience")
+        except jwt.InvalidAlgorithmError:
+            # Other JWT-related error
+            print("Invalid algorithm")
+        except jwt.InvalidSignatureError:
+            # Other JWT-related error
+            print("Invalid signature")
+        except jwt.ImmatureSignatureError:
+            print("Immature signature")
+
+    def get_token_from_header(self, request):
+        # Get the Authorization header from the request
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+
+        if auth_header and auth_header.startswith("Bearer "):
+            # Extract the token from the Authorization header
+            return auth_header.split(" ")[1]
+
+        return None
+
+    def validate_claims(self, decoded_token):
+        # Implement your custom claim validation logic here
+        # Return True if all claims are valid, False otherwise
+        if decoded_token["iss"] != "penészmentesítés":
+            return False
+        return True
+
+    def get_user_from_token(self, decoded_token):
+        # Implement your logic to retrieve the user information associated with the token
+        # This could involve querying your database or any other data source
+        # Return a user-like object or user information
+
+        url = "https://login.auth0.com/api/v2/roles/:id/users"
+
+        payload = {}
+        headers = {"Accept": "application/json"}
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+
+        print(response.text)
+
+        return None
