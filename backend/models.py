@@ -690,11 +690,11 @@ class Roles(models.Model):
 
 
 class MiniCrmAdatlapok(models.Model):
-    Id = models.TextField(primary_key=True)
-    CategoryId = models.TextField(blank=True, null=True)
-    ContactId = models.TextField(blank=True, null=True)
-    MainContactId = models.TextField(blank=True, null=True)
-    StatusId = models.TextField(blank=True, null=True)
+    Id = models.IntegerField(primary_key=True)
+    CategoryId = models.IntegerField(blank=True, null=True)
+    ContactId = models.IntegerField(blank=True, null=True)
+    MainContactId = models.IntegerField(blank=True, null=True)
+    StatusId = models.IntegerField(blank=True, null=True)
     UserId = models.BigIntegerField(blank=True, null=True)
     Name = models.TextField(blank=True, null=True)
     StatusUpdatedAt = models.TextField(blank=True, null=True)
