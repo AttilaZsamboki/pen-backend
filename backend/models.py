@@ -1446,7 +1446,7 @@ class MiniCrmAdatlapok(models.Model):
     Text1970 = models.TextField(blank=True, null=True)
     MilyenMasProblema = models.BigIntegerField(blank=True, null=True)
     Tavolsag = models.TextField(blank=True, null=True)
-    FelmeresiDij = models.TextField(blank=True, null=True)
+    FelmeresiDij = models.IntegerField(blank=True, null=True)
     FelmeresIdopontja2 = models.TextField(blank=True, null=True)
     MiAzUgyfelFoSzempontja3 = models.TextField(blank=True, null=True)
     EgyebSzempontok3 = models.TextField(blank=True, null=True)
