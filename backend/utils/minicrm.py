@@ -323,13 +323,14 @@ def update_offer_order(offer_id, fields, project=True, type="Offer"):
     )
 
 
-def get_order_address(order_id):
-    address = get_order(order_id=order_id)
+def get_order_address(order_id=None, order=None):
+    if not order and order_id:
+        order = get_order(order_id=order_id)
     return {
-        "status": address["status"],
-        "response": address["response"]["Customer"]
-        if address["status"] == "Success"
-        else address["response"],
+        "status": order["status"],
+        "response": order["response"]["Customer"]
+        if order["status"] == "Success"
+        else order["response"],
     }
 
 
