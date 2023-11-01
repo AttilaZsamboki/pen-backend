@@ -1449,7 +1449,7 @@ class MiniCrmAdatlapok(models.Model):
     FelmeresiDij = models.TextField(blank=True, null=True)
     FelmeresIdopontja2 = models.TextField(blank=True, null=True)
     MiAzUgyfelFoSzempontja3 = models.TextField(blank=True, null=True)
-    EgyebSzempontok3 = models.BigIntegerField(blank=True, null=True)
+    EgyebSzempontok3 = models.TextField(blank=True, null=True)
     Cim2 = models.TextField(blank=True, null=True)
     UtazasiIdoKozponttol = models.TextField(blank=True, null=True)
     MehetADijbekero = models.TextField(blank=True, null=True)

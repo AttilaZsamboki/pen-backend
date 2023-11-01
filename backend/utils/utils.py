@@ -35,3 +35,7 @@ def map_db_column_to_field(model, data):
     }
     print(field_names["ArajanlatMegjegyzes"])
     return {field_names.get(k, k): v for k, v in data.items()}
+
+
+def filter_fields(model, data):
+    return {k: v for k, v in data.items() if k in model._meta.fields}

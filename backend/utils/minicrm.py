@@ -346,5 +346,5 @@ status_map = {
     2894: "Vázlat",
     3014: "Elutasítva",
     2897: "Sztornózva",
-    3112: "Sikeres megrendelés"
+    3112: "Sikeres megrendelés",
 }
