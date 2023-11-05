@@ -67,9 +67,7 @@ def get_all_adatlap(category_id, status_id=None, criteria=None, deleted=False):
             if adatlap["Deleted"] == 0
         ]
     if criteria:
-        return [
-            adatlap for adatlap in adatlapok["Results"].values() if criteria(adatlap)
-        ]
+        return [adatlap for adatlap in adatlapok if criteria(adatlap)]
     return adatlapok
 
 
