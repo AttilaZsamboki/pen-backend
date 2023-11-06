@@ -64,7 +64,12 @@ class CalculateDistance(APIView):
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
 
-        models.MiniCrmAdatlapok(**data).save()
+        felmero = "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
+        data.pop("Felmero2")
+        models.MiniCrmAdatlapok(
+            Felmero2=felmero,
+            **data,
+        ).save()
         return Response({"status": "success"}, status=HTTP_200_OK)
 
     def get(self, request):
