@@ -66,9 +66,12 @@ class CalculateDistance(APIView):
 
         felmero = "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
         data.pop("Felmero2")
+        valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
+        filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+
         models.MiniCrmAdatlapok(
             Felmero2=felmero,
-            **data,
+            **filtered_data,
         ).save()
         return Response({"status": "success"}, status=HTTP_200_OK)
 
