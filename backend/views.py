@@ -582,12 +582,21 @@ def get_unas_order_data(type):
             )
             return f"<Error>{kapcsolat['response']}</Error>"
         kapcsolat = kapcsolat["response"]
-        try:
-            business_kapcsolat = contact_details(contact_id=adatlap["MainContactId"])[
-                "response"
-            ]
-        except:
-            business_kapcsolat = order_data["Customer"]
+        if adatlap["MainContactId"]:
+            business_kapcsolat = contact_details(contact_id=adatlap["MainContactId"])
+            if business_kapcsolat["status"] == "Error":
+                log(
+                    "Hiba akadt a kontaktok lekérdezése közben",
+                    "ERROR",
+                    "pen_unas_get_order",
+                    business_kapcsolat["response"],
+                )
+                return f"<Error>{business_kapcsolat['response']}</Error>"
+            business_kapcsolat = business_kapcsolat["response"]
+        else:
+            business_kapcsolat = kapcsolat
+
+        print(business_kapcsolat)
         try:
             cim = address_list(adatlap["MainContactId"])[0]
         except:
