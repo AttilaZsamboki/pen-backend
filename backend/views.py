@@ -112,34 +112,29 @@ class OrderWebhook(APIView):
             + ", StatusId: "
             + str(data["Data"]["StatusId"]),
         )
-        if (
-            data["Data"]["StatusId"] == 3007
-            and models.Orders.objects.filter(order_id=data["Head"]["Id"]).count() == 0
-        ):
-            try:
-                models.Orders.objects.create(
-                    adatlap_id=data["Id"], order_id=data["Head"]["Id"]
-                )
-                log(
-                    "Rendelés azonosító elmentve",
-                    "SUCCESS",
-                    "pen_order_webhook",
-                    "OrderId: " + str(data["Head"]["Id"]),
-                )
-            except Exception as e:
-                log(
-                    "Penészmentesítés rendelés webhook sikertelen",
-                    "ERROR",
-                    "pen_order_webhook",
-                    e,
-                )
-                return Response("Succesfully received data", status=HTTP_200_OK)
-        log(
-            "Penészmentesítés rendelés webhook sikeresen lefutott",
-            "SUCCESS",
-            "pen_order_webhook",
-        )
-        return Response("Succesfully received data", status=HTTP_200_OK)
+        try:
+            valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
+            filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
+            models.MiniCrmAdatlapok(**filtered_data).save()
+            models.Orders(
+                adatlap_id=data["Id"],
+                order_id=data["Head"]["Id"],
+                PaymentMethod=data["Head"]["PaymentMethod"],
+            ).save()
+            log(
+                "Penészmentesítés rendelés webhook sikeresen lefutott",
+                "SUCCESS",
+                "pen_order_webhook",
+            )
+            return Response("Succesfully received data", status=HTTP_200_OK)
+        except:
+            log(
+                "Penészmentesítés rendelés webhook sikertelen",
+                "ERROR",
+                "pen_order_webhook",
+                details=traceback.format_exc(),
+            )
+            return Response("Succesfully received data", status=HTTP_200_OK)
 
 
 class ProductsList(generics.ListCreateAPIView):
@@ -567,9 +562,9 @@ class UnasLogin(APIView):
 
 
 def get_unas_order_data(type):
-    adatlapok = get_all_adatlap(category_id=29, status_id=3008)
-    if adatlapok == "Error":
-        return ""
+    adatlapok = models.MiniCrmAdatlapok.objects.filter(
+        CategoryId=29, StatusId=3008
+    ).values()
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
                             <Orders>
@@ -579,30 +574,43 @@ def get_unas_order_data(type):
     datas = []
     for adatlap in adatlapok:
         # Get the order data, adatlap details, business contact details, address, and contact details for each adatlap
-        order_data = get_order(
-            models.Orders.objects.get(adatlap_id=adatlap["Id"]).order_id
-        )["response"]
-        adatlap_details = get_adatlap_details(id=adatlap["Id"])["response"]
-        kapcsolat = contact_details(contact_id=adatlap["ContactId"])["response"]
+        order_data = models.Orders.objects.get(adatlap_id=adatlap["Id"]).__dict__
+        kapcsolat = contact_details(contact_id=adatlap["ContactId"])
+        if kapcsolat["status"] == "Error":
+            log(
+                "Hiba akadt a kontaktok lekérdezése közben",
+                "ERROR",
+                "pen_unas_get_order",
+                details=kapcsolat["response"],
+            )
+            return f"<Error>{kapcsolat['response']}</Error>"
+        kapcsolat = kapcsolat["response"]
         try:
-            business_kapcsolat = contact_details(contact_id=adatlap["BusinessId"])[
+            business_kapcsolat = contact_details(contact_id=adatlap["MainContactId"])[
                 "response"
             ]
         except:
             business_kapcsolat = order_data["Customer"]
         try:
-            cim = address_list(adatlap["BusinessId"])[0]
+            cim = address_list(adatlap["MainContactId"])[0]
         except:
-            cim = order_data["Customer"]
+            cim = adatlap
+
+        felmeres = models.Felmeresek.objects.filter(
+            id=adatlap["FelmeresLink"].split("/")[-1] if adatlap["FelmeresLink"] else 0
+        ).first()
 
         # Add the data to the datas list
         datas.append(
             {
                 "OrderData": order_data,
-                "AdatlapDetails": adatlap_details,
+                "AdatlapDetails": adatlap,
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim,
                 "Kapcsolat": kapcsolat,
+                "Tételek": models.FelmeresItems.objects.filter(
+                    adatlap_id=felmeres.id if felmeres else 0
+                ),
             }
         )
 
@@ -640,20 +648,20 @@ def get_unas_order_data(type):
                         <CustomerType>private</CustomerType>
                     </Invoice>
                     <Shipping>
-                        <Name>{data['OrderData']["Customer"]["Name"]}</Name>
-                        <ZIP>{data['OrderData']["Customer"]["PostalCode"]}</ZIP>
-                        <City>{data["OrderData"]["Customer"]["City"]}</City>
-                        <Street>{data["OrderData"]["Customer"]["Address"]}</Street>
-                        <County>{data["OrderData"]["Customer"]["County"]}</County>
-                        <Country>{data["OrderData"]["Customer"]["CountryId"]}</Country>
+                        <Name>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</Name>
+                        <ZIP>{data["AdatlapDetails"]["Iranyitoszam"]}</ZIP>
+                        <City>{data["AdatlapDetails"]["Telepules"]}</City>
+                        <Street>{data["AdatlapDetails"]["Cim2"]}</Street>
+                        <County>{data["AdatlapDetails"]["Megye"]}</County>
+                        <Country>{data["AdatlapDetails"]["Orszag"]}</Country>
                     <CountryCode>hu</CountryCode>
                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
-                        <RecipientName>{data["OrderData"]["Customer"]["Name"]}</RecipientName>
+                        <RecipientName>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</RecipientName>
                     </Shipping>
                 </Addresses>
             </Customer>
-            <Currency>{data['OrderData']["CurrencyCode"]}</Currency>
+            <Currency>HUF</Currency>
             <Status>Folyamatban</Status>
             <StatusDateMod><![CDATA[2021.03.25 20:15:39]]></StatusDateMod>
             <StatusID>3008</StatusID>
@@ -666,26 +674,26 @@ def get_unas_order_data(type):
                 <Id>3372937</Id>
                 <Name><![CDATA[GLS CsomagPontok]]></Name>
             </Shipping>
-            <SumPriceGross>{sum([float(i["PriceTotal"]) for i in data["OrderData"]["Items"]])}</SumPriceGross>
+            <SumPriceGross>{sum([float(i.netPrice) * sum([j["ammount"] for j in i.inputValues]) for i in data["Tételek"]])}</SumPriceGross>
             <Items>
                 """
                 + "\n".join(
                     [
                         f"""<Item>
-                    <Id>{models.Products.objects.get(sku=i["SKU"]).id if i["SKU"] and i["SKU"] != "null" and i["SKU"] != "undefined" else "discount-amount"}</Id>
-                    <Sku>{i["SKU"] if i["SKU"] and i["SKU"] != "null" else "discount-amount"}</Sku>
-                    <Name>{i["Name"]}</Name>
-                    <Unit>{i["Unit"]}</Unit>
-                    <Quantity>{i["Quantity"]}</Quantity>
-                    <PriceNet>{i["PriceNet"]}</PriceNet>
-                    <PriceGross>{float(i["PriceNet"])*1.27}</PriceGross>
-                    <Vat>{i["VAT"]}</Vat>
+                    <Id>{i.product_id}</Id>
+                    <Sku>{i.product.sku if i.product else "discount-amount"}</Sku>
+                    <Name>{i.name}</Name>
+                    <Unit>darab</Unit>
+                    <Quantity>{sum([float(j["ammount"]) for j in i.inputValues])}</Quantity>
+                    <PriceNet>{i.netPrice}</PriceNet>
+                    <PriceGross>{float(i.netPrice)*1.27}</PriceGross>
+                    <Vat>27%</Vat>
                     <Status>
                         <![CDATA[]]>
                     </Status>
                     </Item>
                     """
-                        for i in data["OrderData"]["Items"]
+                        for i in data["Tételek"]
                     ]
                 )
                 + """

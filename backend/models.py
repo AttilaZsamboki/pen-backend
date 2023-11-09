@@ -419,8 +419,9 @@ class ErpAuthTokens(models.Model):
 
 
 class Orders(models.Model):
-    adatlap_id = models.IntegerField(blank=True, null=True)
-    order_id = models.IntegerField(blank=True, null=True)
+    adatlap_id = models.IntegerField(db_column="ProjectId", blank=True, null=True)
+    order_id = models.IntegerField(db_column="Id", primary_key=True)
+    PaymentMethod = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1465,7 +1466,7 @@ class MiniCrmAdatlapok(models.Model):
     Enum2007 = models.TextField(blank=True, null=True)
     DateTime2008 = models.TextField(blank=True, null=True)
     Enum2009 = models.TextField(blank=True, null=True)
-    Beepitok = models.BigIntegerField(blank=True, null=True)
+    Beepitok = models.TextField(blank=True, null=True)
     Enum2016 = models.TextField(blank=True, null=True)
     Text2017 = models.TextField(blank=True, null=True)
     File2018 = models.TextField(blank=True, null=True)
