@@ -38,14 +38,11 @@ from .utils.logs import log
 from .utils.minicrm import (
     address_list,
     contact_details,
-    get_adatlap_details,
-    get_all_adatlap,
     get_all_adatlap_details,
-    get_order,
     update_offer_order,
     status_map,
 )
-from .utils.utils import replace_self_closing_tags, map_db_column_to_field
+from .utils.utils import replace_self_closing_tags
 
 # Create your views here.
 
@@ -620,7 +617,7 @@ def get_unas_order_data(type):
         + "\n".join(
             [
                 f"""<Order>
-            <Key>{data["OrderData"]["Id"] if type != "dev" else str(uuid.uuid4())}</Key>
+            <Key>{data["OrderData"]["order_id"] if type != "dev" else str(uuid.uuid4())}</Key>
             <Date>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</Date>
             <DateMod>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</DateMod>
             <Lang>hu</Lang>
