@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "backend",
     "rest_framework",
     "corsheaders",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -141,6 +142,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "PAGE_SIZE": 10,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB

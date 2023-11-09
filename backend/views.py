@@ -9,6 +9,7 @@ import traceback
 import xml.etree.ElementTree as ET
 
 import boto3
+import django_filters.rest_framework
 from django.db import connection
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Coalesce
@@ -594,13 +595,16 @@ def get_unas_order_data(type):
                 return f"<Error>{business_kapcsolat['response']}</Error>"
             business_kapcsolat = business_kapcsolat["response"]
         else:
-            business_kapcsolat = kapcsolat
+            business_kapcsolat = {
+                "Name": kapcsolat["LastName"] + " " + kapcsolat["FirstName"],
+                "EUVatNumber": "",
+                **kapcsolat,
+            }
 
-        print(business_kapcsolat)
         try:
             cim = address_list(adatlap["MainContactId"])[0]
         except:
-            cim = adatlap
+            cim = address_list(adatlap["ContactId"])[0]
 
         felmeres = models.Felmeresek.objects.filter(
             id=adatlap["FelmeresLink"].split("/")[-1] if adatlap["FelmeresLink"] else 0
@@ -1064,14 +1068,19 @@ class UserRole(APIView):
 
 class MiniCrmAdatlapok(generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
-    queryset = models.MiniCrmAdatlapok.objects.all()
     permission_classes = [AllowAny]
+    queryset = models.MiniCrmAdatlapok.objects.all()
+    filterset_fields = ["CategoryId"]
 
     def get_queryset(self):
-        id = self.request.query_params.get("id")
+        id = self.request.query_params.get("Id")
         if id:
             id = id.split(",")
             return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
+        status_id = self.request.query_params.get("StatusId")
+        if status_id:
+            status_id = status_id.split(",")
+            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
         return super().get_queryset()
 
 
