@@ -731,7 +731,7 @@ def get_unas_order_data(type):
                 + "\n".join(
                     [
                         f"""<Item>
-                    <Id>{i.product_id}</Id>
+                    <Id>{i.product_id if i.product_id else "discount-amount"}</Id>
                     <Sku>{i.product.sku if i.product else "discount-amount"}</Sku>
                     <Name>{i.name}</Name>
                     <Unit>darab</Unit>
