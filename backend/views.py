@@ -9,7 +9,6 @@ import traceback
 import xml.etree.ElementTree as ET
 
 import boto3
-import django_filters.rest_framework
 from django.db import connection
 from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Coalesce
@@ -42,6 +41,8 @@ from .utils.minicrm import (
     get_all_adatlap_details,
     update_offer_order,
     status_map,
+    address_ids,
+    address_details,
 )
 from .utils.utils import replace_self_closing_tags
 
@@ -573,23 +574,32 @@ def get_unas_order_data(type):
     for adatlap in adatlapok:
         # Get the order data, adatlap details, business contact details, address, and contact details for each adatlap
         order_data = models.Orders.objects.get(adatlap_id=adatlap["Id"]).__dict__
-        kapcsolat = contact_details(contact_id=adatlap["ContactId"])
+        script_name = "pen_unas_get_order"
+        kapcsolat = contact_details(
+            contact_id=adatlap["ContactId"],
+            script_name=script_name,
+            description="Vevő adatok",
+        )
         if kapcsolat["status"] == "Error":
             log(
                 "Hiba akadt a kontaktok lekérdezése közben",
                 "ERROR",
-                "pen_unas_get_order",
+                script_name,
                 details=kapcsolat["response"],
             )
             return f"<Error>{kapcsolat['response']}</Error>"
         kapcsolat = kapcsolat["response"]
         if adatlap["MainContactId"]:
-            business_kapcsolat = contact_details(contact_id=adatlap["MainContactId"])
+            business_kapcsolat = contact_details(
+                contact_id=adatlap["MainContactId"],
+                script_name=script_name,
+                description="Számlázási adatok",
+            )
             if business_kapcsolat["status"] == "Error":
                 log(
                     "Hiba akadt a kontaktok lekérdezése közben",
                     "ERROR",
-                    "pen_unas_get_order",
+                    script_name,
                     business_kapcsolat["response"],
                 )
                 return f"<Error>{business_kapcsolat['response']}</Error>"
@@ -602,9 +612,38 @@ def get_unas_order_data(type):
             }
 
         try:
-            cim = address_list(adatlap["MainContactId"])[0]
+            cim = address_details(
+                list(
+                    address_ids(
+                        adatlap["MainContactId"],
+                        script_name=script_name,
+                        description="Cím lista",
+                    )
+                )[0],
+                script_name=script_name,
+                description="Cím részlet",
+            )
         except:
-            cim = address_list(adatlap["ContactId"])[0]
+            ids = list(
+                address_ids(
+                    adatlap["ContactId"],
+                    script_name=script_name,
+                    description="Cím lista",
+                )
+            )
+            if ids:
+                cim = address_details(
+                    ids[0], script_name=script_name, description="Cím részlet"
+                )
+            else:
+                {
+                    "PostalCode": "",
+                    "City": "",
+                    "Address": "",
+                    "County": "",
+                    "CountryId": "",
+                    "Country": "",
+                }
 
         felmeres = models.Felmeresek.objects.filter(
             id=adatlap["FelmeresLink"].split("/")[-1] if adatlap["FelmeresLink"] else 0
@@ -616,7 +655,7 @@ def get_unas_order_data(type):
                 "OrderData": order_data,
                 "AdatlapDetails": adatlap,
                 "BusinessKapcsolat": business_kapcsolat,
-                "Cím": cim,
+                "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
                 "Tételek": models.FelmeresItems.objects.filter(
                     adatlap_id=felmeres.id if felmeres else 0

@@ -3,14 +3,27 @@ import django
 import os
 import sys
 
-sys.path.append(os.path.abspath('/home/atti/googleds/dataupload'))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                      "peneszmentesites.settings")
+sys.path.append(os.path.abspath("/home/atti/googleds/dataupload"))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "peneszmentesites.settings")
 django.setup()
-from backend.models import Logs  # noqa
+from backend.models import Logs, MiniCrmRequests  # noqa
 
 
 def log(log_value, status="SUCCESS", script_name="sm_vendor_orders", details=""):
-    log = Logs(script_name=script_name,
-               time=datetime.now()+ timedelta(hours=2), status=status, value=log_value, details=details)
+    log = Logs(
+        script_name=script_name,
+        time=datetime.now() + timedelta(hours=2),
+        status=status,
+        value=log_value,
+        details=details,
+    )
     log.save()
+
+
+def log_minicrm_request(endpoint, script, description=None):
+    MiniCrmRequests(
+        time=datetime.now() + timedelta(hours=1),
+        endpoint=endpoint,
+        script=script,
+        description=description,
+    ).save()

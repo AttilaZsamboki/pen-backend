@@ -1643,3 +1643,13 @@ class MiniCrmAdatlapok(models.Model):
     class Meta:
         managed = False
         db_table = "pen_minicrm_adatlapok"
+
+class MiniCrmRequests(models.Model):
+    time = models.DateTimeField(blank=True, null=True)
+    endpoint = models.TextField(blank=True, null=True)
+    script = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'minicrm_requests'

@@ -1,20 +1,30 @@
 import os
 import requests
 import random
-import json
-
 
 from dotenv import load_dotenv
+from ..utils.logs import log_minicrm_request
 
 load_dotenv()
 
 
-def get_request(endpoint, id=None, query_params=None, isR3=True):
+def get_request(
+    endpoint,
+    id=None,
+    query_params=None,
+    isR3=True,
+    script_name=None,
+    request_description=None,
+):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
+    endpoint = f"{'R3/' if isR3 else ''}{endpoint}{'/'+str(id) if id else ''}"
+    log_minicrm_request(
+        endpoint=endpoint, script=script_name, description=request_description
+    )
     data = requests.get(
-        f"https://r3.minicrm.hu/Api/{'R3/' if isR3 else ''}{endpoint}{'/'+str(id) if id else ''}",
+        f"https://r3.minicrm.hu/Api/{endpoint}",
         auth=(system_id, api_key),
         params=query_params,
     )
@@ -71,14 +81,28 @@ def get_all_adatlap(category_id, status_id=None, criteria=None, deleted=False):
     return adatlapok
 
 
-def get_adatlap_details(id):
-    return get_request(endpoint="Project", id=id)
+def get_adatlap_details(id, script_name=None, description=None):
+    return get_request(
+        endpoint="Project",
+        id=id,
+        script_name=script_name,
+        request_description=description,
+    )
 
 
-def contact_details(contact_id=None, adatlap_id=None):
+def contact_details(
+    contact_id=None, adatlap_id=None, script_name=None, description=None
+):
     if adatlap_id and not contact_id:
-        contact_id = get_adatlap_details(adatlap_id)["response"]["ContactId"]
-    return get_request("Contact", id=contact_id)
+        contact_id = get_adatlap_details(adatlap_id, script_name, description)[
+            "response"
+        ]["ContactId"]
+    return get_request(
+        "Contact",
+        id=contact_id,
+        script_name=script_name,
+        request_description=description,
+    )
 
 
 def get_all_contacts(adatlap_ids, type="ContactId"):
@@ -96,12 +120,25 @@ def get_all_contacts(adatlap_ids, type="ContactId"):
     return contacts
 
 
-def address_ids(contact_id):
-    return get_request("AddressList", id=contact_id)["response"]["Results"].keys()
+def address_ids(contact_id, script_name=None, description=None):
+    resp = get_request(
+        "AddressList",
+        id=contact_id,
+        script_name=script_name,
+        request_description=description,
+    )
+    if resp["status"] != "Error" and resp["response"]["Results"]:
+        return resp["response"]["Results"].keys()
+    return []
 
 
-def address_details(address_id):
-    return get_request("Address", id=address_id)
+def address_details(address_id, script_name=None, description=None):
+    return get_request(
+        "Address",
+        id=address_id,
+        script_name=script_name,
+        request_description=description,
+    )
 
 
 def get_all_addresses(contact_ids):
@@ -111,8 +148,13 @@ def get_all_addresses(contact_ids):
     return addresses
 
 
-def address_list(contact_id):
-    return [address_details(i)["response"] for i in address_ids(contact_id)]
+def address_list(contact_id, script_name=None, description=None):
+    return [
+        address_details(i, script_name=script_name, description=description)["response"]
+        for i in address_ids(
+            contact_id, script_name=script_name, description=description
+        )
+    ]
 
 
 def billing_address(contact_id):
