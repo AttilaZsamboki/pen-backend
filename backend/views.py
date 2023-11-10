@@ -572,6 +572,8 @@ def get_unas_order_data(type):
     # Get all adatlap objects with category_id=29 and status_id=3008
     datas = []
     for adatlap in adatlapok:
+        if adatlap["RendelesSzama"] != "" and adatlap["RendelesSzama"] is not None:
+            continue
         # Get the order data, adatlap details, business contact details, address, and contact details for each adatlap
         order_data = models.Orders.objects.get(adatlap_id=adatlap["Id"]).__dict__
         script_name = "pen_unas_get_order"
