@@ -106,10 +106,7 @@ class OrderWebhook(APIView):
             "Penészmentesítés rendelés webhook meghívva",
             "INFO",
             "pen_order_webhook",
-            "AdatlapId: "
-            + str(data["Id"])
-            + ", StatusId: "
-            + str(data["Data"]["StatusId"]),
+            json.dumps(data)
         )
         try:
             valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
