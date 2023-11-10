@@ -421,7 +421,6 @@ class ErpAuthTokens(models.Model):
 class Orders(models.Model):
     adatlap_id = models.IntegerField(db_column="ProjectId", blank=True, null=True)
     order_id = models.IntegerField(db_column="Id", primary_key=True)
-    PaymentMethod = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

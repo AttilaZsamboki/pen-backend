@@ -118,7 +118,6 @@ class OrderWebhook(APIView):
             models.Orders(
                 adatlap_id=data["Id"],
                 order_id=data["Head"]["Id"],
-                PaymentMethod=data["Head"]["PaymentMethod"],
             ).save()
             log(
                 "Penészmentesítés rendelés webhook sikeresen lefutott",
@@ -717,8 +716,8 @@ def get_unas_order_data(type):
             <StatusDateMod><![CDATA[2021.03.25 20:15:39]]></StatusDateMod>
             <StatusID>3008</StatusID>
             <Payment>
-                <Id>{models.PaymentMethods.objects.get(name=data["OrderData"]["PaymentMethod"]).id}</Id>
-                <Name>{data["OrderData"]["PaymentMethod"]}</Name>
+                <Id>{models.PaymentMethods.objects.get(name=data["AdatlapDetails"]["FizetesiMod3"]).id}</Id>
+                <Name>{data["AdatlapDetails"]["FizetesiMod3"]}</Name>
                 <Type>transfer</Type>
             </Payment>
             <Shipping>
