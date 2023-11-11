@@ -106,12 +106,29 @@ class OrderWebhook(APIView):
             "Penészmentesítés rendelés webhook meghívva",
             "INFO",
             "pen_order_webhook",
-            json.dumps(data)
+            json.dumps(data),
         )
         try:
             valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-            filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
-            models.MiniCrmAdatlapok(**filtered_data).save()
+            filtered_data = {
+                k: v
+                for k, v in data["Data"].items()
+                if k in valid_fields
+                if k != "Beepitok"
+            }
+            name_mapping = data["Schema"]["Beepitok"]
+
+            def get_names(value):
+                names = []
+                keys = sorted(name_mapping.keys(), key=int, reverse=True)
+                for key in keys:
+                    if value >= int(key):
+                        names.append(name_mapping[key])
+                        value -= int(key)
+                return names
+
+            beeptiok = ", ".join(get_names(data["Data"]["Beepitok"]))
+            models.MiniCrmAdatlapok(Beepitok=beeptiok, **filtered_data).save()
             models.Orders(
                 adatlap_id=data["Id"],
                 order_id=data["Head"]["Id"],
