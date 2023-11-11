@@ -114,7 +114,7 @@ class OrderWebhook(APIView):
                 k: v
                 for k, v in data["Data"].items()
                 if k in valid_fields
-                if k != "Beepitok"
+                if k not in ["Beepitok", "FizetesiMod3"]
             }
             name_mapping = data["Schema"]["Beepitok"]
 
@@ -128,7 +128,13 @@ class OrderWebhook(APIView):
                 return names
 
             beeptiok = ", ".join(get_names(data["Data"]["Beepitok"]))
-            models.MiniCrmAdatlapok(Beepitok=beeptiok, **filtered_data).save()
+            models.MiniCrmAdatlapok(
+                Beepitok=beeptiok,
+                FizetesiMod3=data["Schema"]["FizetesiMod3"][
+                    data["Data"]["FizetesiMod3"]
+                ],
+                **filtered_data,
+            ).save()
             models.Orders(
                 adatlap_id=data["Id"],
                 order_id=data["Head"]["Id"],
