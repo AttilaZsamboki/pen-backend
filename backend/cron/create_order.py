@@ -1,7 +1,7 @@
 from ..utils.logs import log
 from ..utils.minicrm import get_all_adatlap_details, create_order, get_adatlap_details
 
-from ..models import FelmeresItems, Offers, Felmeresek
+from ..models import Offers, Felmeresek, MiniCrmAdatlapok
 
 import os
 import dotenv
@@ -17,13 +17,7 @@ def main():
         script_name="pen_create_order",
         status="INFO",
     )
-    adatlapok = get_all_adatlap_details(category_id=21, status_id=2896)
-    if adatlapok == "Error":
-        log(
-            "Megrendelések létrehozása sikertelen, adatlapok lekérése sikertelen",
-            script_name="pen_create_order",
-            status="ERROR",
-        )
+    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=21, StatusId=2896).values()
     for adatlap in adatlapok:
         try:
             log(

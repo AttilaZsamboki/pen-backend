@@ -1,76 +1,79 @@
 from ..utils.minicrm import (
-    get_all_adatlap_details,
     list_to_dos,
     create_to_do,
     get_order_address,
     contact_details,
-    get_order,
 )
 from ..utils.logs import log
-from ..models import Orders
-import json
-
-
-def criteria(adatlap):
-    print(adatlap)
-    return (
-        adatlap["Beepitok"]
-        and adatlap["DateTime1953"]
-        and list_to_dos(adatlap["Id"], criteria=lambda todo: todo["Type"] == 199) == []
-    )
+from ..models import Orders, MiniCrmAdatlapok, Felmeresek
+import traceback
 
 
 def main():
-    log(
-        "Beépítés feladatok készítése elindult", "INFO", script_name="pen_beepites_todo"
-    )
-    adatlapok = get_all_adatlap_details(
-        category_id=29, deleted=False, criteria=criteria
-    )
-    if adatlapok == "Error":
-        log(
-            "Hiba akadt az adatlapok lekérdezése közben",
-            "ERROR",
-            script_name="pen_beepites_todo",
-        )
-        return
+    script_name = "pen_beepites_todo"
+    log("Beépítés feladatok készítése elindult", "INFO", script_name=script_name)
+    adatlapok = MiniCrmAdatlapok.objects.filter(
+        CategoryId=29, Beepitok__isnull=False, DateTime1953__isnull=False
+    ).values()
     for adatlap in adatlapok:
-        beepitok = adatlap["Beepitok"].split(", ")
-        order_id = Orders.objects.filter(adatlap_id=adatlap["Id"]).first().order_id
+        existing_todos = list_to_dos(
+            adatlap["Id"],
+            criteria=lambda todo: todo["Type"] == 199,
+            script_name=script_name,
+        )
 
-        order = get_order(order_id=order_id)
-        address = get_order_address(order=order)
-        if order["status"] == "Error":
+        if existing_todos != [] and existing_todos is not None:
             log(
-                "Hiba akadt a rendelés lekérdezése közben",
-                "ERROR",
-                script_name="pen_beepites_todo",
-                details=f"Response: {order['response']}. OrderId: {str(order_id)}",
+                "A feladat már létezik",
+                "INFO",
+                script_name=script_name,
+                details=adatlap["Id"],
             )
-            return
-        order = order["response"]
+            continue
+        beepitok = adatlap["Beepitok"].split(", ")
+
+        try:
+            order = Felmeresek.objects.get(id=adatlap["FelmeresLink"].split("/")[-1])
+        except Felmeresek.DoesNotExist:
+            log(
+                "Nincs megrendelés az adatlapon",
+                "ERROR",
+                script_name=script_name,
+                details=adatlap["Id"],
+            )
+            continue
+        except:
+            log(
+                "Hiba akadt a megrendelés lekérdezése közben",
+                "ERROR",
+                script_name=script_name,
+                details=traceback.format_exc(),
+            )
+            continue
+
+        order_id = Orders.objects.filter(adatlap_id=adatlap["Id"]).first().order_id
+        address = get_order_address(order_id=order_id, script_name=script_name)
 
         if address["status"] == "Error":
             log(
                 "Hiba akadt a rendelés lekérdezése közben",
                 "ERROR",
-                script_name="pen_beepites_todo",
+                script_name=script_name,
                 details=f"Response: {address['response']}. OrderId: {str(order_id)}",
             )
             return
         address = address["response"]
 
-        contact = contact_details(adatlap_id=adatlap["Id"])
+        contact = contact_details(adatlap_id=adatlap["Id"], script_name=script_name)
         if contact == "Error":
             log(
                 "Hiba akadt a kapcsolattartó lekérdezése közben",
                 "ERROR",
-                script_name="pen_beepites_todo",
+                script_name=script_name,
             )
             return
         contact = contact["response"]
 
-        print(json.dumps(order, indent=4))
         for beepito in beepitok:
             comment = f"""Új beépítési munkát kaptál
 Ügyfél: {adatlap["Name"]}
@@ -87,20 +90,22 @@ Raktár: https://app.clouderp.hu/v2/order?view=68&search={adatlap["RendelesSzama
 Felmérés: {adatlap["FelmeresLink"]} 
 Utcakép: {adatlap["Utcakep"]}
 
-Megrendelés bruttó: {order["Amount"].replace(".0000", "")}Ft
-Megrendelés nettó: {order["AmountNet"].replace(".0000", "")}Ft"""
+Megrendelés bruttó: {order.grossOrderTotal}Ft
+Megrendelés nettó: {order.netOrderTotal}Ft
+"""
             resp = create_to_do(
                 adatlap["Id"],
                 user=beepito,
                 type=199,
                 comment=comment,
                 deadline=adatlap["DateTime1953"],
+                script_name=script_name,
             )
             if resp.ok:
                 log(
                     "Beépítés feladat létrehozva",
                     "SUCCESS",
-                    script_name="pen_beepites_todo",
+                    script_name=script_name,
                     details=f"Adatlap: {adatlap['Id']}, Beépítő: {beepito}",
                 )
                 continue
@@ -108,7 +113,7 @@ Megrendelés nettó: {order["AmountNet"].replace(".0000", "")}Ft"""
                 log(
                     "Hiba akadt a feladat létrehozása közben",
                     "ERROR",
-                    script_name="pen_beepites_todo",
+                    script_name=script_name,
                     details=f"Adatlap: {adatlap['Id']}, Beépítő: {beepito}, Response: {resp.text}",
                 )
                 continue

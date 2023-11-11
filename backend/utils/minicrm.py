@@ -105,9 +105,10 @@ def contact_details(
     contact_id=None, adatlap_id=None, script_name=None, description=None
 ):
     if adatlap_id and not contact_id:
-        contact_id = get_adatlap_details(adatlap_id, script_name, description)[
-            "response"
-        ]["ContactId"]
+        contact_id = get_adatlap_details(adatlap_id, script_name, description)
+        if contact_id["status"] == "Error":
+            return "Error"
+        contact_id = contact_id["response"]["ContactId"]
     return get_request(
         "Contact",
         id=contact_id,
@@ -371,8 +372,10 @@ def get_offer(offer_id):
     return get_request(endpoint="Offer", id=offer_id, isR3=False)
 
 
-def get_order(order_id):
-    return get_request(endpoint="Order", id=order_id, isR3=False)
+def get_order(order_id, script_name):
+    return get_request(
+        endpoint="Order", id=order_id, isR3=False, script_name=script_name
+    )
 
 
 def update_offer_order(offer_id, fields, project=True, type="Offer"):
@@ -385,9 +388,9 @@ def update_offer_order(offer_id, fields, project=True, type="Offer"):
     )
 
 
-def get_order_address(order_id=None, order=None):
+def get_order_address(order_id=None, order=None, script_name=None):
     if not order and order_id:
-        order = get_order(order_id=order_id)
+        order = get_order(order_id=order_id, script_name=script_name)
     return {
         "status": order["status"],
         "response": order["response"]["Customer"]

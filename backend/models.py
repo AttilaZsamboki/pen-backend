@@ -343,6 +343,23 @@ class Felmeresek(models.Model):
     subject = models.TextField(blank=True, null=True)
     created_by = models.TextField(blank=True, null=True)
 
+    @property
+    def netOrderTotal(self):
+        return sum(
+            item.netTotal for item in self.felmeresitems_set.exclude(type="Discount")
+        )
+
+    @property
+    def grossOrderTotal(self):
+        total = (
+            sum(
+                item.netTotal
+                for item in self.felmeresitems_set.exclude(type="Discount")
+            )
+            * 1.27
+        )
+        return total * (self.felmeresitems_set.get(type="Discount").netPrice / 100)
+
     class Meta:
         managed = False
         db_table = "pen_felmeresek"
@@ -365,6 +382,22 @@ class FelmeresItems(models.Model):
         max_length=255, blank=True, null=True, default="fixed", db_column="value_type"
     )
     source = models.CharField(max_length=100, blank=True, null=True, default="Manual")
+
+    @property
+    def netTotal(self):
+        if self.valueType == "fixed":
+            return self.netPrice * sum([i["ammount"] for i in self.inputValues])
+        elif self.valueType == "percent":
+            order_total = sum(
+                [
+                    i.netPrice * sum([j["ammount"] for j in i.inputValues])
+                    for i in self.adatlap.felmeresitems_set.all()
+                    if i.valueType != "percent"
+                ]
+            )
+            return (self.netPrice / 100) * order_total
+        else:
+            return 0
 
     class Meta:
         managed = False
@@ -1643,6 +1676,7 @@ class MiniCrmAdatlapok(models.Model):
         managed = False
         db_table = "pen_minicrm_adatlapok"
 
+
 class MiniCrmRequests(models.Model):
     time = models.DateTimeField(blank=True, null=True)
     endpoint = models.TextField(blank=True, null=True)
@@ -1651,4 +1685,4 @@ class MiniCrmRequests(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'minicrm_requests'
+        db_table = "minicrm_requests"
