@@ -34,39 +34,50 @@ def get_request(
         return {"status": "Error", "response": data.text}
 
 
-def update_request(id, fields={}, endpoint="Project", isR3=True, method="PUT"):
+def update_request(
+    id, fields={}, endpoint="Project", isR3=True, method="PUT", script_name=None
+):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
+    endpoint = f'{"/R3" if isR3 else ""}/{endpoint}/{id}'
     if method == "PUT":
+        log_minicrm_request(endpoint=endpoint, script=script_name)
         return requests.put(
-            f'https://r3.minicrm.hu/Api{"/R3" if isR3 else ""}/{endpoint}/{id}',
+            f"https://r3.minicrm.hu/Api{endpoint}",
             auth=(system_id, api_key),
             json=fields,
         )
     elif method == "POST":
+        log_minicrm_request(endpoint=endpoint, script=script_name)
         return requests.post(
-            f'https://r3.minicrm.hu/Api{"/R3" if isR3 else ""}/{endpoint}/{id}',
+            f"https://r3.minicrm.hu/Api{endpoint}",
             auth=(system_id, api_key),
             json=fields,
         )
 
 
-def update_adatlap_fields(id, fields):
-    adatlap = update_request(id=id, fields=fields, endpoint="Project")
+def update_adatlap_fields(id, fields, script_name=None):
+    adatlap = update_request(
+        id=id, fields=fields, endpoint="Project", script_name=script_name
+    )
     if adatlap.status_code == 200:
         return {"code": 200, "data": adatlap.json()}
     else:
         return {"code": adatlap.status_code, "reason": adatlap.reason}
 
 
-def get_all_adatlap(category_id, status_id=None, criteria=None, deleted=False):
+def get_all_adatlap(
+    category_id, status_id=None, criteria=None, deleted=False, script=None
+):
     query_params = (
         {"CategoryId": category_id}
         if not status_id
         else {"CategoryId": category_id, "StatusId": status_id}
     )
-    adatlapok = get_request(endpoint="Project", query_params=query_params)
+    adatlapok = get_request(
+        endpoint="Project", query_params=query_params, script_name=script
+    )
     if adatlapok["status"] == "Error":
         return "Error"
     adatlapok = adatlapok["response"]
@@ -164,7 +175,7 @@ def billing_address(contact_id):
             return address
 
 
-def create_to_do(adatlap_id, user, type, comment, deadline):
+def create_to_do(adatlap_id, user, type, comment, deadline, script_name=None):
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
     data = {
@@ -175,23 +186,34 @@ def create_to_do(adatlap_id, user, type, comment, deadline):
         "Deadline": deadline,
     }
 
+    log_minicrm_request(
+        endpoint="ToDo", script=script_name, description="MiniCRM ToDo létrehozása"
+    )
     return requests.put(
         f"https://r3.minicrm.hu/Api/R3/ToDo/", auth=(system_id, api_key), params=data
     )
 
 
 def get_all_adatlap_details(
-    category_id=None, status_id=None, criteria=None, deleted=False, ids=None
+    category_id=None,
+    status_id=None,
+    criteria=None,
+    deleted=False,
+    ids=None,
+    script=None,
 ):
     if not ids:
         adatlapok = get_all_adatlap(
-            category_id=category_id, status_id=status_id, deleted=deleted
+            category_id=category_id, status_id=status_id, deleted=deleted, script=script
         )
         if adatlapok == "Error":
             return "Error"
         adatlapok_detailed = []
         for adatlap in adatlapok:
-            adatlap = get_adatlap_details(adatlap["Id"])["response"]
+            adatlap = get_adatlap_details(adatlap["Id"], script)
+            if adatlap["status"] == "Error":
+                return "Error"
+            adatlap = adatlap["response"]
             if criteria:
                 if criteria(adatlap):
                     adatlapok_detailed.append(adatlap)
@@ -201,7 +223,7 @@ def get_all_adatlap_details(
     else:
         adatlapok_detailed = []
         for id in ids:
-            adatlap = get_adatlap_details(id)["response"]
+            adatlap = get_adatlap_details(id, script)["response"]
             if criteria:
                 if criteria(adatlap):
                     adatlapok_detailed.append(adatlap)
@@ -210,8 +232,8 @@ def get_all_adatlap_details(
         return adatlapok_detailed
 
 
-def list_to_dos(adatlap_id, criteria=None):
-    todos = get_request(endpoint="ToDoList", id=adatlap_id)
+def list_to_dos(adatlap_id, criteria=None, script_name=None):
+    todos = get_request(endpoint="ToDoList", id=adatlap_id, script_name=script_name)
     if todos["status"] == "Error":
         return
     if criteria:
