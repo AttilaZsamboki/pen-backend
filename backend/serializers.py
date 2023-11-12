@@ -128,3 +128,9 @@ class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MiniCrmAdatlapok
         fields = "__all__"
+
+
+class MunkadijSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Munkadij
+        fields = "__all__"

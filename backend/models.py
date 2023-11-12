@@ -1686,3 +1686,13 @@ class MiniCrmRequests(models.Model):
     class Meta:
         managed = False
         db_table = "minicrm_requests"
+
+class Munkadij(models.Model):
+    type = models.CharField(max_length=255, blank=True, null=True)
+    value = models.IntegerField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    product = models.ForeignKey('Products', models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_munkadij'

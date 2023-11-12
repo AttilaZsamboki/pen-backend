@@ -1159,3 +1159,16 @@ class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
     queryset = models.MiniCrmAdatlapok.objects.all()
     permission_classes = [AllowAny]
+
+
+class MunkadijList(generics.ListCreateAPIView):
+    serializer_class = serializers.MunkadijSerializer
+    queryset = models.Munkadij.objects.all()
+    permission_classes = [AllowAny]
+    filterset_fields = "__all__"
+
+
+class MunkadijDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = serializers.MunkadijSerializer
+    queryset = models.Munkadij.objects.all()
+    permission_classes = [AllowAny]
