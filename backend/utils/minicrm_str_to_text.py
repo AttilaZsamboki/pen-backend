@@ -14,6 +14,7 @@ status_map = {
     2894: "Vázlat (nincs kiadva)",
     3082: "Felmérés előkészítés",
     2929: "Sikertelen felmérés",
+    3086: "Sikeres felmérés",
 }
 
 todo_map = {

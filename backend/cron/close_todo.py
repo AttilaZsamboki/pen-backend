@@ -10,10 +10,8 @@ def close_todo(adatlap_id, type):
         adatlap_id,
         criteria=lambda x: x["Status"] == "Open" and todo_map[x["Type"]] == type,
     )
-    print(adatlap_id, todos)
-    return
     for todo in todos:
-        update_todo(todo, {"Status": "Closed"})
+        update_todo(todo["Id"], {"Status": "Closed"})
 
 
 def main():
@@ -31,39 +29,59 @@ def main():
                     details=data["Id"],
                 )
                 continue
-            print(
-                f"Státusz: {adatlap.StatusIdStr} - {adatlap.StatusId}, ToDo típus: {data['Type']}"
-            )
+
+            def next():
+                close_todo(data["Id"], data["Type"])
+                continue
+
             if adatlap.StatusId is None:
                 continue
             if data["Type"] == "Felmérés" and adatlap.StatusIdStr != "Felmérésre vár":
-                close_todo(data["Id"], data["Type"])
-                continue
+                next()
             elif (
                 data["Type"] == "Pénzügy díjbekérő"
                 and adatlap.StatusIdStr != "Utalásra vár"
             ):
-                close_todo(data["Id"], data["Type"])
-                continue
+                next()
             elif (
                 data["Type"] == "Pénzügyi elszámolás"
                 and adatlap.StatusIdStr != "Elszámolásra vár"
             ):
-                close_todo(data["Id"], data["Type"])
-                continue
+                next()
             elif (
                 data["Type"] == "Felmérés szervezés"
                 and adatlap.StatusIdStr != "Új érdeklődő"
                 and adatlap.StatusIdStr != "Felmérés szervezés"
             ):
-                close_todo(data["Id"], data["Type"])
-                continue
+                next()
             elif (
                 data["Type"] == "Pénzügy számlázás"
                 and adatlap.SzamlaSorszama2 is not None
             ):
-                close_todo(data["Id"], data["Type"])
-                continue
+                next()
+            elif (
+                data["Type"] == "Rendszerhiba E1"
+                and adatlap.StatusIdStr != "Felmérés előkészítés"
+            ):
+                next()
+            elif (
+                data["Type"] == "Rendszerhiba E2"
+                and adatlap.SzamlaSorszama2 is not None
+            ):
+                next()
+            elif data["Type"] == "Rendszerhiba E3" and adatlap.FelmeresiDij is not None:
+                next()
+            elif (
+                data["Type"] == "Új jelentkező - BOSS!"
+                and adatlap.StatusIdStr != "Új érdeklődő"
+                and adatlap.StatusIdStr != "Felmérés szervezés"
+            ):
+                next()
+            elif (
+                data["Type"] == "Felmérés - BOSS!"
+                and adatlap.StatusIdStr != "Felmérésre vár"
+            ):
+                next()
 
 
 main()
