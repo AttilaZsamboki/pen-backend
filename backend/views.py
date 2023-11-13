@@ -345,7 +345,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, pk):
         try:
             felmeres = models.Felmeresek.objects.get(id=pk)
-            adatlap = models.MiniCrmAdatlapok.objects.get(Id=felmeres.adatlap_id)
+            adatlap = models.MiniCrmAdatlapok.objects.get(Felmeresid=pk)
             return Response(
                 serializers.FelmeresekSerializer(
                     {
