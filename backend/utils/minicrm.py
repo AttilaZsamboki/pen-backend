@@ -195,6 +195,15 @@ def create_to_do(adatlap_id, user, type, comment, deadline, script_name=None):
     )
 
 
+def todo_details(todo_id, script_name=None, description=None):
+    return get_request(
+        endpoint="ToDo",
+        id=todo_id,
+        request_description=description,
+        script_name=script_name,
+    )
+
+
 def get_all_adatlap_details(
     category_id=None,
     status_id=None,

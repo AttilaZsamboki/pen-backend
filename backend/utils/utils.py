@@ -2,7 +2,8 @@ from ..config_development import base_path as dev
 from ..config_production import base_path as prod
 import boto3
 from dotenv import load_dotenv
-
+from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 import os
 
 load_dotenv()
@@ -39,3 +40,19 @@ def map_db_column_to_field(model, data):
 
 def filter_fields(model, data):
     return {k: v for k, v in data.items() if k in model._meta.fields}
+
+
+def get_spreadsheet(sheet_name, worksheet_name):
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/drive",
+    ]
+    SERVICE_ACCOUNT_FILE = "gds-dataupload-444ed56fca7c.json"
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        SERVICE_ACCOUNT_FILE, scope
+    )
+
+    client = gspread.authorize(credentials)
+
+    sheet = client.open(sheet_name).worksheet(worksheet_name)
+    return sheet

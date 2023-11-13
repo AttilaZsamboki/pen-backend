@@ -1,4 +1,5 @@
 from django.db import models
+from .utils.minicrm_str_to_text import status_map
 
 
 # Create your models here.
@@ -419,11 +420,10 @@ class Counties(models.Model):
 
 
 class Offers(models.Model):
-    id = models.AutoField(primary_key=True)
-    offer_id = models.IntegerField(blank=True, null=True)
-    adatlap = models.IntegerField(db_column="adatlap_id")
-    felmeres_id = models.IntegerField(db_column="Felmeresid", blank=True, null=True)
-    status_id = models.IntegerField(blank=True, null=True, db_column="StatusId")
+    id = models.IntegerField(
+        db_column="Id", primary_key=True
+    )  # Field name made lowercase.
+    projectid = models.IntegerField(db_column="ProjectId")  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -1672,6 +1672,12 @@ class MiniCrmAdatlapok(models.Model):
     LastEvent = models.TextField(blank=True, null=True)
     StatusGroup = models.TextField(blank=True, null=True)
 
+    @property
+    def StatusIdStr(self):
+        if self.StatusId and self.StatusId in status_map.keys():
+            return status_map[self.StatusId]
+        return ""
+
     class Meta:
         managed = False
         db_table = "pen_minicrm_adatlapok"
@@ -1687,6 +1693,7 @@ class MiniCrmRequests(models.Model):
         managed = False
         db_table = "minicrm_requests"
 
+
 class Munkadij(models.Model):
     type = models.CharField(max_length=255, blank=True, null=True)
     value = models.IntegerField(blank=True, null=True)
@@ -1694,4 +1701,4 @@ class Munkadij(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'pen_munkadij'
+        db_table = "pen_munkadij"

@@ -34,14 +34,14 @@ def main():
             )
         id = adatlap["Felmeresid"]
         adatlap_id = Felmeresek.objects.get(id=id).adatlap_id
-        offer = Offers.objects.filter(adatlap=adatlap["Id"])
+        offer = Offers.objects.filter(projectid=adatlap["Id"]).first()
         felmeres = get_adatlap_details(adatlap_id)
         if offer and felmeres["status"] != "Error":
             felmeres = felmeres["response"]
             order = create_order(
                 adatlap_id=adatlap_id,
                 contact_id=adatlap["ContactId"],
-                offer_id=offer[0].offer_id,
+                offer_id=offer.id,
                 adatlap_status="Szervezésre vár",
                 project_data={
                     "Megye2": felmeres["Megye"],
@@ -79,7 +79,7 @@ def main():
             system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
             api_key = os.environ.get("PEN_MINICRM_API_KEY")
             resp = requests.post(
-                f"https://r3.minicrm.hu/Api/Offer/{offer[0].offer_id}/Project",
+                f"https://r3.minicrm.hu/Api/Offer/{offer.id}/Project",
                 auth=(system_id, api_key),
                 json={"StatusId": "Sikeres megrendelés"},
             )

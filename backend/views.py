@@ -35,12 +35,11 @@ from .auth0backend import CustomJWTAuthentication
 from . import models, serializers
 from .utils.calculate_distance import process_data
 from .utils.logs import log
+from .utils.minicrm_str_to_text import status_map
 from .utils.minicrm import (
-    address_list,
     contact_details,
     get_all_adatlap_details,
     update_offer_order,
-    status_map,
     address_ids,
     address_details,
 )
@@ -345,18 +344,16 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, pk):
         try:
-            felmeres = models.Felmeresek.objects.filter(id=pk)
-            offer = models.Offers.objects.filter(felmeres_id=pk)
-            if offer.first():
-                return Response(
-                    serializers.FelmeresekSerializer(
-                        {
-                            "offer_status": status_map[offer.first().status_id],
-                            **felmeres.first().__dict__,
-                        },
-                    ).data
-                )
-            return Response(serializers.FelmeresekSerializer(felmeres.first()).data)
+            felmeres = models.Felmeresek.objects.get(id=pk)
+            adatlap = models.MiniCrmAdatlapok.objects.get(Id=felmeres.adatlap_id)
+            return Response(
+                serializers.FelmeresekSerializer(
+                    {
+                        "offer_status": status_map[adatlap.StatusId],
+                        **felmeres.__dict__,
+                    },
+                ).data
+            )
         except Exception as e:
             log(
                 "Felmérés lekérdezése sikertelen",
@@ -425,7 +422,6 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
 class OfferWebhook(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        adatlap_id = data["Id"]
         log(
             "Penészmentesítés rendelés webhook meghívva",
             "INFO",
@@ -433,12 +429,15 @@ class OfferWebhook(APIView):
             request.body,
         )
         try:
-            models.Offers.objects.filter(adatlap=adatlap_id).delete()
+            valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
+            filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
+
+            models.MiniCrmAdatlapok(
+                **filtered_data,
+            ).save()
             models.Offers(
-                offer_id=data["Head"]["Id"],
-                adatlap=adatlap_id,
-                felmeres_id=data["Data"]["Felmeresid"],
-                status_id=data["Data"]["StatusId"],
+                projectid=data["Id"],
+                id=data["Head"]["Id"],
             ).save()
             log(
                 "Penészmentesítés rendelés webhook sikeresen lefutott",
@@ -446,12 +445,12 @@ class OfferWebhook(APIView):
                 "pen_offer_webhook",
             )
             return Response("Succesfully received data", status=HTTP_200_OK)
-        except Exception as e:
+        except:
             log(
-                "Penészmentesítés rendelés webhook sikertelen",
+                "Penészmentesítés ajánlat webhook sikertelen",
                 "ERROR",
                 "pen_offer_webhook",
-                details=f"Error: {e}. {traceback.format_exc()}",
+                details=traceback.format_exc(),
             )
             return Response("Succesfully received data", status=HTTP_200_OK)
 
@@ -980,7 +979,7 @@ class CancelOffer(APIView):
             return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
         offer_adatlap = offer_adatlap[0]
 
-        offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).offer_id
+        offer_id = models.Offers.objects.get(projectid=offer_adatlap["Id"]).id
         update_resp = update_offer_order(
             offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True
         )
