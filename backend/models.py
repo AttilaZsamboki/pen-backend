@@ -1705,7 +1705,7 @@ class Munkadij(models.Model):
 
 
 class FelmeresMunkadijak(models.Model):
-    felmeres = models.ForeignKey("Felmeresek", models.DO_NOTHING, blank=True, null=True)
+    felmeres = models.ForeignKey("Felmeresek", models.CASCADE, blank=True, null=True)
     munkadij = models.ForeignKey("Munkadij", models.DO_NOTHING, blank=True, null=True)
     amount = models.IntegerField()
     value = models.FloatField()
