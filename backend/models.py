@@ -1702,3 +1702,12 @@ class Munkadij(models.Model):
     class Meta:
         managed = False
         db_table = "pen_munkadij"
+
+
+class FelmeresMunkadijak(models.Model):
+    felmeres = models.ForeignKey("Felmeresek", models.DO_NOTHING, blank=True, null=True)
+    munkadij = models.ForeignKey("Munkadij", models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_felmeres_munkadijak"

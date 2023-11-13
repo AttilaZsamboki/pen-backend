@@ -134,3 +134,9 @@ class MunkadijSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Munkadij
         fields = "__all__"
+
+
+class FelmeresMunkadijakSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.FelmeresMunkadijak
+        fields = "__all__"
