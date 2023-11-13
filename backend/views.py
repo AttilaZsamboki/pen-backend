@@ -350,6 +350,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
                 return Response(
                     serializers.FelmeresekSerializer(felmeres.__dict__).data
                 )
+            adatlap = adatlap.first()
             return Response(
                 serializers.FelmeresekSerializer(
                     {
