@@ -1707,6 +1707,7 @@ class Munkadij(models.Model):
 class FelmeresMunkadijak(models.Model):
     felmeres = models.ForeignKey("Felmeresek", models.DO_NOTHING, blank=True, null=True)
     munkadij = models.ForeignKey("Munkadij", models.DO_NOTHING, blank=True, null=True)
+    ammount = models.IntegerField()
 
     class Meta:
         managed = False
