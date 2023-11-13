@@ -1189,7 +1189,7 @@ class FelmeresMunkadijList(generics.ListCreateAPIView):
         adatlap_ids_in_request = [item.get("felmeres") for item in data]
 
         # Delete items not in request
-        models.FelmeresItems.objects.filter(
+        models.FelmeresMunkadijak.objects.filter(
             adatlap_id__in=adatlap_ids_in_request
         ).delete()
 
