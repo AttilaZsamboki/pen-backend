@@ -345,7 +345,11 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, pk):
         try:
             felmeres = models.Felmeresek.objects.get(id=pk)
-            adatlap = models.MiniCrmAdatlapok.objects.get(Felmeresid=pk)
+            adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
+            if not adatlap.exists():
+                return Response(
+                    serializers.FelmeresekSerializer(felmeres.__dict__).data
+                )
             return Response(
                 serializers.FelmeresekSerializer(
                     {
@@ -358,7 +362,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
             log(
                 "Felmérés lekérdezése sikertelen",
                 "ERROR",
-                "pen_offer_webhook",
+                "pen_felmeresek_detail",
                 details=f"Error: {e}. {traceback.format_exc()}",
             )
             return Response("Succesfully received data", status=HTTP_200_OK)
