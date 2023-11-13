@@ -1182,6 +1182,36 @@ class FelmeresMunkadijList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresMunkadijakSerializer
     queryset = models.FelmeresMunkadijak.objects.all()
     permission_classes = [AllowAny]
+    filterset_fields = "__all__"
+
+    def post(self, request):
+        data = request.data
+        adatlap_ids_in_request = [item.get("felmeres") for item in data]
+
+        # Delete items not in request
+        models.FelmeresItems.objects.filter(
+            adatlap_id__in=adatlap_ids_in_request
+        ).delete()
+
+        for item in data:
+            adatlap_id = item.pop("felmeres", None)
+            munkadij_id = item.pop("munkadij", None)
+            if adatlap_id is not None:
+                adatlap = get_object_or_404(models.Felmeresek, id=adatlap_id)
+                item["felmeres"] = adatlap
+            if munkadij_id is not None:
+                product = get_object_or_404(models.Munkadij, id=munkadij_id)
+                item["munkadij"] = product
+            item = {
+                k: v
+                for k, v in item.items()
+                if k in [f.name for f in models.FelmeresMunkadijak._meta.get_fields()]
+            }
+            instance, created = models.FelmeresMunkadijak.objects.update_or_create(
+                id=item.get("id", None),  # assuming 'id' is the unique field
+                defaults=item,
+            )
+        return Response(status=HTTP_200_OK)
 
 
 class FelmeresMunkadijDetail(generics.RetrieveUpdateDestroyAPIView):
