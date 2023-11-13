@@ -349,7 +349,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
             return Response(
                 serializers.FelmeresekSerializer(
                     {
-                        "offer_status": status_map[adatlap.StatusId],
+                        "offer_status": adatlap.StatusIdStr,
                         **felmeres.__dict__,
                     },
                 ).data

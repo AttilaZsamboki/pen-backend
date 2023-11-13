@@ -31,30 +31,39 @@ def main():
                     details=data["Id"],
                 )
                 continue
+            print(
+                f"Státusz: {adatlap.StatusIdStr} - {adatlap.StatusId}, ToDo típus: {data['Type']}"
+            )
+            if adatlap.StatusId is None:
+                continue
             if data["Type"] == "Felmérés" and adatlap.StatusIdStr != "Felmérésre vár":
-                print(adatlap.StatusIdStr)
                 close_todo(data["Id"], data["Type"])
-                pass
+                continue
             elif (
                 data["Type"] == "Pénzügy díjbekérő"
                 and adatlap.StatusIdStr != "Utalásra vár"
             ):
                 close_todo(data["Id"], data["Type"])
+                continue
             elif (
                 data["Type"] == "Pénzügyi elszámolás"
                 and adatlap.StatusIdStr != "Elszámolásra vár"
             ):
                 close_todo(data["Id"], data["Type"])
-            elif data["Type"] == "Felmérés szervezés" and (
-                adatlap.StatusIdStr != "Új érdeklődő"
-                or adatlap.StatusIdStr != "Felmérés szervezés"
+                continue
+            elif (
+                data["Type"] == "Felmérés szervezés"
+                and adatlap.StatusIdStr != "Új érdeklődő"
+                and adatlap.StatusIdStr != "Felmérés szervezés"
             ):
                 close_todo(data["Id"], data["Type"])
+                continue
             elif (
                 data["Type"] == "Pénzügy számlázás"
                 and adatlap.SzamlaSorszama2 is not None
             ):
                 close_todo(data["Id"], data["Type"])
+                continue
 
 
 main()

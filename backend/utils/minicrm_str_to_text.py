@@ -12,6 +12,8 @@ status_map = {
     2927: "Új érdeklődő",
     2933: "Felmérés szervezés",
     2894: "Vázlat (nincs kiadva)",
+    3082: "Felmérés előkészítés",
+    2929: "Sikertelen felmérés",
 }
 
 todo_map = {
