@@ -675,15 +675,6 @@ def get_unas_order_data(type):
         ).first()
 
         # Add the data to the datas list
-        munkadíj = sum(
-            [
-                i.value * i.amount
-                for i in models.FelmeresMunkadijak.objects.filter(
-                    felmeres=felmeres.id if felmeres else 0
-                )
-            ]
-        )
-
         datas.append(
             {
                 "OrderData": order_data,
@@ -695,6 +686,14 @@ def get_unas_order_data(type):
                     models.FelmeresItems.objects.filter(
                         adatlap_id=felmeres.id if felmeres else 0
                     )
+                ),
+                "Munkadíj": sum(
+                    [
+                        i.value * i.amount
+                        for i in models.FelmeresMunkadijak.objects.filter(
+                            felmeres=felmeres.id if felmeres else 0
+                        )
+                    ]
                 ),
             }
         )
@@ -771,7 +770,7 @@ def get_unas_order_data(type):
                     <Unit>darab</Unit>
                     <Quantity>{sum([float(j["ammount"]) for j in i.inputValues])}</Quantity>
                     <PriceNet>{float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100)}</PriceNet>
-                    <PriceGross>{float(i.netPrice)*1.27}</PriceGross>
+                    <PriceGross>{(float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100))*1.27}</PriceGross>
                     <Vat>27%</Vat>
                     <Status>
                         <![CDATA[]]>
@@ -782,19 +781,27 @@ def get_unas_order_data(type):
                     ]
                 )
                 + """
+                """
+                + (
+                    f"""
                 <Item>
-                    <Id>{i.product_id if i.product_id else "discount-amount"}</Id>
-                    <Sku>{i.product.sku if i.product else "discount-amount"}</Sku>
-                    <Name>{i.name}</Name>
+                    <Id>discount-amount</Id>
+                    <Sku>discount-amount</Sku>
+                    <Name>Munkadíj</Name>
                     <Unit>darab</Unit>
-                    <Quantity>{sum([float(j["ammount"]) for j in i.inputValues])}</Quantity>
-                    <PriceNet>{float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100)}</PriceNet>
-                    <PriceGross>{float(i.netPrice)*1.27}</PriceGross>
+                    <Quantity>1</Quantity>
+                    <PriceNet>{data["Munkadíj"]}</PriceNet>
+                    <PriceGross>{data["Munkadíj"]*1.27}</PriceGross>
                     <Vat>27%</Vat>
                     <Status>
                         <![CDATA[]]>
                     </Status>
                     </Item>
+                    """
+                    if data["Munkadíj"]
+                    else ""
+                )
+                + """
             </Items>
             <Params>
 """
