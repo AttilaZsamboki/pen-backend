@@ -348,7 +348,7 @@ class Felmeresek(models.Model):
     def netOrderTotal(self):
         return sum(
             item.netTotal for item in self.felmeresitems_set.exclude(type="Discount")
-        )
+        ) + sum(item.value * item.amount for item in self.felmeresmunkadijak_set.all())
 
     @property
     def grossOrderTotal(self):
