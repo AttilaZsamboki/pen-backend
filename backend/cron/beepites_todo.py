@@ -90,7 +90,7 @@ Raktár: https://app.clouderp.hu/v2/order?view=68&search={adatlap["RendelesSzama
 Felmérés: {adatlap["FelmeresLink"]} 
 Utcakép: {adatlap["Utcakep"]}
 
-Megrendelés bruttó: {order.grossOrderTotal}Ft
+Megrendelés bruttó: {str(order.grossOrderTotal)}Ft
 Megrendelés nettó: {order.netOrderTotal}Ft
 """
             resp = create_to_do(

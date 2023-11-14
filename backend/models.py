@@ -352,14 +352,11 @@ class Felmeresek(models.Model):
 
     @property
     def grossOrderTotal(self):
-        total = (
-            sum(
-                item.netTotal
-                for item in self.felmeresitems_set.exclude(type="Discount")
-            )
-            * 1.27
-        )
-        return total * (self.felmeresitems_set.get(type="Discount").netPrice / 100)
+        total = self.netOrderTotal * 1.27
+        discount = self.felmeresitems_set.filter(type="Discount")
+        if discount.exists() and discount.first().netPrice != 0:
+            return total * (discount.first().netPrice / 100)
+        return total
 
     class Meta:
         managed = False
