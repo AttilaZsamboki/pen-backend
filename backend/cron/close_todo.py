@@ -10,12 +10,13 @@ def close_todo(adatlap_id, type):
         adatlap_id,
         criteria=lambda x: x["Status"] == "Open" and todo_map[x["Type"]] == type,
     )
-    for todo in todos:
-        update_todo(todo["Id"], {"Status": "Closed"})
+    if todos:
+        for todo in todos:
+            update_todo(todo["Id"], {"Status": "Closed"})
 
 
 def main():
-    log("Összes teendő lekérdezése elindult", "INFO", script_name="close_todo")
+    log("Összes teendő lekérdezése elindult", "INFO", script_name="pen_close_todo")
     sheet = get_spreadsheet("[SYS] ÖSSZES TEENDŐ", "Munkalap1")
     for row in sheet.get("B2:C"):
         if len(row) == 2:
@@ -32,7 +33,6 @@ def main():
 
             def next():
                 close_todo(data["Id"], data["Type"])
-                continue
 
             if adatlap.StatusId is None:
                 continue
