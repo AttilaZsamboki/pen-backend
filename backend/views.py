@@ -57,10 +57,10 @@ class CalculateDistance(APIView):
             request.body.decode("utf-8"),
         )
         data = json.loads(request.body.decode("utf-8"))["Data"]
-        if data["StatusId"] == "2927":
-            response = process_data(data)
-            if response == "Error":
-                return Response({"status": "error"}, status=HTTP_200_OK)
+        # if data["StatusId"] == "2927":
+        #     response = process_data(data)
+        #     if response == "Error":
+        #         return Response({"status": "error"}, status=HTTP_200_OK)
 
         felmero = "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
         data.pop("Felmero2")
