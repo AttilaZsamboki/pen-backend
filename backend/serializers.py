@@ -127,7 +127,21 @@ class RolesSerializer(serializers.ModelSerializer):
 class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MiniCrmAdatlapok
-        fields = "__all__"
+        fields = [
+            "Id",
+            "Name",
+            "CategoryId",
+            "StatusId",
+            "ContactId",
+            "Cim2",
+            "FelmeresiDij",
+            "Telepules",
+            "Iranyitoszam",
+            "Orszag",
+            "Felmero2",
+            "IngatlanKepe",
+            "CreatedAt",
+        ]
 
 
 class MunkadijSerializer(serializers.ModelSerializer):
