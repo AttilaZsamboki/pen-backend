@@ -355,7 +355,7 @@ class Felmeresek(models.Model):
         total = self.netOrderTotal * 1.27
         discount = self.felmeresitems_set.filter(type="Discount")
         if discount.exists() and discount.first().netPrice != 0:
-            return total * (discount.first().netPrice / 100)
+            return total * (1 - (discount.first().netPrice / 100))
         return total
 
     class Meta:
