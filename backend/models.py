@@ -324,6 +324,7 @@ class ProductTemplate(models.Model):
     product = models.ForeignKey(
         "Products", models.DO_NOTHING
     )  # The composite primary key (product_id, template_id) found, that is not supported. The first column is selected.
+    type = models.CharField(max_length=100, default="Item")
 
     class Meta:
         managed = False
@@ -432,7 +433,6 @@ class QuestionProducts(models.Model):
         "Products", models.DO_NOTHING
     )  # The composite primary key (product_id, question_id) found, that is not supported. The first column is selected.
     question = models.ForeignKey("Questions", models.CASCADE, primary_key=True)
-    type = models.CharField(max_length=100, default="Item")
 
     class Meta:
         managed = False
