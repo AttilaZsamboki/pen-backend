@@ -8,3 +8,4 @@ pen-env/
 .env
 backend/test
 static/images/google_street_view/street_view.jpg
+backend/utils/google_maps.py

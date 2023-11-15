@@ -13,7 +13,7 @@ dotenv.load_dotenv()
 def calculate_distance(start, end, mode="driving"):
     gmaps = googlemaps.Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
     try:
-        direction_result = gmaps.directions(start, end, mode=mode)
+        direction_result = gmaps.directions(start, end, mode=mode, alternatives=True)
     except (googlemaps.exceptions.ApiError, googlemaps.exceptions.HTTPError) as e:
         log(
             "Hiba a Google Maps API-al való kommunikáció során",
@@ -22,8 +22,10 @@ def calculate_distance(start, end, mode="driving"):
             details=e,
         )
         return "Error"
-    distance = direction_result[0]["legs"][0]["distance"]["value"]
-    duration = direction_result[0]["legs"][0]["duration"]["value"]
+    distance = min([i["legs"][0]["distance"]["value"] for i in direction_result])
+    duration = [
+        i for i in direction_result if i["legs"][0]["distance"]["value"] == distance
+    ][0]["legs"][0]["duration"]["value"]
     return {"distance": distance, "duration": duration}
 
 
