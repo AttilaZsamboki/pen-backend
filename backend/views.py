@@ -58,7 +58,6 @@ class CalculateDistance(APIView):
         )
         data = json.loads(request.body.decode("utf-8"))["Data"]
 
-
         felmero = "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
         data.pop("Felmero2")
         valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
@@ -132,7 +131,9 @@ class OrderWebhook(APIView):
                 Beepitok=beeptiok,
                 FizetesiMod3=data["Schema"]["FizetesiMod3"][
                     data["Data"]["FizetesiMod3"]
-                ],
+                ]
+                if data["Data"]["FizetesiMod3"]
+                else None,
                 **filtered_data,
             ).save()
             models.Orders(
