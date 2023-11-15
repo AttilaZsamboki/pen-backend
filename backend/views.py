@@ -898,7 +898,7 @@ class UnasSetProduct(APIView):
     parser_classes = (XMLParser,)
     renderer_classes = (XMLRenderer,)
 
-    def post(self, request):
+    def post(self, request, type):
         log(
             "Unas termék szinkron megkezdődött",
             "INFO",
