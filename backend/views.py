@@ -35,7 +35,6 @@ from .auth0backend import CustomJWTAuthentication
 from . import models, serializers
 from .utils.calculate_distance import process_data
 from .utils.logs import log
-from .utils.minicrm_str_to_text import status_map
 from .utils.minicrm import (
     contact_details,
     get_all_adatlap_details,

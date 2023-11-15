@@ -13,7 +13,10 @@ def main():
     script_name = "pen_beepites_todo"
     log("Beépítés feladatok készítése elindult", "INFO", script_name=script_name)
     adatlapok = MiniCrmAdatlapok.objects.filter(
-        CategoryId=29, Beepitok__isnull=False, DateTime1953__isnull=False
+        CategoryId=29,
+        Beepitok__isnull=False,
+        DateTime1953__isnull=False,
+        RendelesSzama__isnull=False,
     ).values()
     for adatlap in adatlapok:
         existing_todos = list_to_dos(
@@ -65,7 +68,7 @@ def main():
         address = address["response"]
 
         contact = contact_details(adatlap_id=adatlap["Id"], script_name=script_name)
-        if contact == "Error":
+        if contact == "Error" or contact["status"] == "Error":
             log(
                 "Hiba akadt a kapcsolattartó lekérdezése közben",
                 "ERROR",

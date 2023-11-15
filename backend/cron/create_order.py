@@ -1,5 +1,5 @@
 from ..utils.logs import log
-from ..utils.minicrm import get_all_adatlap_details, create_order, get_adatlap_details
+from ..utils.minicrm import create_order, get_adatlap_details
 
 from ..models import Offers, Felmeresek, MiniCrmAdatlapok
 
