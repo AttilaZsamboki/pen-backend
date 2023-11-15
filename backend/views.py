@@ -67,7 +67,7 @@ class CalculateDistance(APIView):
             Felmero2=felmero,
             **filtered_data,
         ).save()
-        if data["StatusId"] == "2927":
+        if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
             response = process_data(data)
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
