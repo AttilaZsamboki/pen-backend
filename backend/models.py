@@ -321,7 +321,9 @@ class Templates(models.Model):
 
 class ProductTemplate(models.Model):
     template = models.ForeignKey("Templates", models.CASCADE, primary_key=True)
-    product = models.IntegerField(db_column="") # The composite primary key (product_id, template_id) found, that is not supported. The first column is selected.
+    product = models.IntegerField(
+        db_column="product_id"
+    )  # The composite primary key (product_id, template_id) found, that is not supported. The first column is selected.
     type = models.CharField(max_length=100, default="Item")
 
     class Meta:
