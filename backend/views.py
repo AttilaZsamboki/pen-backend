@@ -312,7 +312,12 @@ class ProductTemplatesList(generics.ListCreateAPIView):
             [
                 models.ProductTemplate(
                     template=models.Templates.objects.get(id=template_id),
-                    product=models.Products.objects.get(id=i),
+                    product=models.Products.objects.get(id=i["product"]),
+                    **{
+                        j: k
+                        for j, k in i.items()
+                        if j not in ["product", "template_id"]
+                    },
                 )
                 for i in request.data
             ]

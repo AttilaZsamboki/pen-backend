@@ -329,7 +329,7 @@ class ProductTemplate(models.Model):
     class Meta:
         managed = False
         db_table = "pen_product_template"
-        unique_together = (("product", "template"),)
+        unique_together = (("product", "template", "type"),)
 
 
 class Felmeresek(models.Model):
