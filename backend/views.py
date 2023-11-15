@@ -295,16 +295,6 @@ class ProductTemplatesList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        data = json.loads(request.body)
-        template_instance = models.Templates.objects.get(id=data["template_id"])
-        product_instance = models.Products.objects.get(id=data["product_id"])
-
-        models.ProductTemplate.objects.create(
-            template=template_instance, product=product_instance
-        )
-        return Response(status=HTTP_200_OK)
-
-    def put(self, request):
         template_id = self.request.query_params.get("template_id")
         products = models.ProductTemplate.objects.filter(template=template_id)
         products.delete()
@@ -313,11 +303,7 @@ class ProductTemplatesList(generics.ListCreateAPIView):
                 models.ProductTemplate(
                     template=models.Templates.objects.get(id=template_id),
                     product=models.Products.objects.get(id=i["product"]),
-                    **{
-                        j: k
-                        for j, k in i.items()
-                        if j not in ["product", "template_id"]
-                    },
+                    **{j: k for j, k in i.items() if j not in ["product", "template"]},
                 )
                 for i in request.data
             ]
