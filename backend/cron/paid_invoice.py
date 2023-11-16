@@ -28,9 +28,17 @@ def main():
         query_response = requests.post(
             "https://www.szamlazz.hu/szamla/",
             files={"action-szamla_agent_xml": ("invoice.xml", query_xml)},
-        ).text
+        )
+        if query_response.status_code != 200:
+            log(
+                "Számla lekérdezése sikertelen",
+                script_name="pen_paid_invoice",
+                status="ERROR",
+                details=query_response.reason,
+            )
+            continue
 
-        root = ET.fromstring(query_response)
+        root = ET.fromstring(query_response.text)
 
         # Define the namespace
         ns = {"szamla": "http://www.szamlazz.hu/szamla"}
