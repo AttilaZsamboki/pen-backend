@@ -95,6 +95,7 @@ Utcakép: {adatlap["Utcakep"]}
 
 Megrendelés bruttó: {str(order.grossOrderTotal)}Ft
 Megrendelés nettó: {order.netOrderTotal}Ft
+Kedvezményes összeg: {order.grossOrderTotal - order.grossOrderTotal * 0.1}Ft
 """
             resp = create_to_do(
                 adatlap["Id"],
