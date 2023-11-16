@@ -1,5 +1,6 @@
 from ..utils.logs import log
 from ..utils.minicrm import create_order, get_adatlap_details
+from ..utils.minicrm_str_to_text import warranty_type_map
 
 from ..models import Offers, Felmeresek, MiniCrmAdatlapok
 
@@ -33,25 +34,25 @@ def main():
                 details=f"Adatlap: {adatlap}",
             )
         id = adatlap["Felmeresid"]
-        adatlap = Felmeresek.objects.get(id=id)
+        felmeres = Felmeresek.objects.get(id=id)
         offer = Offers.objects.filter(projectid=adatlap["Id"]).first()
-        felmeres = get_adatlap_details(adatlap.adatlap_id)
-        if offer and felmeres["status"] != "Error":
-            felmeres = felmeres["response"]
+        adatlap_details = get_adatlap_details(felmeres.adatlap_id)
+        if offer and adatlap_details["status"] != "Error":
+            adatlap_details = adatlap_details["response"]
             order = create_order(
-                adatlap_id=adatlap.adatlap_id,
+                adatlap_id=felmeres.adatlap_id,
                 contact_id=adatlap["ContactId"],
                 offer_id=offer.id,
                 adatlap_status="Szervezésre vár",
                 project_data={
-                    "Megye2": felmeres["Megye"],
-                    "Utcakep": felmeres["StreetViewUrl"],
-                    "IngatlanKepe2": felmeres["IngatlanKepe"],
-                    "FelmeresLink": felmeres["FelmeresAdatok"],
-                    "KiMerteFel2": felmeres["Felmero2"],
-                    "FelmeresDatuma2": felmeres["FelmeresIdopontja2"],
-                    "GaranciaTipusa": adatlap.warranty,
-                    "Indoklas": adatlap.warranty_reason,
+                    "Megye2": adatlap_details["Megye"],
+                    "Utcakep": adatlap_details["StreetViewUrl"],
+                    "IngatlanKepe2": adatlap_details["IngatlanKepe"],
+                    "FelmeresLink": adatlap_details["FelmeresAdatok"],
+                    "KiMerteFel2": adatlap_details["Felmero2"],
+                    "FelmeresDatuma2": adatlap_details["FelmeresIdopontja2"],
+                    "GaranciaTipusa": warranty_type_map[felmeres.warranty],
+                    "Indoklas": felmeres.warranty_reason,
                 },
             )
             if order["status"] == "error":
@@ -103,7 +104,7 @@ def main():
             f"{adatlap['Name']} megrendelés létrehozása sikertelen, nem létezik felmérés",
             script_name="pen_create_order",
             status="ERROR",
-            details=f"Offer: {offer}. Felmérés: {felmeres}",
+            details=f"Offer: {offer}. Felmérés: {adatlap_details}",
         )
     log(
         "Megrendelések létrehozása sikeresen befejeződött",

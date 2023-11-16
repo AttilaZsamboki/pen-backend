@@ -31,3 +31,10 @@ todo_map = {
     240: "Rendszerhiba E2",
     238: "Pénzügy számlázás",
 }
+
+warranty_type_map = {
+    "Teljes garancia": "Teljes",
+    "Feltételes garancia": "Részleges",
+    "Eszköz garancia": "Eszköz",
+    "Nem adunk garanciát a rendszerre": "Nincs",
+}
