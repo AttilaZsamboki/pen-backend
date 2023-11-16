@@ -10,6 +10,7 @@ import requests
 import datetime
 import os
 from dotenv import load_dotenv
+import traceback
 
 load_dotenv()
 
@@ -298,7 +299,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 "Nincsenek számlázási adatok",
                 "FAILED",
                 script_name=f"pen_{script_name}",
-                details=f"adatlap: {adatlap['Id']}, error: {e}",
+                details=f"adatlap: {adatlap['Id']}, error: {traceback.format_exc()}",
             )
             continue
         except Exception as e:
@@ -306,7 +307,7 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 f"Hiba akadt a {name} feltöltésében",
                 "ERROR",
                 script_name=f"pen_{script_name}",
-                details=f"error:{e}",
+                details=traceback.format_exc(),
             )
             continue
         log(
