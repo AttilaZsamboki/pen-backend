@@ -1199,6 +1199,14 @@ class MunkadijDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Munkadij.objects.all()
     permission_classes = [AllowAny]
 
+    def delete(self, request, pk):
+        try:
+            models.Munkadij.objects.filter(id=pk).delete()
+            models.ProductTemplate.objects.filter(product=pk, type="Munkadíj").delete()
+            return Response(status=HTTP_200_OK)
+        except:
+            return Response(status=HTTP_400_BAD_REQUEST)
+
 
 class FelmeresMunkadijList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresMunkadijakSerializer

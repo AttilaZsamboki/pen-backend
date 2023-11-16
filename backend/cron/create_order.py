@@ -33,13 +33,13 @@ def main():
                 details=f"Adatlap: {adatlap}",
             )
         id = adatlap["Felmeresid"]
-        adatlap_id = Felmeresek.objects.get(id=id).adatlap_id
+        adatlap = Felmeresek.objects.get(id=id)
         offer = Offers.objects.filter(projectid=adatlap["Id"]).first()
-        felmeres = get_adatlap_details(adatlap_id)
+        felmeres = get_adatlap_details(adatlap.adatlap_id)
         if offer and felmeres["status"] != "Error":
             felmeres = felmeres["response"]
             order = create_order(
-                adatlap_id=adatlap_id,
+                adatlap_id=adatlap.adatlap_id,
                 contact_id=adatlap["ContactId"],
                 offer_id=offer.id,
                 adatlap_status="Szervezésre vár",
@@ -50,6 +50,8 @@ def main():
                     "FelmeresLink": felmeres["FelmeresAdatok"],
                     "KiMerteFel2": felmeres["Felmero2"],
                     "FelmeresDatuma2": felmeres["FelmeresIdopontja2"],
+                    "GaranciaTipusa": adatlap.warranty,
+                    "Indoklas": adatlap.warranty_reason,
                 },
             )
             if order["status"] == "error":
