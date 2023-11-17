@@ -55,15 +55,19 @@ class CalculateDistance(APIView):
             "pen_calculate_distance_webhook",
             request.body.decode("utf-8"),
         )
-        data = json.loads(request.body.decode("utf-8"))["Data"]
+        all_data = json.loads(request.body.decode("utf-8"))
+        data = all_data["Data"]
 
         felmero = "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
         data.pop("Felmero2")
         valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-        filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+        filtered_data = {
+            k: v for k, v in data.items() if k in valid_fields and k != "FizetesiMod2"
+        }
 
         models.MiniCrmAdatlapok(
             Felmero2=felmero,
+            FizetesiMod2=all_data["Schema"]["FizetesiMod2"][data["FizetesiMod2"]],
             **filtered_data,
         ).save()
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
