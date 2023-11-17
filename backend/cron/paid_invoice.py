@@ -53,7 +53,7 @@ def main():
                     "Kifizetett számla",
                     script_name="pen_paid_invoice",
                     status="INFO",
-                    details="Adatlap ID: " + adatlap.Id,
+                    details="Adatlap ID: " + str(adatlap.Id),
                 )
                 resp = update_adatlap_fields(adatlap.Id, {"StatusId": "3023"})
                 if resp["code"] == 200:
@@ -61,7 +61,7 @@ def main():
                         "Adatlap frissítve",
                         script_name="pen_paid_invoice",
                         status="INFO",
-                        details="Adatlap ID: " + adatlap.Id,
+                        details="Adatlap ID: " + str(adatlap.Id),
                     )
                 else:
                     log(

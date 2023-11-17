@@ -1,5 +1,6 @@
 from .utils.google_maps import calculate_distance
 from .models import MiniCrmAdatlapok
+from .utils.utils import round_up_to_hour
 from django.db.models import DateTimeField
 from django.db.models.functions import Cast, TruncDate
 import datetime
@@ -65,10 +66,12 @@ def main(felmeres_adatlap):
                     )
                     open_slots.append(
                         {
-                            "at": adatlap_filter[i].FelmeresIdopontja2_datetime
-                            + datetime.timedelta(
-                                seconds=3600 + distance_to["duration"]
-                            ),
+                            "at": round_up_to_hour(
+                                adatlap_filter[i].FelmeresIdopontja2_datetime
+                                + datetime.timedelta(
+                                    seconds=3600 + distance_to["duration"]
+                                )
+                            ).replace(second=0, microsecond=0),
                             "felmero": felmero["Felmero2"],
                             "diff": distance_from["duration"]
                             + distance_to["duration"]

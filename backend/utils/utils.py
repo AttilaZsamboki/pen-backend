@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import os
+import math
+import datetime
 
 load_dotenv()
 
@@ -56,3 +58,7 @@ def get_spreadsheet(sheet_name, worksheet_name):
 
     sheet = client.open(sheet_name).worksheet(worksheet_name)
     return sheet
+
+
+def round_up_to_hour(dt):
+    return dt + datetime.timedelta(minutes=math.ceil(dt.minute / 60) * 60 - dt.minute)
