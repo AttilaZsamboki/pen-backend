@@ -345,7 +345,7 @@ class Felmeresek(models.Model):
     subject = models.TextField(blank=True, null=True)
     created_by = models.TextField(blank=True, null=True)
     warranty = models.CharField(max_length=255, blank=True, null=True)
-    warranty_reason = models.TextField()
+    warranty_reason = models.TextField(blank=True, null=True)
 
     @property
     def netOrderTotal(self):
