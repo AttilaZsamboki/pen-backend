@@ -5,7 +5,7 @@ from ..utils.minicrm import (
 )
 from ..utils.utils import get_spreadsheet
 from ..utils.logs import log
-from ..models import MiniCrmAdatlapok
+from ..models import MiniCrmAdatlapok, MiniCrmTodos
 
 
 def felmeres_todo():
@@ -18,32 +18,25 @@ def felmeres_todo():
         Felmero2__isnull=False,
         FelmeresIdopontja2__isnull=False,
     ).values()
-    to_dos = []
-    sheet = get_spreadsheet("[SYS] ÖSSZES TEENDŐ", "Munkalap1")
-    for row in sheet.get("B2:C"):
-        if len(row) == 2:
-            data = {"Id": row[0].split("/")[-1], "Type": row[1]}
-            if data["Type"] == "Felmérés":
-                to_dos.append(data)
+
     for adatlap in adatlapok:
-        url = "https://app.peneszmentesites.hu/new?page=1&adatlap_id=" + str(
-            adatlap["Id"]
-        )
-        urlap = update_adatlap_fields(
-            id=adatlap["Id"], fields={"Urlap": url}, script_name=script_name
-        )
-        if urlap["code"] == "Error":
-            log(
-                "Hiba akadt az adatlap Urlap mezőjének frissítése közben",
-                "ERROR",
-                script_name=script_name,
-                details="Adatlap: "
-                + str(adatlap["Id"])
-                + ", Error: "
-                + str(urlap["reason"]),
+        if MiniCrmTodos.objects.filter(projectid=adatlap["Id"]).exists() is False:
+            url = "https://app.peneszmentesites.hu/new?page=1&adatlap_id=" + str(
+                adatlap["Id"]
             )
-            continue
-        if [i for i in to_dos if i["Id"] == str(adatlap["Id"])] == []:
+            urlap = update_adatlap_fields(
+                id=adatlap["Id"], fields={"Urlap": url}, script_name=script_name
+            )
+            if urlap["code"] == "Error":
+                log(
+                    "Hiba akadt az adatlap Urlap mezőjének frissítése közben",
+                    "ERROR",
+                    script_name=script_name,
+                    details="Adatlap: "
+                    + str(adatlap["Id"])
+                    + ", Error: "
+                    + str(urlap["reason"]),
+                )
             contact = contact_details(
                 contact_id=adatlap["ContactId"], script_name=script_name
             )
@@ -69,6 +62,7 @@ def felmeres_todo():
                 script_name=script_name,
             )
             if todo.status_code == 200:
+                MiniCrmTodos(projectid=adatlap["Id"]).save()
                 continue
             log(
                 "Hiba akadt a feladat létrehozása közben",

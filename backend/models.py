@@ -1480,7 +1480,7 @@ class MiniCrmAdatlapok(models.Model):
     MilyenMasProblema = models.BigIntegerField(blank=True, null=True)
     Tavolsag = models.TextField(blank=True, null=True)
     FelmeresiDij = models.IntegerField(blank=True, null=True)
-    FelmeresIdopontja2 = models.TextField(blank=True, null=True)
+    FelmeresIdopontja2 = models.DateTimeField(blank=True, null=True)
     MiAzUgyfelFoSzempontja3 = models.TextField(blank=True, null=True)
     EgyebSzempontok3 = models.TextField(blank=True, null=True)
     Cim2 = models.TextField(blank=True, null=True)
@@ -1713,3 +1713,13 @@ class FelmeresMunkadijak(models.Model):
     class Meta:
         managed = False
         db_table = "pen_felmeres_munkadijak"
+
+
+class MiniCrmTodos(models.Model):
+    projectid = models.IntegerField(
+        db_column="ProjectId"
+    )  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = "pen_minicrm_todos"
