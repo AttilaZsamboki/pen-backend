@@ -1,15 +1,41 @@
-from ..utils.minicrm import update_all_status
 from ..utils.logs import log
+from ..models import MiniCrmAdatlapok
+from ..utils.minicrm import update_adatlap_fields
+
 
 def main():
-    log("Átutalásos felmérés - Automatikus lezárás elindult", "INFO", script_name="pen_close_felmeres")
-    def condition(adatlap):
-        if adatlap["StatusId"] == "Elszámolásra vár" and adatlap["FizetesiMod2"] == "Átutalás" and adatlap["SzamlaSorszama2"] != "":
-            return True
-        return False
-    adatlapok = update_all_status(category_id=23, status="Sikeres felmérés", condition=condition)
+    log(
+        "Átutalásos felmérés - Automatikus lezárás elindult",
+        "INFO",
+        script_name="pen_close_felmeres",
+    )
+
+    adatlapok = MiniCrmAdatlapok.objects.filter(
+        StatusId="3084", FizetesiMod2="Átutalás", SzamlaSorszama2__isnull=False
+    ).values()
+
     if adatlapok == []:
         log("Nincs lezárható adatlap", "INFO", script_name="pen_close_felmeres")
         return
-    log(f"Az alábbi adatlapokat sikeresen lezártuk: {', '.join([str(i['data']['Id']) for i in adatlapok if i['code'] == 200])}", "INFO", script_name="pen_close_felmeres")
+    for adatlap in adatlapok:
+        resp = update_adatlap_fields(
+            id=adatlap["Id"],
+            fields={"StatusId": "Sikeres felmérés"},
+            script_name="pen_close_felmeres",
+        )
+        if resp["code"] == 200:
+            log(
+                f"Az alábbi adatlapot sikeresen lezártuk: {adatlap['Id']}",
+                "INFO",
+                script_name="pen_close_felmeres",
+            )
+            continue
+        log(
+            "Hiba történt a lezárás során",
+            "ERROR",
+            script_name="pen_close_felmeres",
+            details=resp["reason"],
+        )
+
+
 main()
