@@ -2,7 +2,7 @@ import requests
 import os
 import googlemaps
 import dotenv
-import urllib.parse
+import traceback
 
 from .logs import log
 from .utils import base_path
@@ -10,10 +10,12 @@ from .utils import base_path
 dotenv.load_dotenv()
 
 
-def calculate_distance(start, end, mode="driving"):
+def calculate_distance(start, end, mode="driving", waypoints=None, priorty="duration"):
     gmaps = googlemaps.Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
     try:
-        direction_result = gmaps.directions(start, end, mode=mode, alternatives=True)
+        direction_result = gmaps.directions(
+            start, end, mode=mode, alternatives=True, waypoints=waypoints
+        )
     except (googlemaps.exceptions.ApiError, googlemaps.exceptions.HTTPError) as e:
         log(
             "Hiba a Google Maps API-al való kommunikáció során",
@@ -21,11 +23,87 @@ def calculate_distance(start, end, mode="driving"):
             script_name="pen_calculate_distance",
             details=e,
         )
-        return "Error"
-    distance = min([i["legs"][0]["distance"]["value"] for i in direction_result])
-    duration = [
-        i for i in direction_result if i["legs"][0]["distance"]["value"] == distance
-    ][0]["legs"][0]["duration"]["value"]
+        return traceback.format_exc()
+    if not direction_result:
+        log(
+            "Hiba a Google Maps API-al való kommunikáció során. Hibásan megadott cím",
+            status="INFO",
+            script_name="pen_calculate_distance",
+            details=f"start: {start}, end: {end}, mode: {mode}, waypoints: {waypoints}",
+        )
+        return
+    if priorty == "distance":
+        if waypoints:
+            distance = min(
+                [
+                    sum(
+                        [
+                            i["legs"][j]["distance"]["value"]
+                            for j in range(len(i["legs"]))
+                        ]
+                    )
+                    for i in direction_result
+                ]
+            )
+            duration = sum(
+                [
+                    i
+                    for i in direction_result
+                    if sum(
+                        [
+                            i["legs"][j]["distance"]["value"]
+                            for j in range(len(i["legs"]))
+                        ]
+                    )
+                    == distance
+                ][0]["legs"][j]["duration"]["value"]
+                for j in range(len(direction_result[0]["legs"]))
+            )
+        else:
+            distance = min(
+                [i["legs"][0]["distance"]["value"] for i in direction_result]
+            )
+            duration = [
+                i
+                for i in direction_result
+                if i["legs"][0]["distance"]["value"] == distance
+            ][0]["legs"][0]["duration"]["value"]
+    elif priorty == "duration":
+        if waypoints:
+            duration = min(
+                [
+                    sum(
+                        [
+                            i["legs"][j]["duration"]["value"]
+                            for j in range(len(i["legs"]))
+                        ]
+                    )
+                    for i in direction_result
+                ]
+            )
+            distance = sum(
+                [
+                    i
+                    for i in direction_result
+                    if sum(
+                        [
+                            i["legs"][j]["duration"]["value"]
+                            for j in range(len(i["legs"]))
+                        ]
+                    )
+                    == duration
+                ][0]["legs"][j]["distance"]["value"]
+                for j in range(len(direction_result[0]["legs"]))
+            )
+        else:
+            duration = min(
+                [i["legs"][0]["duration"]["value"] for i in direction_result]
+            )
+            distance = [
+                i
+                for i in direction_result
+                if i["legs"][0]["duration"]["value"] == duration
+            ][0]["legs"][0]["distance"]["value"]
     return {"distance": distance, "duration": duration}
 
 

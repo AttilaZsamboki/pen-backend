@@ -67,7 +67,9 @@ class CalculateDistance(APIView):
 
         models.MiniCrmAdatlapok(
             Felmero2=felmero,
-            FizetesiMod2=all_data["Schema"]["FizetesiMod2"][data["FizetesiMod2"]],
+            FizetesiMod2=all_data["Schema"]["FizetesiMod2"][data["FizetesiMod2"]]
+            if data["FizetesiMod2"]
+            else None,
             **filtered_data,
         ).save()
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:

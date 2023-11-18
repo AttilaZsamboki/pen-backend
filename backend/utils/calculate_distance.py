@@ -12,7 +12,7 @@ def process_data(data, source="webhook"):
     address = (
         f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"
     )
-    gmaps_result = calculate_distance(start=telephely, end=address)
+    gmaps_result = calculate_distance(start=telephely, end=address, priorty="distance")
     script_name = "pen_calculate_distance_" + source
     if gmaps_result == "Error":
         log(

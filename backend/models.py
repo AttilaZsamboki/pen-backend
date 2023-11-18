@@ -1716,10 +1716,33 @@ class FelmeresMunkadijak(models.Model):
 
 
 class MiniCrmTodos(models.Model):
-    projectid = models.IntegerField(
-        db_column="ProjectId"
-    )  # Field name made lowercase.
+    projectid = models.IntegerField(db_column="ProjectId")  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = "pen_minicrm_todos"
+
+
+class Cimek(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    role = models.CharField(max_length=100, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_cimek"
+
+
+class OpenSlots(models.Model):
+    adatlap = models.ForeignKey(
+        "MinicrmAdatlapok", models.DO_NOTHING, blank=True, null=True
+    )
+    at = models.DateTimeField(
+        blank=True, null=True
+    )  # Field renamed because it was a Python reserved word.
+    group = models.TextField(blank=True, null=True)
+    diff = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_open_slots"
