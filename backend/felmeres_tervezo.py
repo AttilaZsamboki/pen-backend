@@ -1,8 +1,6 @@
 from .utils.google_maps import calculate_distance
 from .models import MiniCrmAdatlapok, Cimek, OpenSlots
 from .utils.utils import round_to_closest_hour
-from django.db.models import DateTimeField
-from django.db.models.functions import Cast, TruncDate
 import datetime
 from django.utils import timezone
 from .utils.logs import log
@@ -23,7 +21,7 @@ def main(felmeres_adatlap):
     ]
 
     for date in next_30_days:
-        for felmero in Cimek.objects.all().values("Felmero2").distinct():
+        for felmero in adatlapok.values("Felmero2").distinct():
             adatlap_filter = adatlapok.filter(
                 FelmeresIdopontja2__date=date,
                 Felmero2=felmero["Felmero2"],
@@ -32,12 +30,12 @@ def main(felmeres_adatlap):
                 OpenSlots(
                     adatlap_id=felmeres_adatlap.Id,
                     at=date.replace(
-                        hour=9,
+                        hour=8,
                         minute=0,
                         second=0,
                         microsecond=0,
                     ),
-                    group=felmero,
+                    group=felmero["Felmero2"],
                     diff=calculate_distance(
                         start=Cimek.objects.get(name=felmero["Felmero2"]).address,
                         end=get_address(felmeres_adatlap),
@@ -114,11 +112,16 @@ def main(felmeres_adatlap):
                         end=get_address(adatlap_filter[i + 1]),
                         mode="driving",
                     )
+
                     OpenSlots(
                         adatlap_id=felmeres_adatlap.Id,
-                        at=round_to_closest_hour(
-                            adatlap_filter[i].FelmeresIdopontja2_datetime
-                            + datetime.timedelta(seconds=3600 + distance_to["duration"])
+                        at=timezone.make_aware(
+                            round_to_closest_hour(
+                                adatlap_filter[i].FelmeresIdopontja2
+                                + datetime.timedelta(
+                                    seconds=3600 + distance_to["duration"]
+                                )
+                            )
                         ),
                         group=felmero["Felmero2"],
                         diff=distance_from["duration"]
@@ -168,4 +171,4 @@ def get_address(adatlap):
     )
 
 
-main(MiniCrmAdatlapok.objects.get(Id="43151"))
+main(MiniCrmAdatlapok.objects.get(Id="43935"))

@@ -55,7 +55,9 @@ def main():
                     status="INFO",
                     details="Adatlap ID: " + str(adatlap.Id),
                 )
-                resp = update_adatlap_fields(adatlap.Id, {"StatusId": "3023"})
+                resp = update_adatlap_fields(
+                    adatlap.Id, {"StatusId": "3023", "BefizetesMegerkezett": "Igen"}
+                )
                 if resp["code"] == 200:
                     log(
                         "Adatlap frissítve",

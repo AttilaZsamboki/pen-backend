@@ -150,3 +150,5 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 FILE_UPLOAD_TEMP_DIR = (
     "/var/pen_temp" if os.environ.get("ENVIRONMENT") != "development" else "/"
 )
+
+USE_TZ = False
