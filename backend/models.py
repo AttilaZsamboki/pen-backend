@@ -1695,9 +1695,11 @@ class MiniCrmRequests(models.Model):
 
 
 class Munkadij(models.Model):
+    VALUE_TYPES = [("hour", "Óradíj"), ("fix", "Összeg")]
     type = models.CharField(max_length=255, blank=True, null=True)
     value = models.IntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    value_type = models.CharField(max_length=100, choices=VALUE_TYPES, default="hour")
 
     class Meta:
         managed = False
@@ -1746,3 +1748,12 @@ class OpenSlots(models.Model):
     class Meta:
         managed = False
         db_table = "pen_open_slots"
+
+
+class Settings(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    value = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_settings"

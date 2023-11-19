@@ -12,7 +12,7 @@ from backend.models import Logs, MiniCrmRequests  # noqa
 def log(log_value, status="SUCCESS", script_name="sm_vendor_orders", details=""):
     log = Logs(
         script_name=script_name,
-        time=datetime.now() + timedelta(hours=1),
+        time=datetime.now(),
         status=status,
         value=log_value,
         details=details,
@@ -22,7 +22,7 @@ def log(log_value, status="SUCCESS", script_name="sm_vendor_orders", details="")
 
 def log_minicrm_request(endpoint, script, description=None):
     MiniCrmRequests(
-        time=datetime.now() + timedelta(hours=1),
+        time=datetime.now(),
         endpoint=endpoint,
         script=script,
         description=description,
