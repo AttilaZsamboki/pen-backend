@@ -154,3 +154,9 @@ class FelmeresMunkadijakSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.FelmeresMunkadijak
         fields = "__all__"
+
+
+class SettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Settings
+        fields = "__all__"

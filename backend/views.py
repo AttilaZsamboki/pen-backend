@@ -1254,3 +1254,8 @@ class FelmeresMunkadijDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.FelmeresMunkadijakSerializer
     queryset = models.FelmeresMunkadijak.objects.all()
     permission_classes = [AllowAny]
+
+class SettingsList(generics.ListAPIView):
+    serializer_class = serializers.SettingsSerializer
+    queryset = models.Settings.objects.all()
+    permission_classes = [AllowAny]
