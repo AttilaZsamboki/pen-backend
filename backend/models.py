@@ -1697,7 +1697,7 @@ class MiniCrmRequests(models.Model):
 class Munkadij(models.Model):
     VALUE_TYPES = [("hour", "Óradíj"), ("fix", "Összeg")]
     type = models.CharField(max_length=255, blank=True, null=True)
-    value = models.IntegerField(blank=True, null=True)
+    value = models.FloatField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     value_type = models.CharField(max_length=100, choices=VALUE_TYPES, default="hour")
 
