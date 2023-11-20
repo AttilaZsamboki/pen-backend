@@ -346,6 +346,7 @@ class Felmeresek(models.Model):
     created_by = models.TextField(blank=True, null=True)
     warranty = models.CharField(max_length=255, blank=True, null=True)
     warranty_reason = models.TextField(blank=True, null=True)
+    hourly_wage = models.FloatField(blank=True, null=True)
 
     @property
     def netOrderTotal(self):
