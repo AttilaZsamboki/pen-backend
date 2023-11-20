@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from ..models import MiniCrmAdatlapok
 from ..utils.minicrm import update_adatlap_fields
+import datetime
 
 load_dotenv()
 
@@ -56,7 +57,13 @@ def main():
                     details="Adatlap ID: " + str(adatlap.Id),
                 )
                 resp = update_adatlap_fields(
-                    adatlap.Id, {"StatusId": "3023", "BefizetesMegerkezett": "Igen"}
+                    adatlap.Id,
+                    {
+                        "StatusId": "3023",
+                        "BefizetesMegerkezett": "Igen",
+                        "DijbekeroUzenetek": adatlap.DijbekeroUzenetek
+                        + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}",
+                    },
                 )
                 if resp["code"] == 200:
                     log(
