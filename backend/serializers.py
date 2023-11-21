@@ -160,3 +160,9 @@ class SettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Settings
         fields = "__all__"
+
+
+class AppointmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Appointments
+        fields = "__all__"

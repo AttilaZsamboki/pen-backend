@@ -1255,7 +1255,16 @@ class FelmeresMunkadijDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresMunkadijak.objects.all()
     permission_classes = [AllowAny]
 
+
 class SettingsList(generics.ListAPIView):
     serializer_class = serializers.SettingsSerializer
     queryset = models.Settings.objects.all()
     permission_classes = [AllowAny]
+
+
+class AppointmentList(generics.ListCreateAPIView):
+    serializer_class = serializers.AppointmentsSerializer
+    queryset = models.Appointments.objects.all()
+    permission_classes = [AllowAny]
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [IsAuthenticated]

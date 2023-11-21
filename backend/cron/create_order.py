@@ -50,7 +50,9 @@ def main(adatlap):
                 "FelmeresLink": adatlap_details["FelmeresAdatok"],
                 "KiMerteFel2": adatlap_details["Felmero2"],
                 "FelmeresDatuma2": adatlap_details["FelmeresIdopontja2"],
-                "GaranciaTipusa": warranty_type_map[felmeres.warranty],
+                "GaranciaTipusa": warranty_type_map[felmeres.warranty]
+                if felmeres.warranty
+                else None,
                 "Indoklas": felmeres.warranty_reason,
             },
         )
