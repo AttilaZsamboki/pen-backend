@@ -675,6 +675,11 @@ def get_unas_order_data(type):
             {
                 "OrderData": order_data,
                 "AdatlapDetails": adatlap,
+                "FelmeresAdatlapDetails": models.MiniCrmAdatlapok.objects.get(
+                    Id=felmeres.adatlap_id
+                ).__dict__
+                if felmeres
+                else {},
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
@@ -729,11 +734,11 @@ def get_unas_order_data(type):
                     </Invoice>
                     <Shipping>
                         <Name>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</Name>
-                        <ZIP>{data["AdatlapDetails"]["Iranyitoszam"]}</ZIP>
-                        <City>{data["AdatlapDetails"]["Telepules"]}</City>
-                        <Street>{data["AdatlapDetails"]["Cim2"]}</Street>
-                        <County>{data["AdatlapDetails"]["Megye"]}</County>
-                        <Country>{data["AdatlapDetails"]["Orszag"]}</Country>
+                        <ZIP>{data["FelmeresAdatlapDetails"]["Iranyitoszam"]}</ZIP>
+                        <City>{data["FelmeresAdatlapDetails"]["Telepules"]}</City>
+                        <Street>{data["FelmeresAdatlapDetails"]["Cim2"]}</Street>
+                        <County>{data["FelmeresAdatlapDetails"]["Megye"]}</County>
+                        <Country>{data["FelmeresAdatlapDetails"]["Orszag"]}</Country>
                     <CountryCode>hu</CountryCode>
                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
