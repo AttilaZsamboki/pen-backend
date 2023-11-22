@@ -9,6 +9,7 @@ from ..utils.logs import log
 import requests
 import datetime
 import os
+import time
 from dotenv import load_dotenv
 import traceback
 
@@ -265,34 +266,21 @@ def create_invoice_or_proform(is_proform=True, cash=False):
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
-            update_resp = update_adatlap_fields(
-                adatlap["Id"],
-                {
-                    "DijbekeroPdf2"
-                    if is_proform
-                    else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
-                    "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"],
-                    "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam,
-                    f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime(
-                        "%Y-%m-%d"
-                    ),
-                    "FizetesiHatarido": (
-                        datetime.datetime.now() + datetime.timedelta(days=3)
-                    ).strftime("%Y-%m-%d")
-                    if is_proform
-                    else adatlap["FizetesiHatarido"],
-                    (
-                        "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
-                    ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
-                },
-            )
-            if update_resp["code"] == 400:
-                log(
-                    f"Hiba akadt a {name} feltöltésében",
-                    "ERROR",
-                    script_name=f"pen_{script_name}",
-                    details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}",
+            for _ in range(2):
+                update_resp = update_proform_adatlap(
+                    is_proform, name, adatlap, szamlaszam
                 )
+                if update_resp["code"] == 400:
+                    log(
+                        f"Hiba akadt a {name} feltöltésében",
+                        "ERROR",
+                        script_name=f"pen_{script_name}",
+                        details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}",
+                    )
+                    time.sleep(180)
+                else:
+                    break
+
             os.remove(pdf_path)
         except KeyError as e:
             log(
@@ -316,6 +304,30 @@ def create_invoice_or_proform(is_proform=True, cash=False):
             script_name=f"pen_{script_name}",
         )
         continue
+
+
+def update_proform_adatlap(is_proform, name, adatlap, szamlaszam):
+    return update_adatlap_fields(
+        adatlap["Id"],
+        {
+            "DijbekeroPdf2"
+            if is_proform
+            else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+            "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"],
+            "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam,
+            f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime(
+                "%Y-%m-%d"
+            ),
+            "FizetesiHatarido": (
+                datetime.datetime.now() + datetime.timedelta(days=3)
+            ).strftime("%Y-%m-%d")
+            if is_proform
+            else adatlap["FizetesiHatarido"],
+            (
+                "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
+            ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
+        },
+    )
 
 
 create_invoice_or_proform(is_proform=False)

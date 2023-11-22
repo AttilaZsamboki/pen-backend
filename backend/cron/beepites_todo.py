@@ -5,6 +5,7 @@ from ..utils.minicrm import (
     contact_details,
 )
 from ..utils.logs import log
+from ..utils.utils import round_to_five
 from ..models import Orders, MiniCrmAdatlapok, Felmeresek
 import traceback
 
@@ -93,9 +94,9 @@ Raktár: https://app.clouderp.hu/v2/order?view=68&search={adatlap["RendelesSzama
 Felmérés: {adatlap["FelmeresLink"]} 
 Utcakép: {adatlap["Utcakep"]}
 
-Megrendelés bruttó: {str(order.grossOrderTotal)}Ft
-Megrendelés nettó: {order.netOrderTotal}Ft
-Kedvezményes összeg: {order.grossOrderTotal - order.grossOrderTotal * 0.1}Ft
+Megrendelés bruttó: {str(round_to_five(order.grossOrderTotal))}Ft
+Megrendelés nettó: {round_to_five(order.netOrderTotal)}Ft
+Kedvezményes összeg: {round_to_five(order.grossOrderTotal - order.grossOrderTotal * 0.1)}Ft
 """
             resp = create_to_do(
                 adatlap["Id"],

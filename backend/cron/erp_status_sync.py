@@ -1,13 +1,11 @@
 from ..utils.minicrm import get_all_adatlap, update_order_status
 from ..utils.logs import log
-from ..models import Orders, Order
+from ..models import Orders, Order, MiniCrmAdatlapok
 
 
 def main():
     log("MiniCRM ERP státusz szinkron megkezdődött", "INFO", "pen_erp_status_sync")
-    adatlapok = get_all_adatlap(
-        category_id=29, criteria=lambda adatlap: adatlap["StatusId"] in [3008, 3012]
-    )
+    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=29, Enum1951=4375).values()
     if not adatlapok:
         log("Nincs új adatlap a MiniCRM-ben", "INFO", "pen_erp_status_sync")
         return
@@ -28,7 +26,7 @@ def main():
                 adatlap["Id"],
             )
             continue
-        if adatlap["StatusId"] == 3008 and order.order_status == "Completed":
+        if order.order_status == "Completed":
             resp = update_order_status(order.webshop_id)
             if not resp.ok:
                 log(

@@ -582,14 +582,13 @@ class UnasLogin(APIView):
 
 def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
-        CategoryId=29, StatusId=3008
+        CategoryId=29, Enum1951=4375
     ).values()
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
                             <Orders>
                             </Orders>"""
 
-    # Get all adatlap objects with category_id=29 and status_id=3008
     datas = []
     for adatlap in adatlapok:
         if adatlap["RendelesSzama"] != "" and adatlap["RendelesSzama"] is not None:

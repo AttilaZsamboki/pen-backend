@@ -31,7 +31,6 @@ for adatlap in db_adatlapok:
         if k in valid_fields
         and k
         not in [
-            "BusinessId",
             "ProjectHash",
             "ProjectEmail",
             "UserId",
@@ -44,5 +43,8 @@ for adatlap in db_adatlapok:
     }
     MiniCrmAdatlapok(
         StatusId=[i["StatusId"] for i in adatlapok if i["Id"] == adatlap["Id"]][0],
+        MainContacId=[i["BusinessId"] for i in adatlapok if i["Id"] == adatlap["Id"]][
+            0
+        ],
         **filtered_data
     ).save()

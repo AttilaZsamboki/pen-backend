@@ -64,3 +64,13 @@ def round_to_closest_hour(dt):
     dt += datetime.timedelta(minutes=30)
     rounded_seconds = (dt - datetime_min).total_seconds() // 3600 * 3600
     return datetime_min + datetime.timedelta(seconds=rounded_seconds)
+
+
+def get_address(adatlap):
+    return (
+        f"{adatlap.Cim2} {adatlap.Telepules}, {adatlap.Iranyitoszam} {adatlap.Orszag}"
+    )
+
+
+def round_to_five(n):
+    return round(n / 5) * 5
