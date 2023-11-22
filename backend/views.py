@@ -582,7 +582,7 @@ class UnasLogin(APIView):
 
 def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
-        CategoryId=29, Enum1951=4375
+        CategoryId=29, Enum1951=4374
     ).values()
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
