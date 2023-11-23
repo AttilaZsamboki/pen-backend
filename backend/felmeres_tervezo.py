@@ -68,8 +68,9 @@ def build_distance_matrix(response):
 
 data = create_data()
 distance_matrix = create_distance_matrix(data)
-population_size = 1000
-max_generations = 1000
+population_size = 90
+max_generations = 100
+tournament_size = 4
 
 
 def generate_route(cities):
@@ -89,11 +90,15 @@ def calculate_fitness(route):
     return 1 / calculate_distance(route)
 
 
-def selection(population, fitnesses):
-    indices = np.random.choice(
-        np.arange(len(population)), size=2, p=fitnesses / fitnesses.sum()
-    )
-    return population[indices[0]], population[indices[1]]
+def tournament_selection(population, fitnesses, tournament_size):
+    # Randomly select tournament_size individuals from the population
+    indices = np.random.choice(len(population), tournament_size)
+    tournament_individuals = [population[i] for i in indices]
+    tournament_fitnesses = [fitnesses[i] for i in indices]
+
+    # Select the fittest individual from the tournament
+    winner_index = np.argmax(tournament_fitnesses)
+    return tournament_individuals[winner_index]
 
 
 def crossover(parent1, parent2):
@@ -139,31 +144,21 @@ def mutate(route):
 # Initialize population
 population = [
     generate_route([(int(idx), i) for idx, i in enumerate(data["addresses"])])
-    for _ in range(1000)
+    for _ in range(128)
 ]
 
 # Main loop
-elitism_size = 10  # Number of elite individuals
-
 for generation in range(max_generations):
     fitnesses = np.array([calculate_fitness(route) for route in population])
-
-    # Sort the population by fitness
-    sorted_indices = np.argsort(fitnesses)[::-1]
-    population = [population[i] for i in sorted_indices]
-
-    # Select the elite individuals
-    elites = population[:elitism_size]
-
     new_population = []
-    for _ in range(population_size - elitism_size):  # Adjusted for elitism
-        parent1, parent2 = selection(population, fitnesses)
+    for _ in range(population_size):
+        parent1, parent2 = tournament_selection(
+            population, fitnesses, tournament_size
+        ), tournament_selection(population, fitnesses, tournament_size)
         child = crossover(parent1, parent2)
         child = mutate(child)
         new_population.append(child)
-
-    # Add the elites to the new population
-    population = elites + new_population
+    population = new_population
 
 # Calculate fitnesses for all routes in the population
 fitnesses = [calculate_fitness(route) for route in population]
