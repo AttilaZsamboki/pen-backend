@@ -833,13 +833,17 @@ def get_unas_order_data(type):
 
 
 def get_total(data):
-    total = sum(
-        [
-            float(i.netPrice) * sum([j["ammount"] for j in i.inputValues])
-            for i in data["Tételek"]
-            if i.valueType != "percent"
-        ]
+    total = (
+        sum(
+            [
+                float(i.netPrice) * sum([j["ammount"] for j in i.inputValues])
+                for i in data["Tételek"]
+                if i.valueType != "percent"
+            ]
+        )
+        + data["Munkadíj"]
     )
+
     return total
 
 
