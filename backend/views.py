@@ -582,7 +582,8 @@ class UnasLogin(APIView):
 
 def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
-        CategoryId=29, Enum1951=4374
+        Q(Enum1951=4374) | Q(StatusId=3008),
+        CategoryId=29,
     ).values()
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
@@ -813,7 +814,7 @@ def get_unas_order_data(type):
 <Name><![CDATA[clouderp-labels]]></Name>
 <Value><![CDATA[{i}]]></Value>
 </Param>"""
-                        for index, i in enumerate(
+                        for index, i in numerate(
                             data["AdatlapDetails"]["Beepitok"].split(", ")
                         )
                     ]
