@@ -752,7 +752,7 @@ def get_unas_order_data(type):
             <StatusDateMod><![CDATA[2021.03.25 20:15:39]]></StatusDateMod>
             <StatusID>3008</StatusID>
             <Payment>
-                <Id>{models.PaymentMethods.objects.get(name=data["AdatlapDetails"]["FizetesiMod3"]).id}</Id>
+                <Id>{models.PaymentMethods.objects.get(name=data["AdatlapDetails"]["FizetesiMod3"]).id if data["AdatlapDetails"]["FizetesiMod3"] else ""}</Id>
                 <Name>{data["AdatlapDetails"]["FizetesiMod3"]}</Name>
                 <Type>transfer</Type>
             </Payment>
@@ -814,7 +814,7 @@ def get_unas_order_data(type):
 <Name><![CDATA[clouderp-labels]]></Name>
 <Value><![CDATA[{i}]]></Value>
 </Param>"""
-                        for index, i in numerate(
+                        for index, i in enumerate(
                             data["AdatlapDetails"]["Beepitok"].split(", ")
                         )
                     ]
