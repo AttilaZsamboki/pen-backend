@@ -347,6 +347,8 @@ class Felmeresek(models.Model):
     warranty = models.CharField(max_length=255, blank=True, null=True)
     warranty_reason = models.TextField(blank=True, null=True)
     hourly_wage = models.FloatField(blank=True, null=True)
+    is_conditional = models.BooleanField(blank=True, null=True, default=False)
+    condition = models.TextField(blank=True, null=True)
 
     @property
     def netOrderTotal(self):
