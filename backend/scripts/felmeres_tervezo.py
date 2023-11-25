@@ -1,7 +1,6 @@
 import math
-import random
 import numpy as np
-import googlemaps
+from ..utils import google_routes
 import os
 from ..utils.logs import log
 from ..models import Appointments
@@ -9,7 +8,7 @@ from ..models import MiniCrmAdatlapok
 from ..utils.utils import get_address
 from django.db.models import Q
 
-gmaps = googlemaps.Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
+gmaps = google_routes.Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
 
 
 def print_route(route):
@@ -81,65 +80,53 @@ def create_distance_matrix(data):
     num_addresses = len(addresses)
     q, r = divmod(num_addresses * num_addresses, max_elements)
     dest_addresses = addresses
-    distance_matrix = []
+    distance_matrix = None
     for i in range(q):
         origin_addresses = addresses[i * max_elements : (i + 1) * max_elements]
-        response = send_request(origin_addresses, dest_addresses)
-        distance_matrix += build_distance_matrix(response)
+        response = get_matrix(origin_addresses, dest_addresses)
+        if distance_matrix is None:
+            distance_matrix = response
+        distance_matrix.merge(response)
     if r > 0:
         origin_addresses = addresses[q * max_elements : q * max_elements + r]
-        response = send_request(origin_addresses, dest_addresses)
-        distance_matrix += build_distance_matrix(response)
+        response = get_matrix(dest_addresses, origin_addresses)
+        if distance_matrix is None:
+            distance_matrix = response
+        distance_matrix.merge(response)
     return distance_matrix
 
 
-def send_request(origin_addresses, dest_addresses):
-    """Build and send request for the given origin and destination addresses."""
-
-    def build_address_str(addresses):
-        address_str = ""
-        for i in range(len(addresses) - 1):
-            address_str += addresses[i] + "|"
-        address_str += addresses[-1]
-        return address_str
-
-    origin_address_str = build_address_str(origin_addresses)
-    dest_address_str = build_address_str(dest_addresses)
-    result = gmaps.distance_matrix(origin_address_str, dest_address_str)
-    return result
-
-
-def build_distance_matrix(response):
-    distance_matrix = []
-    for row in response["rows"]:
-        row_list = [
-            math.floor(row["elements"][j]["duration"]["value"] / 60)
-            for j in range(len(row["elements"]))
-        ]
-        distance_matrix.append(row_list)
-    return distance_matrix
+def get_matrix(dest_addresses, origin_addresses):
+    return gmaps.distance_matrix(
+        origin_addresses,
+        dest_addresses,
+        fields=["duration"],
+    )
 
 
 def generate_route(cities, days):
     routes = []
+
     for day in days:
         day_cities = [
             i
             for i in cities
             if i["date"].replace(hour=0, minute=0) == day.date.replace(hour=0, minute=0)
         ]
+        home = {
+            "id": 0,
+            "date": day.date.replace(hour=0, minute=0),
+            "dates": [day.date.replace(hour=0, minute=0)],
+            "address": start_city,
+            "fixed": True,
+            "adatlap": MiniCrmAdatlapok(),
+        }
+
         day_cities.append(
-            {
-                "id": 0,
-                "date": day.date.replace(hour=0, minute=0),
-                "dates": [day.date.replace(hour=0, minute=0)],
-                "address": start_city,
-                "fixed": True,
-                "adatlap": MiniCrmAdatlapok(),
-            },
+            home,
         )
 
-        sort_route(day_cities)
+        sort_route(day_cities + [home])
         routes += day_cities
 
     return routes
@@ -151,8 +138,12 @@ def sort_route(route):
 
 def calculate_distance(route):
     return sum(
-        distance_matrix[int(route[i - 1]["id"])][int(route[i]["id"])]
-        for i in range(len(route))
+        [
+            distance_matrix.get_element(
+                origin_idx=int(route[i - 1]["id"]), destination_idx=int(route[i]["id"])
+            ).get_duration_value()
+            for i in range(len(route))
+        ]
     )
 
 
@@ -221,7 +212,6 @@ population = [
     for _ in range(512)
 ]
 
-print_route(population[0])
 for generation in range(max_generations):
     fitnesses = np.array([calculate_fitness(route) for route in population])
     new_population = []

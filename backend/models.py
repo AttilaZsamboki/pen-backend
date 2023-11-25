@@ -1672,6 +1672,7 @@ class MiniCrmAdatlapok(models.Model):
     InternalUrl = models.TextField(blank=True, null=True)
     LastEvent = models.TextField(blank=True, null=True)
     StatusGroup = models.TextField(blank=True, null=True)
+    VisszafizetesDatuma = models.TextField(blank=True, null=True)
 
     @property
     def StatusIdStr(self):
@@ -1760,10 +1761,13 @@ class Settings(models.Model):
         managed = False
         db_table = "pen_settings"
 
+
 class Appointments(models.Model):
-    adatlap = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING, blank=True, null=True)
+    adatlap = models.ForeignKey(
+        "MinicrmAdatlapok", models.DO_NOTHING, blank=True, null=True
+    )
     date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'pen_appointments'
+        db_table = "pen_appointments"

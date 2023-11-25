@@ -82,6 +82,12 @@ def main():
                 and adatlap.StatusIdStr != "Felmérésre vár"
             ):
                 next()
+            elif (
+                data["Type"] == "Pénzügy visszatérítés"
+                and adatlap.VisszafizetesDatuma is not None
+                and adatlap.VisszafizetesDatuma != ""
+            ):
+                next()
 
 
 main()

@@ -30,6 +30,7 @@ todo_map = {
     224: "Pénzügyi elszámolás",
     240: "Rendszerhiba E2",
     238: "Pénzügy számlázás",
+    246: "Pénzügy visszatérítés",
 }
 
 warranty_type_map = {
