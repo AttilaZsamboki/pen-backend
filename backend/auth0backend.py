@@ -78,8 +78,4 @@ class CustomJWTAuthentication(BaseAuthentication):
         return True
 
     def get_user_from_token(self, decoded_token):
-        try:
-            UserRoles.objects.get(user=decoded_token["sub"])
-            return SimpleUser(decoded_token, True)
-        except UserRoles.DoesNotExist:
-            return SimpleUser(decoded_token, False)
+        return SimpleUser(decoded_token, True)

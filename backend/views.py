@@ -672,15 +672,21 @@ def get_unas_order_data(type):
         ).first()
 
         # Add the data to the datas list
+        felmeres_adatlap_details = models.MiniCrmAdatlapok.objects.get(
+                    Id=felmeres.adatlap_id
+                ).__dict__
+        try:
+            print(felmeres_adatlap_details["Iranyitoszam"])
+        except:
+            continue
+
         datas.append(
             {
                 "OrderData": order_data,
                 "AdatlapDetails": adatlap,
-                "FelmeresAdatlapDetails": models.MiniCrmAdatlapok.objects.get(
-                    Id=felmeres.adatlap_id
-                ).__dict__
+                "FelmeresAdatlapDetails": felmeres_adatlap_details
                 if felmeres
-                else {},
+                else {"Iranyitoszam": "", "Telepules": "", "Cim2": "", "Megye": "", "Orszag": ""},
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
