@@ -338,7 +338,9 @@ class Felmeresek(models.Model):
     adatlap_id = models.ForeignKey(
         "MinicrmAdatlapok", models.DO_NOTHING, db_column="adatlap_id"
     )
-    template = models.ForeignKey('Templates', models.DO_NOTHING, db_column='template', blank=True, null=True)
+    template = models.ForeignKey(
+        "Templates", models.DO_NOTHING, db_column="template", blank=True, null=True
+    )
     type = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
     created_at = models.DateTimeField(blank=True, null=True)
@@ -1719,6 +1721,7 @@ class FelmeresMunkadijak(models.Model):
     munkadij = models.ForeignKey("Munkadij", models.DO_NOTHING, blank=True, null=True)
     amount = models.IntegerField()
     value = models.FloatField()
+    hour = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1786,12 +1789,15 @@ class ScriptRetries(models.Model):
         managed = False
         db_table = "script_retries"
 
+
 class DistanceMatrix(models.Model):
-    origin = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING, db_column='origin')
-    dest = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING, db_column='dest')
+    origin = models.ForeignKey(
+        "MinicrmAdatlapok", models.DO_NOTHING, db_column="origin"
+    )
+    dest = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING, db_column="dest")
     distance = models.FloatField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'pen_distance_matrix'
+        db_table = "pen_distance_matrix"
