@@ -42,6 +42,7 @@ from .utils.minicrm import (
     address_ids,
     address_details,
 )
+from .scripts.api_scripts import mini_crm_proxy
 from .utils.utils import replace_self_closing_tags
 
 # Create your views here.
@@ -673,8 +674,8 @@ def get_unas_order_data(type):
 
         # Add the data to the datas list
         felmeres_adatlap_details = models.MiniCrmAdatlapok.objects.get(
-                    Id=felmeres.adatlap_id
-                ).__dict__
+            Id=felmeres.adatlap_id
+        ).__dict__
         try:
             print(felmeres_adatlap_details["Iranyitoszam"])
         except:
@@ -686,7 +687,13 @@ def get_unas_order_data(type):
                 "AdatlapDetails": adatlap,
                 "FelmeresAdatlapDetails": felmeres_adatlap_details
                 if felmeres
-                else {"Iranyitoszam": "", "Telepules": "", "Cim2": "", "Megye": "", "Orszag": ""},
+                else {
+                    "Iranyitoszam": "",
+                    "Telepules": "",
+                    "Cim2": "",
+                    "Megye": "",
+                    "Orszag": "",
+                },
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
@@ -1283,3 +1290,12 @@ class AppointmentList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
     authentication_classes = [CustomJWTAuthentication]
     permission_classes = [IsAuthenticated]
+
+
+class MiniCrmProxy(APIView):
+    def put(self, request, adatlap_id):
+        data = mini_crm_proxy(request.data, adatlap_id, True)
+        if data["code"] == 200:
+            return Response(data["data"])
+        else:
+            return Response(data=data["reason"], status=data["code"])

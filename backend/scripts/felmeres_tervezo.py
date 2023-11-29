@@ -100,7 +100,7 @@ class Generation:
             addresses = [starting_city] + [
                 i.address for i in self.data if i.date.replace(hour=0, minute=0) == date
             ]
-            response = gmaps.distance_matrix(addresses, addresses)
+            response = gmaps.distance_matrix(addresses, addresses, fields=["duration"])
             result[date] = response
         return result
 
@@ -230,26 +230,27 @@ class Generation:
         return child
 
     def main(self):
-        for _ in range(self.max_generations):
-            new_population = []
-            for _ in range(population_size):
-                parent1, parent2 = (
-                    self.tournament_selection(),
-                    self.tournament_selection(),
-                )
+        # for _ in range(self.max_generations):
+        #     new_population = []
+        #     for _ in range(population_size):
+        #         parent1, parent2 = (
+        #             self.tournament_selection(),
+        #             self.tournament_selection(),
+        #         )
 
-                child = self.crossover(parent1, parent2)
-                child = child.mutate()
+        #         child = self.crossover(parent1, parent2)
+        #         child = child.mutate()
 
-                new_population.append(child)
-            population = new_population
+        #         new_population.append(child)
+        #     population = new_population
 
-        fitnesses = [route.calculate_fitness() for route in self.population]
+        # fitnesses = [route.calculate_fitness() for route in self.population]
 
-        best_route_index = np.argmax(fitnesses)
+        # best_route_index = np.argmax(fitnesses)
 
-        best_route = population[best_route_index]
-        return self.Individual(data=best_route, outer_instance=self)
+        # best_route = population[best_route_index]
+        # return self.Individual(data=best_route, outer_instance=self)
+        pass
 
     def tournament_selection(self):
         indices = np.random.choice(len(self.population), self.tournament_size)
@@ -260,10 +261,10 @@ class Generation:
         return tournament_individuals[winner_index]
 
 
-population_size = 1000
-initial_population_size = 512
-max_generations = 1000
-tournament_size = 4
+population_size = 1
+initial_population_size = 1
+max_generations = 1
+tournament_size = 1
 start_city = "Budapest"
 
 result = Generation(
@@ -273,4 +274,4 @@ result = Generation(
     tournament_size=tournament_size,
     population_size=population_size,
 ).main()
-result.print_route()
+# result.print_route()

@@ -275,11 +275,8 @@ def update_todo(id, fields, script_name=None):
     update_request(id=id, fields=fields, endpoint="ToDo", script_name=script_name)
 
 
-def create_order(
-    adatlap_id, contact_id, offer_id, adatlap_status=None, project_data=None
-):
-    adatlap = get_adatlap_details(id=adatlap_id)["response"]
-    contactData = contact_details(contact_id=contact_id)["response"]
+def create_order(adatlap, offer_id, adatlap_status=None, project_data=None):
+    contactData = contact_details(contact_id=adatlap.ContactId)["response"]
     offerData = get_offer(offer_id)["response"]
     if offerData == "Error":
         return {"status": "error", "response": "Offer not found"}
@@ -310,9 +307,9 @@ def create_order(
 <Projects>
     <Project Id="{randomId}">
         <StatusId>3099</StatusId>
-        <Name>{adatlap["Name"]}</Name>
-        <ContactId>{contact_id}</ContactId>
-        <UserId>{adatlap["UserId"]}</UserId>
+        <Name>{adatlap.Name}</Name>
+        <ContactId>{adatlap.ContactId}</ContactId>
+        <UserId>{adatlap.UserId}</UserId>
         <CategoryId>32</CategoryId>
         <Contacts>
             <Contact Id="{randomId}">
@@ -325,7 +322,7 @@ def create_order(
         </Contacts>
         <Orders>
             <Order Id="{randomId}">
-                <Number>{adatlap["Name"]}</Number>
+                <Number>{adatlap.Name}</Number>
                 <CurrencyCode>HUF</CurrencyCode>
                 <!-- Performace date of order [required date] -->
                 <Performance>2015-09-22 12:15:13</Performance>

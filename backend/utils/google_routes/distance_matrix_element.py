@@ -9,4 +9,4 @@ class DistanceMatrixElement:
         self.localizedValues = element.get("localizedValues")
 
     def get_duration_value(self):
-        return int(self.duration[:-1] if self.duration else 0)
+        return int(self.duration[:-1] if self.duration else -9999)

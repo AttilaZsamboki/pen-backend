@@ -25,7 +25,9 @@ class Client:
         )
         headers = {
             "Content-Type": "application/json",
-            "X-Goog-FieldMask": ",".join(fields + ["originIndex", "destinationIndex"]),
+            "X-Goog-FieldMask": ",".join(
+                (fields + ["originIndex", "destinationIndex"]) if fields else ["*"]
+            ),
             "X-Goog-Api-Key": self.api_key,
         }
 

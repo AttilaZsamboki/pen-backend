@@ -1,5 +1,5 @@
 from ..utils.logs import log
-from ..utils.minicrm import create_order, get_adatlap_details
+from ..utils.minicrm import create_order
 from ..utils.minicrm_str_to_text import warranty_type_map
 
 from ..models import Offers, Felmeresek, MiniCrmAdatlapok
@@ -21,7 +21,7 @@ def main(adatlap):
 
     try:
         log(
-            f"{adatlap['Name']} megrendelés létrehozása",
+            f"{adatlap.Name} megrendelés létrehozása",
             script_name="pen_create_order",
             status="INFO",
         )
@@ -32,34 +32,33 @@ def main(adatlap):
             status="ERROR",
             details=f"Adatlap: {adatlap}",
         )
-    id = adatlap["Felmeresid"]
+    id = adatlap.Felmeresid
     felmeres = Felmeresek.objects.get(id=id)
-    offer = Offers.objects.filter(projectid=adatlap["Id"]).first()
-    adatlap_details = get_adatlap_details(felmeres.adatlap_id)
-    if offer and adatlap_details["status"] != "Error":
-        adatlap_details = adatlap_details["response"]
+    offer = Offers.objects.filter(projectid=adatlap.Id).first()
+    if offer:
         order = create_order(
-            adatlap_id=felmeres.adatlap_id,
-            contact_id=adatlap["ContactId"],
+            adatlap=felmeres.adatlap_id,
             offer_id=offer.id,
             adatlap_status="Szervezésre vár",
             project_data={
-                "Megye2": adatlap_details["Megye"],
-                "Utcakep": adatlap_details["StreetViewUrl"],
-                "IngatlanKepe2": adatlap_details["IngatlanKepe"],
-                "FelmeresLink": adatlap_details["FelmeresAdatok"],
-                "KiMerteFel2": adatlap_details["Felmero2"],
-                "FelmeresDatuma2": adatlap_details["FelmeresIdopontja2"],
+                "Megye2": felmeres.adatlap_id.Megye,
+                "Utcakep": felmeres.adatlap_id.StreetViewUrl,
+                "IngatlanKepe2": felmeres.adatlap_id.IngatlanKepe,
+                "FelmeresLink": felmeres.adatlap_id.FelmeresAdatok,
+                "KiMerteFel2": felmeres.adatlap_id.Felmero2,
+                "FelmeresDatuma2": felmeres.adatlap_id.FelmeresIdopontja2,
                 "GaranciaTipusa": warranty_type_map[felmeres.warranty]
                 if felmeres.warranty
                 else None,
                 "Indoklas": felmeres.warranty_reason,
+                "KiepitesFeltetele": "Van" if felmeres.is_conditional else "Nincs",
+                "KiepitesFeltetelLeirasa": felmeres.condition,
             },
         )
         if order["status"] == "error":
             if order["response"].lower() == "xml is not valid!":
                 log(
-                    f"{adatlap['Name']} megrendelés létrehozása sikertelen, XML nem valid",
+                    f"{adatlap.Name} megrendelés létrehozása sikertelen, XML nem valid",
                     script_name="pen_create_order",
                     status="ERROR",
                     details=order["xml"],
@@ -67,14 +66,14 @@ def main(adatlap):
                 return
             elif order["response"].lower() == "input doesn't look like it's an xml":
                 log(
-                    f"{adatlap['Name']} megrendelés létrehozása sikertelen, input nem XML",
+                    f"{adatlap.Name} megrendelés létrehozása sikertelen, input nem XML",
                     script_name="pen_create_order",
                     status="ERROR",
                     details=order["xml"],
                 )
                 return
             log(
-                f"{adatlap['Name']} megrendelés létrehozása sikertelen",
+                f"{adatlap.Name} megrendelés létrehozása sikertelen",
                 script_name="pen_create_order",
                 status="ERROR",
                 details=order["response"],
@@ -96,16 +95,16 @@ def main(adatlap):
             )
             return
         log(
-            f"{adatlap['Name']} megrendelés létrehozása sikeres",
+            f"{adatlap.Name} megrendelés létrehozása sikeres",
             script_name="pen_create_order",
             status="SUCCESS",
         )
         return
     log(
-        f"{adatlap['Name']} megrendelés létrehozása sikertelen, nem létezik felmérés",
+        f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
         script_name="pen_create_order",
         status="ERROR",
-        details=f"Offer: {offer}. Felmérés: {adatlap_details}",
+        details=f"Offer: {offer}. Felmérés: {felmeres}",
     )
     log(
         "Megrendelések létrehozása sikeresen befejeződött",
@@ -115,7 +114,7 @@ def main(adatlap):
 
 
 try:
-    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=21, StatusId=2896).values()
+    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=21, StatusId=2896)
     for adatlap in adatlapok:
         main(adatlap)
 except Exception as e:

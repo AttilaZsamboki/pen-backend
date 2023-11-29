@@ -10,6 +10,7 @@ class Logs(models.Model):
     status = models.TextField()
     value = models.TextField()
     details = models.TextField()
+    data = models.JSONField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -334,8 +335,10 @@ class ProductTemplate(models.Model):
 
 class Felmeresek(models.Model):
     id = models.AutoField(primary_key=True)
-    adatlap_id = models.IntegerField()
-    template = models.IntegerField(blank=True, null=True)
+    adatlap_id = models.ForeignKey(
+        "MinicrmAdatlapok", models.DO_NOTHING, db_column="adatlap_id"
+    )
+    template = models.ForeignKey('Templates', models.DO_NOTHING, db_column='template', blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
     created_at = models.DateTimeField(blank=True, null=True)
@@ -1773,3 +1776,22 @@ class Appointments(models.Model):
     class Meta:
         managed = False
         db_table = "pen_appointments"
+
+
+class ScriptRetries(models.Model):
+    log = models.ForeignKey("Logs", models.DO_NOTHING, blank=True, null=True)
+    time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "script_retries"
+
+class DistanceMatrix(models.Model):
+    origin = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING, db_column='origin')
+    dest = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING, db_column='dest')
+    distance = models.FloatField(blank=True, null=True)
+    duration = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'pen_distance_matrix'
