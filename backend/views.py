@@ -767,7 +767,7 @@ def get_unas_order_data(type):
                 <Id>3372937</Id>
                 <Name><![CDATA[GLS CsomagPontok]]></Name>
             </Shipping>
-            <SumPriceGross>{sum([(float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100)) * sum([j["ammount"] for j in i.inputValues]) for i in data["Tételek"]])}</SumPriceGross>
+            <SumPriceGross>{sum([(float(i.netPrice) if i.valueType != "percent" else (get_total(data) * (int(i.netPrice)/100) if i.type != 'Discount' else -(get_total(data) * (int(i.netPrice)/100)))) * sum([j["ammount"] for j in i.inputValues]) for i in data["Tételek"]])*1.27}</SumPriceGross>
             <Items>
                 """
                 + "\n".join(
@@ -778,8 +778,8 @@ def get_unas_order_data(type):
                     <Name>{i.name}</Name>
                     <Unit>darab</Unit>
                     <Quantity>{sum([float(j["ammount"]) for j in i.inputValues])}</Quantity>
-                    <PriceNet>{float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100)}</PriceNet>
-                    <PriceGross>{(float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100))*1.27}</PriceGross>
+                    <PriceNet>{"-" if i.type == "Discount" else ""}{float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100)}</PriceNet>
+                    <PriceGross>{"-" if i.type == "Discount" else ""}{(float(i.netPrice) if i.valueType != "percent" else get_total(data) * (int(i.netPrice)/100))*1.27}</PriceGross>
                     <Vat>27%</Vat>
                     <Status>
                         <![CDATA[]]>
