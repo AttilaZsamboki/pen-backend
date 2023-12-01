@@ -336,7 +336,9 @@ class ProductTemplate(models.Model):
 class Felmeresek(models.Model):
     id = models.AutoField(primary_key=True)
     adatlap_id = models.ForeignKey(
-        "MinicrmAdatlapok", models.DO_NOTHING, db_column="adatlap_id"
+        "MinicrmAdatlapok",
+        models.DO_NOTHING,
+        db_column="adatlap_id",
     )
     template = models.ForeignKey(
         "Templates", models.DO_NOTHING, db_column="template", blank=True, null=True
@@ -1794,7 +1796,12 @@ class DistanceMatrix(models.Model):
     origin = models.ForeignKey(
         "MinicrmAdatlapok", models.DO_NOTHING, db_column="origin"
     )
-    dest = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING, db_column="dest")
+    dest = models.ForeignKey(
+        "MinicrmAdatlapok",
+        models.DO_NOTHING,
+        db_column="dest",
+        related_name="pendistancematrix_dest_set",
+    )
     distance = models.FloatField(blank=True, null=True)
     duration = models.FloatField(blank=True, null=True)
 

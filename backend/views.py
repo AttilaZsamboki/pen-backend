@@ -334,6 +334,23 @@ class FelmeresekList(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
 
 
+def felmeresek_detail(pk):
+    felmeres = models.Felmeresek.objects.get(id=pk)
+    adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
+    if not adatlap.exists():
+        return serializers.FelmeresekSerializer(
+            adatlap_id=felmeres.adatlap_id, **felmeres.__dict__
+        )
+    adatlap = adatlap.first()
+    return serializers.FelmeresekSerializer(
+        {
+            "offer_status": adatlap.StatusIdStr,
+            "adatlap_id": felmeres.adatlap_id,
+            **felmeres.__dict__,
+        },
+    )
+
+
 class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
@@ -341,22 +358,11 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
+        if os.environ.get("ENVIRONMENT") == "development":
+            res = felmeresek_detail(pk)
+            return Response(res.data)
         try:
-            felmeres = models.Felmeresek.objects.get(id=pk)
-            adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
-            if not adatlap.exists():
-                return Response(
-                    serializers.FelmeresekSerializer(felmeres.__dict__).data
-                )
-            adatlap = adatlap.first()
-            return Response(
-                serializers.FelmeresekSerializer(
-                    {
-                        "offer_status": adatlap.StatusIdStr,
-                        **felmeres.__dict__,
-                    },
-                ).data
-            )
+            return Response(felmeresek_detail(pk).data)
         except Exception as e:
             log(
                 "Felmérés lekérdezése sikertelen",
@@ -364,7 +370,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
                 "pen_felmeresek_detail",
                 details=f"Error: {e}. {traceback.format_exc()}",
             )
-            return Response("Succesfully received data", status=HTTP_200_OK)
+            return Response("A felmérés nem létezik", status=HTTP_400_BAD_REQUEST)
 
 
 class FelmeresItemsList(generics.ListCreateAPIView):
