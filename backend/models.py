@@ -1723,7 +1723,6 @@ class FelmeresMunkadijak(models.Model):
     munkadij = models.ForeignKey("Munkadij", models.DO_NOTHING, blank=True, null=True)
     amount = models.IntegerField()
     value = models.FloatField()
-    hour = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False

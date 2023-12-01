@@ -682,27 +682,12 @@ def get_unas_order_data(type):
         ).first()
 
         # Add the data to the datas list
-        felmeres_adatlap_details = models.MiniCrmAdatlapok.objects.get(
-            Id=felmeres.adatlap_id
-        ).__dict__
-        try:
-            print(felmeres_adatlap_details["Iranyitoszam"])
-        except:
-            continue
 
         datas.append(
             {
                 "OrderData": order_data,
                 "AdatlapDetails": adatlap,
-                "FelmeresAdatlapDetails": felmeres_adatlap_details
-                if felmeres
-                else {
-                    "Iranyitoszam": "",
-                    "Telepules": "",
-                    "Cim2": "",
-                    "Megye": "",
-                    "Orszag": "",
-                },
+                "FelmeresAdatlapDetails": felmeres.adatlap_id,
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
@@ -757,11 +742,11 @@ def get_unas_order_data(type):
                     </Invoice>
                     <Shipping>
                         <Name>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</Name>
-                        <ZIP>{data["FelmeresAdatlapDetails"]["Iranyitoszam"]}</ZIP>
-                        <City>{data["FelmeresAdatlapDetails"]["Telepules"]}</City>
-                        <Street>{data["FelmeresAdatlapDetails"]["Cim2"]}</Street>
-                        <County>{data["FelmeresAdatlapDetails"]["Megye"]}</County>
-                        <Country>{data["FelmeresAdatlapDetails"]["Orszag"]}</Country>
+                        <ZIP>{data["FelmeresAdatlapDetails"].Iranyitoszam}</ZIP>
+                        <City>{data["FelmeresAdatlapDetails"].Telepules}</City>
+                        <Street>{data["FelmeresAdatlapDetails"].Cim2}</Street>
+                        <County>{data["FelmeresAdatlapDetails"].Megye}</County>
+                        <Country>{data["FelmeresAdatlapDetails"].Orszag}</Country>
                     <CountryCode>hu</CountryCode>
                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
