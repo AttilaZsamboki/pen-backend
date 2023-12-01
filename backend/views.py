@@ -339,7 +339,10 @@ def felmeresek_detail(pk):
     adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
     if not adatlap.exists():
         return serializers.FelmeresekSerializer(
-            adatlap_id=felmeres.adatlap_id, **felmeres.__dict__
+            {
+                "adatlap_id": felmeres.adatlap_id,
+                **felmeres.__dict__,
+            },
         )
     adatlap = adatlap.first()
     return serializers.FelmeresekSerializer(
