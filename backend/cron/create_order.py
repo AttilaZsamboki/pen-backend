@@ -12,7 +12,7 @@ import traceback
 dotenv.load_dotenv()
 
 
-def main(adatlap):
+def main(adatlap: MiniCrmAdatlapok):
     log(
         "Megrendelések létrehozása elkezdődött",
         script_name="pen_create_order",
@@ -44,7 +44,7 @@ def main(adatlap):
                 "Megye2": felmeres.adatlap_id.Megye,
                 "Utcakep": felmeres.adatlap_id.StreetViewUrl,
                 "IngatlanKepe2": felmeres.adatlap_id.IngatlanKepe,
-                "FelmeresLink": felmeres.adatlap_id.FelmeresAdatok,
+                "FelmeresLink": "https://app.peneszmentesites.hu/" + str(id),
                 "KiMerteFel2": felmeres.adatlap_id.Felmero2,
                 "FelmeresDatuma2": felmeres.adatlap_id.FelmeresIdopontja2,
                 "GaranciaTipusa": warranty_type_map[felmeres.warranty]

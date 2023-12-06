@@ -7,7 +7,7 @@ from ..models import Counties
 import math
 
 
-def process_data(data, source="webhook"):
+def calculate_distance_fun(data, source="webhook"):
     telephely = "Budapest, Nagytétényi út 218-220, 1225"
     address = (
         f"{data['Cim2']} {data['Telepules']}, {data['Iranyitoszam']} {data['Orszag']}"

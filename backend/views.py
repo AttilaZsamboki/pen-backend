@@ -33,7 +33,7 @@ from rest_framework_xml.renderers import XMLRenderer
 from .auth0backend import CustomJWTAuthentication
 
 from . import models, serializers
-from .utils.calculate_distance import process_data
+from .utils.calculate_distance import calculate_distance_fun
 from .utils.logs import log
 from .utils.minicrm import (
     contact_details,
@@ -48,33 +48,42 @@ from .utils.utils import replace_self_closing_tags
 # Create your views here.
 
 
+def save_webhook(request, process_data):
+    log(
+        "Penészmentesítés MiniCRM webhook meghívva",
+        "INFO",
+        "pen_felmeres_webhook",
+        request.body.decode("utf-8"),
+    )
+    all_data = json.loads(request.body.decode("utf-8"))
+
+    data = process_data(all_data)
+    valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
+    filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+
+    models.MiniCrmAdatlapok(
+        **filtered_data,
+    ).save()
+    return data
+
+
 class CalculateDistance(APIView):
     def post(self, request):
-        log(
-            "Penészmentesítés MiniCRM webhook meghívva",
-            "INFO",
-            "pen_calculate_distance_webhook",
-            request.body.decode("utf-8"),
-        )
-        all_data = json.loads(request.body.decode("utf-8"))
-        data = all_data["Data"]
+        def process_data(all_data):
+            data = all_data["Data"]
+            data["Felmero2"] = (
+                "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
+            )
+            if data["FizetesiMod2"]:
+                data["FizetesiMod2"] = all_data["Schema"]["FizetesiMod2"][
+                    data["FizetesiMod2"]
+                ]
+            return data
 
-        felmero = "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
-        data.pop("Felmero2")
-        valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-        filtered_data = {
-            k: v for k, v in data.items() if k in valid_fields and k != "FizetesiMod2"
-        }
+        data = save_webhook(request, process_data=process_data)
 
-        models.MiniCrmAdatlapok(
-            Felmero2=felmero,
-            FizetesiMod2=all_data["Schema"]["FizetesiMod2"][data["FizetesiMod2"]]
-            if data["FizetesiMod2"]
-            else None,
-            **filtered_data,
-        ).save()
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
-            response = process_data(data)
+            response = calculate_distance_fun(data)
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
         return Response({"status": "success"}, status=HTTP_200_OK)
@@ -1293,3 +1302,14 @@ class MiniCrmProxy(APIView):
             return Response(data["data"])
         else:
             return Response(data=data["reason"], status=data["code"])
+
+
+class GaranciaWebhook(APIView):
+    def post(self, request):
+        data = save_webhook(request)
+
+        if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
+            response = calculate_distance_fun(data)
+            if response == "Error":
+                return Response({"status": "error"}, status=HTTP_200_OK)
+        return Response({"status": "success"}, status=HTTP_200_OK)

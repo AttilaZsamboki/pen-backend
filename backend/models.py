@@ -1737,25 +1737,19 @@ class MiniCrmTodos(models.Model):
         db_table = "pen_minicrm_todos"
 
 
-class Cimek(models.Model):
+class Salesmen(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
-    role = models.CharField(max_length=100, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+    zip = models.IntegerField()
 
     class Meta:
         managed = False
-        db_table = "pen_cimek"
+        db_table = "pen_salesmen"
 
 
 class OpenSlots(models.Model):
-    adatlap = models.ForeignKey(
-        "MinicrmAdatlapok", models.DO_NOTHING, blank=True, null=True
-    )
-    at = models.DateTimeField(
-        blank=True, null=True
-    )  # Field renamed because it was a Python reserved word.
-    group = models.TextField(blank=True, null=True)
-    diff = models.IntegerField(blank=True, null=True)
+    external_id = models.TextField()
+    at = models.DateTimeField(blank=True, null=True)
+    user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1772,9 +1766,7 @@ class Settings(models.Model):
 
 
 class Appointments(models.Model):
-    adatlap = models.ForeignKey(
-        "MinicrmAdatlapok", models.DO_NOTHING, blank=True, null=True
-    )
+    external_id = models.TextField()
     date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -1791,19 +1783,33 @@ class ScriptRetries(models.Model):
         db_table = "script_retries"
 
 
-class DistanceMatrix(models.Model):
-    origin = models.ForeignKey(
-        "MinicrmAdatlapok", models.DO_NOTHING, db_column="origin"
-    )
-    dest = models.ForeignKey(
-        "MinicrmAdatlapok",
-        models.DO_NOTHING,
-        db_column="dest",
-        related_name="pendistancematrix_dest_set",
-    )
+class Routes(models.Model):
+    origin_zip = models.IntegerField()
+    dest_zip = models.IntegerField()
     distance = models.FloatField(blank=True, null=True)
-    duration = models.FloatField(blank=True, null=True)
+    duration = models.FloatField()
 
     class Meta:
         managed = False
-        db_table = "pen_distance_matrix"
+        db_table = "pen_routes"
+
+
+class UserSkills(models.Model):
+    skill = models.OneToOneField(
+        "Skills", models.DO_NOTHING, primary_key=True
+    )  # The composite primary key (skill_id, user_id) found, that is not supported. The first column is selected.
+    user = models.ForeignKey("Salesmen", models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = "pen_user_skills"
+        unique_together = (("skill", "user"),)
+
+
+class Skills(models.Model):
+    name = models.CharField(max_length=64, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_skills"

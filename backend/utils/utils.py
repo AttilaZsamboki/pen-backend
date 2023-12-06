@@ -74,3 +74,28 @@ def get_address(adatlap):
 
 def round_to_five(n):
     return round(n / 5) * 5
+
+
+def is_number(n):
+    if n is None:
+        return False
+    try:
+        float(n)
+        return True
+    except ValueError:
+        return False
+
+
+def round_to_30(dt: datetime) -> datetime:
+    if dt.minute >= 30:
+        return (
+            dt.replace(minute=30, second=0)
+            if dt.minute < 45
+            else dt.replace(hour=dt.hour + 1, minute=0, second=0)
+        )
+    else:
+        return (
+            dt.replace(minute=0, second=0)
+            if dt.minute < 15
+            else dt.replace(minute=30, second=0)
+        )

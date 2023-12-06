@@ -52,7 +52,7 @@ def felmeres_todo():
                 )
                 continue
             contact = contact["response"]
-            todo_comment = f"Új felmérést kaptál\nNév: {adatlap['Name']}\nCím: {adatlap['Telepules']}, {adatlap['Cim2']} {adatlap['Iranyitoszam']}, {adatlap['Orszag']}\nFizetési mód: {adatlap['FizetesiMod2']}\nÖsszeg: {adatlap['FelmeresiDij']} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: {url}\nUtcakép: {adatlap['StreetViewUrl']}\nTel: {contact['Phone']}"
+            todo_comment = f"Új felmérést kaptál\nNév: {adatlap['Name']}\nCím: {adatlap['Iranyitoszam']} {adatlap['Telepules']} {adatlap['Cim2']}, {adatlap['Orszag']}\nFizetési mód: {adatlap['FizetesiMod2']}\nÖsszeg: {adatlap['FelmeresiDij']} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: {url}\nUtcakép: {adatlap['StreetViewUrl']}\nTel: {contact['Phone']}"
             todo = create_to_do(
                 adatlap_id=adatlap["Id"],
                 user=adatlap["Felmero2"],

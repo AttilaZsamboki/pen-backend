@@ -4,6 +4,7 @@ import os
 import random
 from xml.dom import minidom
 from xml.etree.ElementTree import Element, SubElement, tostring
+from typing import List
 
 import dotenv
 import requests
@@ -19,7 +20,7 @@ felmeresek = Felmeresek.objects.filter(
     ~Q(
         id__in=list(
             MiniCrmAdatlapok.objects.values_list("Felmeresid", flat=True)
-            .filter(Felmeresid__isnull=False, Deleted=1)
+            .filter(Felmeresid__isnull=False, Deleted=0)
             .exclude(Felmeresid="None")
         )
     ),
@@ -34,9 +35,9 @@ def prettify(elem):
 
 
 def assemble_offer_xml(
-    adatlap,
-    items,
-    felmeres,
+    adatlap: MiniCrmAdatlapok,
+    items: List[FelmeresItems],
+    felmeres: Felmeresek,
     user_id=39636,
     template_name=None,
 ):
