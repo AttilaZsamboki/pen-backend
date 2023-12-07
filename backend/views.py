@@ -48,7 +48,7 @@ from .utils.utils import replace_self_closing_tags
 # Create your views here.
 
 
-def save_webhook(request, process_data):
+def save_webhook(request, process_data=None):
     log(
         "Penészmentesítés MiniCRM webhook meghívva",
         "INFO",
@@ -57,7 +57,10 @@ def save_webhook(request, process_data):
     )
     all_data = json.loads(request.body.decode("utf-8"))
 
-    data = process_data(all_data)
+    if process_data:
+        data = process_data(all_data)
+    else:
+        data = all_data["Data"]
     valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
     filtered_data = {k: v for k, v in data.items() if k in valid_fields}
 
@@ -1310,7 +1313,7 @@ class GaranciaWebhook(APIView):
             "Garancia webhook meghívva",
             "INFO",
             "pen_garancia_webhook",
-            data=request.body,
+            data=json.loads(request.body),
         )
         data = save_webhook(request)
 
