@@ -68,9 +68,11 @@ class Generation:
             return sum(distances)
 
         def calculate_fitness(self):
-            if self.calculate_distance() == 0:
+            print("Calculating fitness...")
+            distance = self.calculate_distance()
+            if distance == 0:
                 return 0
-            return 1 / self.calculate_distance()
+            return 1 / distance
 
         def print_route(self, print_starting_city=False):
             route = [
@@ -95,7 +97,12 @@ class Generation:
                 if len(data[i].dates):
                     if len(data[i].dates) == 1:
                         if data[i].dates[0] == "*":
-                            new_date = self.outer_instace.get_possible_dates(data[i])
+                            possible_dates = self.outer_instace.get_possible_dates(
+                                data[i]
+                            )
+                            new_date = possible_dates[
+                                np.random.randint(low=0, high=len(possible_dates))
+                            ]
                     new_date = self.data[i].random_date()
                     data[i].date = new_date
                     Generation.Individual(data=data, outer_instance=self).sort_route()
@@ -114,7 +121,11 @@ class Generation:
         )
 
     def check_working_hours(
-        self, date, felmero: Salesmen, plus_time=0, chromosome=None
+        self,
+        date,
+        felmero: Salesmen,
+        plus_time=0,
+        chromosome: Individual.Chromosome = None,
     ) -> List[datetime]:
         jobs_on_day = [
             i
@@ -186,6 +197,9 @@ class Generation:
         else:
             plus_time = 0
             time_home = self.get_time_home(chromosome)
+            if not time_home:
+                print(chromosome.id)
+                return possible_hours
             while True:
                 if timedelta(minutes=plus_time) + timedelta(
                     seconds=time_home
@@ -305,10 +319,10 @@ class Generation:
             return possible_hours
 
     def get_possible_dates(self, chromosome: Individual.Chromosome):
+        OpenSlots.objects.filter(external_id=chromosome.id).delete()
         possible_dates = []
         for date in self.dates:
             for felmero in self.qualified_salesmen:
-                possible_dates_felmero = []
                 if (
                     self.count_appointments_on_date(date, felmero)
                     < self.max_felmeres_per_day
@@ -317,20 +331,20 @@ class Generation:
                         chromosome, date, felmero=felmero
                     )
                     if gap_appointments:
-                        possible_dates_felmero += gap_appointments
+                        for i in gap_appointments:
+                            possible_dates.append({"felmero": felmero, "date": i})
+                            OpenSlots(
+                                external_id=chromosome.id, at=i, user=felmero
+                            ).save()
                     a = self.check_working_hours(
                         date, felmero=felmero, chromosome=chromosome
                     )
                     if a:
-                        possible_dates_felmero += a
-
-                if possible_dates_felmero:
-                    possible_dates.append({felmero: possible_dates_felmero})
-        OpenSlots.objects.filter(external_id=chromosome.id).delete()
-        for i in possible_dates:
-            for j, k in i.items():
-                for l in k:
-                    OpenSlots(external_id=chromosome.id, at=l, user=j).save()
+                        for i in a:
+                            possible_dates.append({"felmero": felmero, "date": i})
+                            OpenSlots(
+                                external_id=chromosome.id, at=i, user=felmero
+                            ).save()
         return possible_dates
 
     def create_distance_matrix(self, test=False):
@@ -365,7 +379,12 @@ class Generation:
                             addresses.append(adatlap.zip)
                             continue
                         next_adatlap = felmero_adatlapok[i + 1]
-                        if next_adatlap.date - adatlap.date > timedelta(hours=2):
+
+                        if (
+                            next_adatlap.date - adatlap.date
+                            >= timedelta(minutes=self.time_for_one_appointment)
+                            or i == 0
+                        ):
                             addresses.append(adatlap.zip)
             for origin in list(set(addresses)):
                 for destination in addresses:
@@ -386,15 +405,16 @@ class Generation:
                                     duration=np.random.randint(0, 10000),
                                 )
                             else:
-                                response = gmaps.routes(
-                                    origin=origin, destination=destination
-                                )
-                                save = Routes(
-                                    origin_zip=origin,
-                                    dest_zip=destination,
-                                    distance=response[0].distance_meters,
-                                    duration=response[0].parse_duration(),
-                                )
+                                # response = gmaps.routes(
+                                #     origin=origin, destination=destination
+                                # )
+                                # save = Routes(
+                                #     origin_zip=origin,
+                                #     dest_zip=destination,
+                                #     distance=response[0].distance_meters,
+                                #     duration=response[0].parse_duration(),
+                                # )
+                                pass
                             save.save()
 
     def generate_route(self):
@@ -437,6 +457,7 @@ class Generation:
         needed_skill: Skills,
         data: List[Individual.Chromosome],
         fixed_appointments: List[Individual.Chromosome],
+        plan_timespan=31,
     ):
         # Parameters
         self.population_size = population_size
@@ -451,6 +472,7 @@ class Generation:
         self.needed_skill = needed_skill
         self.data = data
         self.fixed_appointments = fixed_appointments
+        self.plan_timespan = plan_timespan
 
         self.qualified_salesmen = [
             i
@@ -462,7 +484,7 @@ class Generation:
             set(
                 [
                     (datetime.now() + timedelta(days=date)).date()
-                    for date in range(31)
+                    for date in range(self.plan_timespan)
                     if any(
                         [
                             len(
@@ -481,7 +503,7 @@ class Generation:
                     )
                     and (datetime.now() + timedelta(days=date)).date().weekday() < 5
                 ]
-                + [i.date.date() for i in fixed_appointments]
+                + [i.date.date() for i in fixed_appointments if i.date > datetime.now()]
             )
         )
 
@@ -504,30 +526,48 @@ class Generation:
 
         for i in range(start, end):
             if len(parent1.data[i].dates):
-                child_gene = [
-                    j for j in child.data if j.adatlap.Id == parent1.data[i].adatlap.Id
-                ]
+                child_gene = [j for j in child.data if j.id == parent1.data[i].id]
                 child_gene[0].date = parent1.data[i].date
                 child.sort_route()
 
         return child
 
+    def assign_new_applicants_dates(self):
+        for i in self.data:
+            print(i.id, i.date)
+            if i.dates == ["*"]:
+                possible_dates = self.get_possible_dates(i)
+                if possible_dates:
+                    rand_date = possible_dates[
+                        np.random.randint(low=0, high=len(possible_dates))
+                    ]
+                    i.date = rand_date["date"]
+                    i.felmero = rand_date["felmero"]
+
     def main(self, test=False):
-        self.create_distance_matrix(test)
+        print("Assigning new applicants dates...")
+        self.assign_new_applicants_dates()
+        if not test:
+            self.create_distance_matrix(test)
         for _ in range(self.max_generations):
             new_population = []
             for _ in range(population_size):
+                print("Generating new population...")
+                print("Tournament selection...")
                 parent1, parent2 = (
                     self.tournament_selection(),
                     self.tournament_selection(),
                 )
 
+                print("Crossover...")
                 child = self.crossover(parent1, parent2)
+                print("Mutation...")
                 child = child.mutate()
 
                 new_population.append(child)
             population = new_population
 
+        print("Calculating fitnesses...")
         fitnesses = [route.calculate_fitness() for route in self.population]
 
         best_route_index = np.argmax(fitnesses)
@@ -588,7 +628,6 @@ class MiniCRMConnector:
                 dates=["*"],
                 id=i[self.id_field],
                 zip=i[self.zip_field],
-                felmero=Salesmen.objects.get(name=i[self.felmero_field]),
             )
             for i in MiniCrmAdatlapok.objects.filter(
                 ~Q(Id__in=[i.external_id for i in self.appointments]),
@@ -596,7 +635,7 @@ class MiniCRMConnector:
             ).values()
             if self.new_aplicant_condition(i) and i[self.felmero_field]
         ]
-        data = []
+        data: List[Generation.Individual.Chromosome] = []
         for i in (
             [
                 Generation.Individual.Chromosome(
@@ -611,12 +650,8 @@ class MiniCRMConnector:
                     date=MiniCrmAdatlapok.objects.filter(Id=i.external_id).values()[0][
                         self.date_field
                     ],
-                    felmero=Salesmen.objects.get(
-                        name=MiniCrmAdatlapok.objects.filter(Id=i.external_id).values()[
-                            0
-                        ][self.felmero_field],
-                    ),
                     id=i.external_id,
+                    felmero=i.user,
                 )
                 for i in self.appointments.distinct("external_id")
             ]
@@ -651,10 +686,11 @@ minicrm_conn = MiniCRMConnector(
     id_field="Id",
     zip_field="Iranyitoszam",
     fixed_appointment_condition=lambda x: x["FelmeresIdopontja2"] is not None
-    and x["StatusId"] not in ["3086", "2929"],
+    and x["StatusId"] not in [3086, 2929],
     new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
-    and x["StatusId"] not in ["3086", "2929"],
+    and x["StatusId"] not in [3086, 2929],
 )
+plan_timespan = 31
 
 result = Generation(
     start_city=start_city,
@@ -669,4 +705,6 @@ result = Generation(
     needed_skill=needed_skill,
     data=minicrm_conn.main(),
     fixed_appointments=minicrm_conn.fix_appointments(),
-).get_possible_dates(Generation.Individual.Chromosome(id=44244, dates=["*"], zip=2120))
+    plan_timespan=plan_timespan,
+).main(test=True)
+print([i.__dict__ for i in result.data])

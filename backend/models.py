@@ -1768,6 +1768,7 @@ class Settings(models.Model):
 class Appointments(models.Model):
     external_id = models.TextField()
     date = models.DateTimeField(blank=True, null=True)
+    user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False

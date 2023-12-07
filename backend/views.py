@@ -453,6 +453,9 @@ class OfferWebhook(APIView):
             request.body,
         )
         try:
+            if data["Data"]["Felmeresid"] is None:
+                return Response("Succesfully received data", status=HTTP_200_OK)
+
             valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
             filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
 
