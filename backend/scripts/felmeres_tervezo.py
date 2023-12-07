@@ -163,20 +163,18 @@ class Generation:
             x = x.first().duration
             y = self.get_time_home(chromosome)
             b = (
-                last_appointment.date
-                + timedelta(minutes=plus_time)
-                + timedelta(seconds=2 * self.time_for_one_appointment)
-                + timedelta(seconds=x + y)
+                last_appointment.date.replace(minute=0, second=0)
+                + max(timedelta(minutes=plus_time), timedelta(seconds=x))
+                + timedelta(minutes=2 * self.time_for_one_appointment)
+                + timedelta(seconds=y)
             )
 
-            print(b, a, last_appointment.date + timedelta(minutes=plus_time))
             if b - a < timedelta(hours=self.number_of_work_hours) and b > a:
                 possible_hours += [
                     round_to_30(
                         last_appointment.date
                         + timedelta(minutes=self.time_for_one_appointment)
-                        + timedelta(seconds=x)
-                        + timedelta(minutes=plus_time)
+                        + max(timedelta(seconds=x), timedelta(minutes=plus_time))
                     )
                 ] + self.check_working_hours(
                     date,
@@ -184,14 +182,14 @@ class Generation:
                     felmero=felmero,
                     chromosome=chromosome,
                 )
-            return possible_hours
+            return list(set(possible_hours))
         else:
             plus_time = 0
             time_home = self.get_time_home(chromosome)
             while True:
                 if timedelta(minutes=plus_time) + timedelta(
                     seconds=time_home
-                ) < timedelta(hours=self.number_of_work_hours):
+                ) * 2 < timedelta(hours=self.number_of_work_hours):
                     possible_hours.append(
                         datetime.combine(
                             date,

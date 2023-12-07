@@ -1306,6 +1306,12 @@ class MiniCrmProxy(APIView):
 
 class GaranciaWebhook(APIView):
     def post(self, request):
+        log(
+            "Garancia webhook meghívva",
+            "INFO",
+            "pen_garancia_webhook",
+            data=request.body,
+        )
         data = save_webhook(request)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
