@@ -430,14 +430,12 @@ class Counties(models.Model):
 
 
 class Offers(models.Model):
-    id = models.IntegerField(
-        db_column="Id", primary_key=True
-    )  # Field name made lowercase.
-    projectid = models.IntegerField(db_column="ProjectId")  # Field name made lowercase.
+    id = models.IntegerField(primary_key=True)
+    adatlap = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING)
 
     class Meta:
         managed = False
-        db_table = "pen_offers"
+        db_table = 'pen_offers'
 
 
 class QuestionProducts(models.Model):
@@ -745,7 +743,7 @@ class MiniCrmAdatlapok(models.Model):
     Invited = models.TextField(blank=True, null=True)
     Deleted = models.TextField(blank=True, null=True)
     CreatedBy = models.BigIntegerField(blank=True, null=True)
-    CreatedAt = models.TextField(blank=True, null=True)
+    CreatedAt = models.DateTimeField(blank=True, null=True)
     UpdatedBy = models.BigIntegerField(blank=True, null=True)
     UpdatedAt = models.TextField(blank=True, null=True)
     Referrer = models.TextField(blank=True, null=True)

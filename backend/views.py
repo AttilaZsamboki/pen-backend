@@ -463,7 +463,7 @@ class OfferWebhook(APIView):
                 **filtered_data,
             ).save()
             models.Offers(
-                projectid=data["Id"],
+                adatlap=data["Id"],
                 id=data["Head"]["Id"],
             ).save()
             log(
@@ -1043,7 +1043,7 @@ class CancelOffer(APIView):
             return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
         offer_adatlap = offer_adatlap[0]
 
-        offer_id = models.Offers.objects.get(projectid=offer_adatlap["Id"]).id
+        offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).id
         update_resp = update_offer_order(
             offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True
         )

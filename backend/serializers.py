@@ -88,12 +88,6 @@ class FelmeresItemsSerializer(serializers.ModelSerializer):
         return instance
 
 
-class OffersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Offers
-        fields = "__all__"
-
-
 class QuestionProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.QuestionProducts

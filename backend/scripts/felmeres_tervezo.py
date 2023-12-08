@@ -100,11 +100,15 @@ class Generation:
                             possible_dates = self.outer_instace.get_possible_dates(
                                 data[i]
                             )
-                            new_date = possible_dates[
-                                np.random.randint(low=0, high=len(possible_dates))
-                            ]
-                    new_date = self.data[i].random_date()
-                    data[i].date = new_date
+                            if possible_dates:
+                                new_date = possible_dates[
+                                    np.random.randint(low=0, high=len(possible_dates))
+                                ]
+                                data[i].date = new_date["date"]
+                                data[i].felmero = new_date["felmero"]
+                    else:
+                        new_date = self.data[i].random_date()
+                        data[i].date = new_date
                     Generation.Individual(data=data, outer_instance=self).sort_route()
                     break
             return self.data
@@ -527,7 +531,10 @@ class Generation:
         for i in range(start, end):
             if len(parent1.data[i].dates):
                 child_gene = [j for j in child.data if j.id == parent1.data[i].id]
-                child_gene[0].date = parent1.data[i].date
+                child_gene[0].date, child_gene[0].felmero = (
+                    parent1.data[i].date,
+                    parent1.data[i].felmero,
+                )
                 child.sort_route()
 
         return child
@@ -573,7 +580,7 @@ class Generation:
         best_route_index = np.argmax(fitnesses)
 
         best_route = population[best_route_index]
-        return self.Individual(data=best_route, outer_instance=self)
+        return Generation.Individual(data=best_route, outer_instance=self)
 
     def tournament_selection(self):
         indices = np.random.choice(len(self.population), self.tournament_size)
@@ -706,5 +713,6 @@ result = Generation(
     data=minicrm_conn.main(),
     fixed_appointments=minicrm_conn.fix_appointments(),
     plan_timespan=plan_timespan,
-).main(test=True)
-print([i.__dict__ for i in result.data])
+)
+result.create_distance_matrix(test=True)
+result.population[0].print_route()

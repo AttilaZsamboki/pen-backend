@@ -34,7 +34,7 @@ def main(adatlap: MiniCrmAdatlapok):
         )
     id = adatlap.Felmeresid
     felmeres = Felmeresek.objects.get(id=id)
-    offer = Offers.objects.filter(projectid=adatlap.Id).first()
+    offer = Offers.objects.filter(adatlap=adatlap.Id).first()
     if offer:
         order = create_order(
             adatlap=felmeres.adatlap_id,
