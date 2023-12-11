@@ -729,8 +729,8 @@ def get_unas_order_data(type):
             [
                 f"""<Order>
             <Key>{data["OrderData"]["order_id"] if type != "dev" else str(uuid.uuid4())}</Key>
-            <Date>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</Date>
-            <DateMod>{data["AdatlapDetails"]["CreatedAt"].replace("-", ".")}</DateMod>
+            <Date>{data["AdatlapDetails"]["CreatedAt"].strftime("%Y-%m-%d")}</Date>
+            <DateMod>{data["AdatlapDetails"]["CreatedAt"].strftime("%Y-%m-%d")}</DateMod>
             <Lang>hu</Lang>
             <Customer>
                 <Id>{data["Kapcsolat"]["Id"]}</Id>

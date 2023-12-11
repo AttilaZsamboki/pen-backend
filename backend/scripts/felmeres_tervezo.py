@@ -1,6 +1,7 @@
 import numpy as np
 from ..utils.google_routes import Client
 import os
+import time
 from ..utils.logs import log
 from ..models import Appointments
 from ..models import MiniCrmAdatlapok, Routes, OpenSlots, Salesmen, Skills, UserSkills
@@ -46,7 +47,7 @@ class Generation:
                 if isinstance(x.date, dt_date):
                     return x.date
                 else:
-                    return datetime.min.date()
+                    return datetime.combine(dt_date.today(), datetime.min.time())
 
             self.data.sort(key=sort_key)
 
@@ -58,12 +59,14 @@ class Generation:
             for i in range(len(self.data)):
                 origin = 0 if i == 0 else self.data[i - 1].zip
                 dest = self.data[i].zip
-                distance = self.outer_instace.matrix.filter(
-                    Q(origin_zip=origin, dest_zip=dest)
-                    | Q(origin_zip=dest, dest_zip=origin)
-                )
-                if distance.exists():
-                    distances.append(distance.first().duration)
+                if is_number(origin) and is_number(dest):
+                    print(origin, dest)
+                    distance = self.outer_instace.matrix.filter(
+                        Q(origin_zip=origin, dest_zip=dest)
+                        | Q(origin_zip=dest, dest_zip=origin)
+                    )
+                    if distance.exists():
+                        distances.append(distance.first().duration)
 
             return sum(distances)
 
@@ -77,14 +80,13 @@ class Generation:
         def print_route(self, print_starting_city=False):
             route = [
                 (
+                    i.date,
                     i.id,
                     i.zip,
-                    f"{i.date.month}-{i.date.day}",
                 )
-                if i.zip != self.outer_instace.start_city or print_starting_city
+                if i.id != 0 or print_starting_city
                 else " - "
                 for i in self.data
-                if i.date != "*"
             ]
 
             print(route)
@@ -94,9 +96,10 @@ class Generation:
             data = self.data.copy()
             while True:
                 i = np.random.randint(0, size)
-                if len(data[i].dates):
-                    if len(data[i].dates) == 1:
-                        if data[i].dates[0] == "*":
+                dates = data[i].dates
+                if len(dates):
+                    if len(dates) == 1:
+                        if dates[0] == "*":
                             possible_dates = self.outer_instace.get_possible_dates(
                                 data[i]
                             )
@@ -397,7 +400,7 @@ class Generation:
                         and is_number(origin)
                         and is_number(destination)
                     ):
-                        if not Routes.objects.filter(
+                        if not self.matrix.filter(
                             Q(origin_zip=origin, dest_zip=destination)
                             | Q(origin_zip=destination, dest_zip=origin)
                         ).exists():
@@ -426,10 +429,10 @@ class Generation:
         for day in self.dates:
             day_cities = self.Individual(
                 outer_instance=self,
-                data=[i for i in self.data if i.date == "*" or i.date == day],
+                data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
             home = self.Individual.Chromosome(
-                date=day,
+                date=datetime.combine(day, datetime.min.time()),
                 dates=[],
             )
 
@@ -511,9 +514,6 @@ class Generation:
             )
         )
 
-        self.population = [
-            self.generate_route() for _ in range(self.initial_population_size)
-        ]
         self.start_city = start_city
         self.matrix = Routes.objects.all()
 
@@ -541,7 +541,6 @@ class Generation:
 
     def assign_new_applicants_dates(self):
         for i in self.data:
-            print(i.id, i.date)
             if i.dates == ["*"]:
                 possible_dates = self.get_possible_dates(i)
                 if possible_dates:
@@ -552,10 +551,18 @@ class Generation:
                     i.felmero = rand_date["felmero"]
 
     def main(self, test=False):
+        start_time = time.time()
+
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
+
         if not test:
             self.create_distance_matrix(test)
+
+        self.population = [
+            self.generate_route() for _ in range(self.initial_population_size)
+        ]
+
         for _ in range(self.max_generations):
             new_population = []
             for _ in range(population_size):
@@ -571,7 +578,14 @@ class Generation:
                 print("Mutation...")
                 child = child.mutate()
 
-                new_population.append(child)
+                new_population.append(
+                    [
+                        child[i]
+                        for i in range(len(child))
+                        if i == 0
+                        or not (child[i - 1].zip is None and child[i].zip is None)
+                    ]
+                )
             population = new_population
 
         print("Calculating fitnesses...")
@@ -580,6 +594,10 @@ class Generation:
         best_route_index = np.argmax(fitnesses)
 
         best_route = population[best_route_index]
+
+        end_time = time.time()
+        print(f"Execution time: {end_time - start_time} seconds")
+
         return Generation.Individual(data=best_route, outer_instance=self)
 
     def tournament_selection(self):
@@ -626,7 +644,9 @@ class MiniCRMConnector:
                 ),
                 Deleted=0,
             ).values()
-            if self.fixed_appointment_condition(i) and i[self.felmero_field]
+            if self.fixed_appointment_condition(i)
+            and i[self.felmero_field]
+            and i[self.date_field] > datetime.now()
         ]
 
     def main(self) -> List[Generation.Individual.Chromosome]:
@@ -640,7 +660,9 @@ class MiniCRMConnector:
                 ~Q(Id__in=[i.external_id for i in self.appointments]),
                 Deleted=0,
             ).values()
-            if self.new_aplicant_condition(i) and i[self.felmero_field]
+            if self.new_aplicant_condition(i)
+            and i[self.felmero_field]
+            and i[self.zip_field]
         ]
         data: List[Generation.Individual.Chromosome] = []
         for i in (
@@ -665,6 +687,8 @@ class MiniCRMConnector:
             + self.fix_appointments()
             + new_applicants
         ):
+            if not i.zip:
+                continue
             attr = i.__dict__.copy()
             attr["date"] = i.random_date()
             data.append(
@@ -676,10 +700,10 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1
-initial_population_size = 1
-max_generations = 1
-tournament_size = 1
+population_size = 32
+initial_population_size = 32
+max_generations = 50
+tournament_size = 2
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
@@ -699,6 +723,7 @@ minicrm_conn = MiniCRMConnector(
 )
 plan_timespan = 31
 
+fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(
     start_city=start_city,
     initial_population_size=initial_population_size,
@@ -711,8 +736,7 @@ result = Generation(
     first_appointment=first_appointment,
     needed_skill=needed_skill,
     data=minicrm_conn.main(),
-    fixed_appointments=minicrm_conn.fix_appointments(),
+    fixed_appointments=fixed_appointments,
     plan_timespan=plan_timespan,
-)
-result.create_distance_matrix(test=True)
-result.population[0].print_route()
+).main(test=True)
+result.print_route()
