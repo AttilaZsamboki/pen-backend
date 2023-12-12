@@ -1783,8 +1783,8 @@ class ScriptRetries(models.Model):
 
 
 class Routes(models.Model):
-    origin_zip = models.IntegerField()
-    dest_zip = models.IntegerField()
+    origin_zip = models.CharField(max_length=50)
+    dest_zip = models.CharField(max_length=50)
     distance = models.FloatField(blank=True, null=True)
     duration = models.FloatField()
 

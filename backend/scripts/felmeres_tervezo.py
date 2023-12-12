@@ -700,16 +700,16 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 32
-initial_population_size = 32
-max_generations = 50
-tournament_size = 2
+population_size = 1
+initial_population_size = 1
+max_generations = 1
+tournament_size = 1
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
 max_felmeres_per_day = 5
 first_appointment = "08:00"
-start_city = 2181
+start_city = "2181"
 needed_skill = Skills.objects.get(id=1)
 minicrm_conn = MiniCRMConnector(
     felmero_field="Felmero2",
@@ -721,7 +721,7 @@ minicrm_conn = MiniCRMConnector(
     new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
     and x["StatusId"] not in [3086, 2929],
 )
-plan_timespan = 31
+plan_timespan = 90
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(

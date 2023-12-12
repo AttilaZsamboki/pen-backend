@@ -74,9 +74,8 @@ class CalculateDistance(APIView):
     def post(self, request):
         def process_data(all_data):
             data = all_data["Data"]
-            data["Felmero2"] = (
-                "Kun Kristóf" if data["Felmero2"] == "4432" else "Tamási Álmos"
-            )
+            if data["Felmero2"]:
+                data["Felmero2"] = all_data["Schema"]["Felmero2"][data["Felmero2"]]
             if data["FizetesiMod2"]:
                 data["FizetesiMod2"] = all_data["Schema"]["FizetesiMod2"][
                     data["FizetesiMod2"]
