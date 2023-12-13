@@ -462,7 +462,7 @@ class OfferWebhook(APIView):
                 **filtered_data,
             ).save()
             models.Offers(
-                adatlap=data["Id"],
+                adatlap=models.MiniCrmAdatlapok.objects.get(Id=data["Id"]),
                 id=data["Head"]["Id"],
             ).save()
             log(

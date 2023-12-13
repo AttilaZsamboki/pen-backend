@@ -660,9 +660,7 @@ class MiniCRMConnector:
                 ~Q(Id__in=[i.external_id for i in self.appointments]),
                 Deleted=0,
             ).values()
-            if self.new_aplicant_condition(i)
-            and i[self.felmero_field]
-            and i[self.zip_field]
+            if self.new_aplicant_condition(i) and i[self.zip_field]
         ]
         data: List[Generation.Individual.Chromosome] = []
         for i in (
