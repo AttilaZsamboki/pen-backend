@@ -1324,3 +1324,11 @@ class GaranciaWebhook(APIView):
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
         return Response({"status": "success"}, status=HTTP_200_OK)
+
+
+class BestSlots(APIView):
+    def get(self, request, external_id):
+        slots = models.BestSlots.objects.filter(
+            slot__external_id=external_id
+        )
+        return Response(serializers.BestSlotsSerializer(slots, many=True).data)

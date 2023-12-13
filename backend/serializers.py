@@ -160,3 +160,23 @@ class AppointmentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Appointments
         fields = "__all__"
+
+
+class SalesmenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Salesmen
+        fields = "__all__"
+
+
+class SlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.OpenSlots
+        fields = "__all__"  # or list the fields you want ['field1', 'field2', ...]
+
+
+class BestSlotsSerializer(serializers.ModelSerializer):
+    slot = SlotSerializer(read_only=True)
+
+    class Meta:
+        model = models.BestSlots
+        fields = "__all__"  # or list the fields you want ['field1', 'field2', ...]

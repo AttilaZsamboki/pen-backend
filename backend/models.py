@@ -431,11 +431,11 @@ class Counties(models.Model):
 
 class Offers(models.Model):
     id = models.IntegerField(primary_key=True)
-    adatlap = models.ForeignKey('MinicrmAdatlapok', models.DO_NOTHING)
+    adatlap = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING)
 
     class Meta:
         managed = False
-        db_table = 'pen_offers'
+        db_table = "pen_offers"
 
 
 class QuestionProducts(models.Model):
@@ -1812,3 +1812,22 @@ class Skills(models.Model):
     class Meta:
         managed = False
         db_table = "pen_skills"
+
+
+
+class OpenSlots(models.Model):
+    external_id = models.TextField()
+    at = models.DateTimeField(blank=True, null=True)
+    user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_open_slots"
+
+class BestSlots(models.Model):
+    slot = models.ForeignKey("OpenSlots", models.DO_NOTHING, blank=True, null=True)
+    level = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_best_slots"

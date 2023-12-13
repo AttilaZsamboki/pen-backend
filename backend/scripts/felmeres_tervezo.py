@@ -556,8 +556,7 @@ class Generation:
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
 
-        if not test:
-            self.create_distance_matrix(test)
+        self.create_distance_matrix(test)
 
         self.population = [
             self.generate_route() for _ in range(self.initial_population_size)
