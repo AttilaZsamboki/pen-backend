@@ -608,6 +608,7 @@ class Generation:
             slots = []
             i = 0
             while True:
+                print(len(population), sorted_fitnesses[i][0])
                 for chromosome in population[sorted_fitnesses[i][0]]:
                     if (
                         chromosome.id == id
@@ -616,16 +617,22 @@ class Generation:
                     ):
                         slots.append(chromosome)
 
-                if len(slots) > self.num_best_slots:
+                if (
+                    len(slots) > self.num_best_slots
+                    or i == len(sorted_fitnesses) - 1
+                    or sorted_fitnesses[i][1] == len(population) - 1
+                ):
                     break
                 i += 1
             for i, slot in enumerate(slots):
-                BestSlots(
-                    slot=OpenSlots.objects.get(
-                        external_id=id, at=slot.date, user=slot.felmero
-                    ),
-                    level=i,
-                ).save()
+                open_slot_obj = OpenSlots.objects.filter(
+                    external_id=id, at=slot.date, user=slot.felmero
+                )
+                if open_slot_obj.exists():
+                    BestSlots(
+                        slot=open_slot_obj.first(),
+                        level=i + 1,
+                    ).save()
 
         best_route_index = np.argmax(fitnesses)
 
@@ -682,7 +689,7 @@ class MiniCRMConnector:
             ).values()
             if self.fixed_appointment_condition(i)
             and i[self.felmero_field]
-            and i[self.date_field] > datetime.now()
+            and i[self.date_field].date() >= datetime.now().date()
         ]
 
     def main(self) -> List[Generation.Individual.Chromosome]:
@@ -735,7 +742,7 @@ class MiniCRMConnector:
 
 
 population_size = 1
-initial_population_size = 1
+initial_population_size = 5
 max_generations = 1
 tournament_size = 1
 
@@ -756,7 +763,7 @@ minicrm_conn = MiniCRMConnector(
     and x["StatusId"] not in [3086, 2929],
 )
 num_best_slots = 5
-plan_timespan = 90
+plan_timespan = 45
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(

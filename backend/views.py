@@ -1334,3 +1334,10 @@ class OpenSlots(APIView):
             if best_slot.exists():
                 slot.level = best_slot.first().level
         return Response(serializers.SlotSerializer(open_slots, many=True).data)
+
+
+class SchedulerSettings(generics.ListAPIView):
+    serializer_class = serializers.SchedulerSettingsSerializer
+    queryset = models.SchedulerSettings.objects.all()
+    permission_classes = [AllowAny]
+    filter_fields = "__all__"

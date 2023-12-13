@@ -48,4 +48,5 @@ urlpatterns = [
     path("minicrm-proxy/<adatlap_id>", views.MiniCrmProxy.as_view()),
     path("garancia-webhook/", views.GaranciaWebhook.as_view()),
     path("open-slots/<external_id>", views.OpenSlots.as_view()),
+    path("scheduler-settings/", views.SchedulerSettings.as_view()),
 ]

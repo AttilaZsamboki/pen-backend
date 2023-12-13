@@ -1815,9 +1815,18 @@ class Skills(models.Model):
 
 
 class BestSlots(models.Model):
-    slot = models.ForeignKey("OpenSlots", models.DO_NOTHING, blank=True, null=True)
+    slot = models.ForeignKey("OpenSlots", models.CASCADE, blank=True, null=True)
     level = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "pen_best_slots"
+
+
+class SchedulerSettings(models.Model):
+    name = models.TextField(blank=True, null=True)
+    value = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_scheduler_settings"

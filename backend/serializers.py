@@ -182,3 +182,9 @@ class BestSlotsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BestSlots
         fields = "__all__"  # or list the fields you want ['field1', 'field2', ...]
+
+
+class SchedulerSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SchedulerSettings
+        fields = "__all__"
