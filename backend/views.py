@@ -1326,9 +1326,11 @@ class GaranciaWebhook(APIView):
         return Response({"status": "success"}, status=HTTP_200_OK)
 
 
-class BestSlots(APIView):
+class OpenSlots(APIView):
     def get(self, request, external_id):
-        slots = models.BestSlots.objects.filter(
-            slot__external_id=external_id
-        )
-        return Response(serializers.BestSlotsSerializer(slots, many=True).data)
+        open_slots = models.OpenSlots.objects.filter(external_id=external_id)
+        for slot in open_slots:
+            best_slot = models.BestSlots.objects.filter(slot=slot.id)
+            if best_slot.exists():
+                slot.level = best_slot.first().level
+        return Response(serializers.SlotSerializer(open_slots, many=True).data)

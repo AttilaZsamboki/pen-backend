@@ -4,7 +4,15 @@ import os
 import time
 from ..utils.logs import log
 from ..models import Appointments
-from ..models import MiniCrmAdatlapok, Routes, OpenSlots, Salesmen, Skills, UserSkills
+from ..models import (
+    MiniCrmAdatlapok,
+    Routes,
+    OpenSlots,
+    Salesmen,
+    Skills,
+    UserSkills,
+    BestSlots,
+)
 from ..utils.utils import is_number, round_to_30
 from datetime import datetime, timedelta, date as dt_date
 from django.db.models import Q
@@ -465,6 +473,7 @@ class Generation:
         data: List[Individual.Chromosome],
         fixed_appointments: List[Individual.Chromosome],
         plan_timespan=31,
+        num_best_slots=5,
     ):
         # Parameters
         self.population_size = population_size
@@ -480,6 +489,7 @@ class Generation:
         self.data = data
         self.fixed_appointments = fixed_appointments
         self.plan_timespan = plan_timespan
+        self.num_best_slots = num_best_slots
 
         self.qualified_salesmen = [
             i
@@ -556,7 +566,8 @@ class Generation:
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
 
-        self.create_distance_matrix(test)
+        if not test:
+            self.create_distance_matrix(test)
 
         self.population = [
             self.generate_route() for _ in range(self.initial_population_size)
@@ -589,6 +600,32 @@ class Generation:
 
         print("Calculating fitnesses...")
         fitnesses = [route.calculate_fitness() for route in self.population]
+        sorted_fitnesses = sorted(
+            enumerate(fitnesses), key=lambda x: x[1], reverse=True
+        )
+        BestSlots.objects.all().delete()
+        for id in list(set([i.id for i in self.data])):
+            slots = []
+            i = 0
+            while True:
+                for chromosome in population[sorted_fitnesses[i][0]]:
+                    if (
+                        chromosome.id == id
+                        and chromosome.date != "*"
+                        and chromosome.date not in [i.date for i in slots]
+                    ):
+                        slots.append(chromosome)
+
+                if len(slots) > self.num_best_slots:
+                    break
+                i += 1
+            for i, slot in enumerate(slots):
+                BestSlots(
+                    slot=OpenSlots.objects.get(
+                        external_id=id, at=slot.date, user=slot.felmero
+                    ),
+                    level=i,
+                ).save()
 
         best_route_index = np.argmax(fitnesses)
 
@@ -718,6 +755,7 @@ minicrm_conn = MiniCRMConnector(
     new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
     and x["StatusId"] not in [3086, 2929],
 )
+num_best_slots = 5
 plan_timespan = 90
 
 fixed_appointments = minicrm_conn.fix_appointments()
@@ -735,5 +773,6 @@ result = Generation(
     data=minicrm_conn.main(),
     fixed_appointments=fixed_appointments,
     plan_timespan=plan_timespan,
+    num_best_slots=num_best_slots,
 ).main(test=True)
 result.print_route()

@@ -169,6 +169,8 @@ class SalesmenSerializer(serializers.ModelSerializer):
 
 
 class SlotSerializer(serializers.ModelSerializer):
+    level = serializers.IntegerField(required=False, read_only=True, default=0)
+
     class Meta:
         model = models.OpenSlots
         fields = "__all__"  # or list the fields you want ['field1', 'field2', ...]

@@ -1814,16 +1814,6 @@ class Skills(models.Model):
         db_table = "pen_skills"
 
 
-
-class OpenSlots(models.Model):
-    external_id = models.TextField()
-    at = models.DateTimeField(blank=True, null=True)
-    user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = "pen_open_slots"
-
 class BestSlots(models.Model):
     slot = models.ForeignKey("OpenSlots", models.DO_NOTHING, blank=True, null=True)
     level = models.IntegerField(blank=True, null=True)
