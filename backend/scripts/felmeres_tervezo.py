@@ -609,6 +609,8 @@ class Generation:
             i = 0
             while True:
                 print(len(population), sorted_fitnesses[i][0])
+                if sorted_fitnesses[i][1] >= len(population):
+                    break
                 for chromosome in population[sorted_fitnesses[i][0]]:
                     if (
                         chromosome.id == id
@@ -617,11 +619,7 @@ class Generation:
                     ):
                         slots.append(chromosome)
 
-                if (
-                    len(slots) > self.num_best_slots
-                    or i == len(sorted_fitnesses) - 1
-                    or sorted_fitnesses[i][1] == len(population) - 1
-                ):
+                if len(slots) > self.num_best_slots or i == len(sorted_fitnesses) - 1:
                     break
                 i += 1
             for i, slot in enumerate(slots):

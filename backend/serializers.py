@@ -135,6 +135,7 @@ class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
             "Felmero2",
             "IngatlanKepe",
             "CreatedAt",
+            "FelmeresiDij",
         ]
 
 
