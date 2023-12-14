@@ -50,4 +50,5 @@ urlpatterns = [
     path("open-slots/<external_id>", views.OpenSlots.as_view()),
     path("scheduler-settings/", views.SchedulerSettings.as_view()),
     path("create-appointment/", views.CreateAppointment.as_view()),
+    path("appointments/<external_id>/", views.GetAppointment.as_view()),
 ]

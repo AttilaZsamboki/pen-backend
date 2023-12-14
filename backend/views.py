@@ -1347,3 +1347,13 @@ class CreateAppointment(generics.CreateAPIView):
     serializer_class = serializers.AppointmentsSerializer
     queryset = models.Appointments.objects.all()
     permission_classes = [AllowAny]
+
+
+class GetAppointment(APIView):
+    def get(self, request, external_id):
+        appointments = models.Appointments.objects.filter(external_id=external_id)
+        if not appointments:
+            return Response(status=HTTP_404_NOT_FOUND)
+        return Response(
+            serializers.AppointmentsSerializer(appointments, many=True).data
+        )

@@ -792,10 +792,10 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1
-initial_population_size = 3
-max_generations = 1
-tournament_size = 1
+population_size = 10
+initial_population_size = 10
+max_generations = 10
+tournament_size = 2
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
