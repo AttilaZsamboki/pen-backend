@@ -12,6 +12,8 @@ from ..models import (
     Skills,
     UserSkills,
     BestSlots,
+    UnschedulableTimes,
+    SchedulerSettings,
 )
 from ..utils.utils import is_number, round_to_30
 from datetime import datetime, timedelta, date as dt_date
@@ -20,6 +22,9 @@ from typing import List
 
 ## Todo: NE FELEJTSD EL ODAíRNI A VÉGÉRE A T-t!!!!!!!
 gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KE"))
+
+
+from datetime import timedelta
 
 
 class Generation:
@@ -135,6 +140,34 @@ class Generation:
             ]
         )
 
+    def is_appointment_schedulable(self, appointment_time: dt_date, user: Salesmen):
+        unschedulable_times = UnschedulableTimes.objects.filter(
+            Q(user=user) | Q(user__isnull=True)
+        )
+        for unschedulable_time in unschedulable_times:
+            repeat_time = unschedulable_time.repeat_time
+            from_field = unschedulable_time.from_field
+            to = unschedulable_time.to
+
+            # Check if the unschedulable time repeats
+            if repeat_time:
+                # Calculate the duration of the unschedulable time
+                duration = to - from_field
+
+                for i in range(len(self.dates)):
+                    date: datetime = from_field + timedelta(days=repeat_time * i)
+                    if date.date() not in self.dates:
+                        if date.date() > max(self.dates):
+                            break
+                        continue
+                    if date <= appointment_time < date + duration:
+                        return False
+            else:
+                # Check if the appointment time falls within the unschedulable time
+                if from_field <= appointment_time <= to:
+                    return False
+        return True
+
     def check_working_hours(
         self,
         date,
@@ -196,29 +229,43 @@ class Generation:
             )
 
             if b - a < timedelta(hours=self.number_of_work_hours) and b > a:
-                possible_hours += [
-                    round_to_30(
-                        last_appointment.date
-                        + timedelta(minutes=self.time_for_one_appointment)
-                        + max(timedelta(seconds=x), timedelta(minutes=plus_time))
+                if self.is_appointment_schedulable(
+                    last_appointment.date
+                    + timedelta(minutes=self.time_for_one_appointment)
+                    + max(timedelta(seconds=x), timedelta(minutes=plus_time)),
+                    felmero,
+                ):
+                    possible_hours += [
+                        round_to_30(
+                            last_appointment.date
+                            + timedelta(minutes=self.time_for_one_appointment)
+                            + max(timedelta(seconds=x), timedelta(minutes=plus_time))
+                        )
+                    ] + self.check_working_hours(
+                        date,
+                        plus_time=plus_time + 30,
+                        felmero=felmero,
+                        chromosome=chromosome,
                     )
-                ] + self.check_working_hours(
-                    date,
-                    plus_time=plus_time + 30,
-                    felmero=felmero,
-                    chromosome=chromosome,
-                )
             return list(set(possible_hours))
         else:
             plus_time = 0
             time_home = self.get_time_home(chromosome)
             if not time_home:
-                print(chromosome.id)
                 return possible_hours
             while True:
                 if timedelta(minutes=plus_time) + timedelta(
                     seconds=time_home
-                ) * 2 < timedelta(hours=self.number_of_work_hours):
+                ) * 2 < timedelta(
+                    hours=self.number_of_work_hours
+                ) and self.is_appointment_schedulable(
+                    datetime.combine(
+                        date,
+                        datetime.strptime(self.first_appointment, "%H:%M").time(),
+                    )
+                    + timedelta(minutes=plus_time),
+                    felmero,
+                ):
                     possible_hours.append(
                         datetime.combine(
                             date,
@@ -326,6 +373,8 @@ class Generation:
                                 datetime.strptime(
                                     self.first_appointment, "%H:%M"
                                 ).time(),
+                            ) and self.is_appointment_schedulable(
+                                time_of_appointment, felmero
                             ):
                                 possible_hours.append(time_of_appointment)
                             plus_time += 30
@@ -474,6 +523,7 @@ class Generation:
         fixed_appointments: List[Individual.Chromosome],
         plan_timespan=31,
         num_best_slots=5,
+        allow_weekends=False,
     ):
         # Parameters
         self.population_size = population_size
@@ -490,6 +540,7 @@ class Generation:
         self.fixed_appointments = fixed_appointments
         self.plan_timespan = plan_timespan
         self.num_best_slots = num_best_slots
+        self.allow_weekends = allow_weekends
 
         self.qualified_salesmen = [
             i
@@ -518,7 +569,10 @@ class Generation:
                             for felmero in Salesmen.objects.all()
                         ]
                     )
-                    and (datetime.now() + timedelta(days=date)).date().weekday() < 5
+                    and (
+                        (datetime.now() + timedelta(days=date)).date().weekday() < 5
+                        or self.allow_weekends
+                    )
                 ]
                 + [i.date.date() for i in fixed_appointments if i.date > datetime.now()]
             )
@@ -606,22 +660,21 @@ class Generation:
         BestSlots.objects.all().delete()
         for id in list(set([i.id for i in self.data])):
             slots = []
-            i = 0
-            while True:
-                print(len(population), sorted_fitnesses[i][0])
+            for i in range(len(sorted_fitnesses)):
                 if sorted_fitnesses[i][1] >= len(population):
                     break
-                for chromosome in population[sorted_fitnesses[i][0]]:
-                    if (
-                        chromosome.id == id
-                        and chromosome.date != "*"
-                        and chromosome.date not in [i.date for i in slots]
-                    ):
-                        slots.append(chromosome)
+                index = sorted_fitnesses[i][0]
+                if index < len(population):
+                    for chromosome in population[index]:
+                        if (
+                            chromosome.id == id
+                            and chromosome.date != "*"
+                            and chromosome.date not in [i.date for i in slots]
+                        ):
+                            slots.append(chromosome)
 
                 if len(slots) > self.num_best_slots or i == len(sorted_fitnesses) - 1:
                     break
-                i += 1
             for i, slot in enumerate(slots):
                 open_slot_obj = OpenSlots.objects.filter(
                     external_id=id, at=slot.date, user=slot.felmero
@@ -740,7 +793,7 @@ class MiniCRMConnector:
 
 
 population_size = 1
-initial_population_size = 5
+initial_population_size = 3
 max_generations = 1
 tournament_size = 1
 
@@ -761,7 +814,8 @@ minicrm_conn = MiniCRMConnector(
     and x["StatusId"] not in [3086, 2929],
 )
 num_best_slots = 5
-plan_timespan = 45
+plan_timespan = 90
+allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(
@@ -779,5 +833,5 @@ result = Generation(
     fixed_appointments=fixed_appointments,
     plan_timespan=plan_timespan,
     num_best_slots=num_best_slots,
+    allow_weekends=allow_weekends,
 ).main(test=True)
-result.print_route()

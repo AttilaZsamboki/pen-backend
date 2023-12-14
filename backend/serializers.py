@@ -135,7 +135,6 @@ class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
             "Felmero2",
             "IngatlanKepe",
             "CreatedAt",
-            "FelmeresiDij",
         ]
 
 
@@ -188,4 +187,10 @@ class BestSlotsSerializer(serializers.ModelSerializer):
 class SchedulerSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SchedulerSettings
+        fields = "__all__"
+
+
+class AppointmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Appointments
         fields = "__all__"

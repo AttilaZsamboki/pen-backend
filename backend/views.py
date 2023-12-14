@@ -1341,3 +1341,9 @@ class SchedulerSettings(generics.ListAPIView):
     queryset = models.SchedulerSettings.objects.all()
     permission_classes = [AllowAny]
     filter_fields = "__all__"
+
+
+class CreateAppointment(generics.CreateAPIView):
+    serializer_class = serializers.AppointmentsSerializer
+    queryset = models.Appointments.objects.all()
+    permission_classes = [AllowAny]

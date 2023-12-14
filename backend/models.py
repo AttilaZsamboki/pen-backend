@@ -1830,3 +1830,17 @@ class SchedulerSettings(models.Model):
     class Meta:
         managed = False
         db_table = "pen_scheduler_settings"
+
+
+class UnschedulableTimes(models.Model):
+    reason = models.TextField(blank=True, null=True)
+    user = models.ForeignKey("Salesmen", models.CASCADE, blank=True, null=True)
+    from_field = models.DateTimeField(
+        db_column="from", blank=True, null=True
+    )  # Field renamed because it was a Python reserved word.
+    to = models.DateTimeField(blank=True, null=True)
+    repeat_time = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_unschedulable_times"
