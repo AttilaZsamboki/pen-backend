@@ -1349,7 +1349,7 @@ class CreateAppointment(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class GetAppointment(APIView):
+class Appointments(APIView):
     def get(self, request, external_id):
         appointments = models.Appointments.objects.filter(external_id=external_id)
         if not appointments:
@@ -1357,3 +1357,24 @@ class GetAppointment(APIView):
         return Response(
             serializers.AppointmentsSerializer(appointments, many=True).data
         )
+
+    def put(self, request, external_id):
+        appointments = models.Appointments.objects.filter(external_id=external_id)
+        if not appointments:
+            return Response(status=HTTP_404_NOT_FOUND)
+        appointments.delete()
+        for i in request.data:
+            salesman = models.Salesmen.objects.filter(id=i["user"])
+            if not salesman.exists():
+                return Response(status=HTTP_404_NOT_FOUND)
+            models.Appointments.objects.create(
+                external_id=external_id, user=salesman.first(), date=i["date"]
+            )
+        return Response(status=HTTP_200_OK)
+
+    def delete(self, request, external_id):
+        appointments = models.Appointments.objects.filter(external_id=external_id)
+        if not appointments:
+            return Response(status=HTTP_404_NOT_FOUND)
+        appointments.delete()
+        return Response(status=HTTP_200_OK)
