@@ -44,7 +44,6 @@ urlpatterns = [
     path("felmeres-munkadij/", views.FelmeresMunkadijList.as_view()),
     path("felmeres-munkadij/<int:pk>/", views.FelmeresMunkadijDetail.as_view()),
     path("settings/", views.SettingsList.as_view()),
-    path("appointments/", views.AppointmentList.as_view()),
     path("minicrm-proxy/<adatlap_id>", views.MiniCrmProxy.as_view()),
     path("garancia-webhook/", views.GaranciaWebhook.as_view()),
     path("open-slots/<external_id>", views.OpenSlots.as_view()),
