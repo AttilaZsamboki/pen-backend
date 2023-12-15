@@ -1320,12 +1320,18 @@ class GaranciaWebhook(APIView):
 
 class Slots(APIView):
     def get(self, request, external_id):
-        open_slots = models.Slots.objects.filter(external_id=external_id)
-        for slot in open_slots:
+        slots = models.Slots.objects.filter(external_id=external_id)
+        for slot in slots:
             best_slot = models.BestSlots.objects.filter(slot=slot.id)
             if best_slot.exists():
                 slot.level = best_slot.first().level
-        return Response(serializers.SlotSerializer(open_slots, many=True).data)
+        return Response(serializers.SlotSerializer(slots, many=True).data)
+
+    def post(self, request, external_id):
+        booked_slots = models.Slots.objects.filter(external_id=external_id)
+        booked_slots.exclude(id__in=request.data).update(booked=False)
+        booked_slots.filter(id__in=request.data).update(booked=True)
+        return Response(status=HTTP_200_OK)
 
 
 class SchedulerSettings(generics.ListAPIView):

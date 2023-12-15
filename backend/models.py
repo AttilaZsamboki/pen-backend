@@ -1751,7 +1751,7 @@ class Slots(models.Model):
 
     class Meta:
         managed = False
-        db_table = "pen_open_slots"
+        db_table = "pen_slots"
 
 
 class Settings(models.Model):
