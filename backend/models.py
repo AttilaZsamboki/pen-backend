@@ -1748,6 +1748,7 @@ class Slots(models.Model):
     external_id = models.TextField()
     at = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
+    booked = models.BooleanField(blank=True, null=True)
 
     class Meta:
         managed = False
