@@ -1744,7 +1744,7 @@ class Salesmen(models.Model):
         db_table = "pen_salesmen"
 
 
-class OpenSlots(models.Model):
+class Slots(models.Model):
     external_id = models.TextField()
     at = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
@@ -1761,16 +1761,6 @@ class Settings(models.Model):
     class Meta:
         managed = False
         db_table = "pen_settings"
-
-
-class Appointments(models.Model):
-    external_id = models.TextField()
-    date = models.DateTimeField(blank=True, null=True)
-    user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = "pen_appointments"
 
 
 class ScriptRetries(models.Model):
@@ -1815,7 +1805,7 @@ class Skills(models.Model):
 
 
 class BestSlots(models.Model):
-    slot = models.ForeignKey("OpenSlots", models.CASCADE, blank=True, null=True)
+    slot = models.ForeignKey("Slots", models.CASCADE, blank=True, null=True)
     level = models.IntegerField(blank=True, null=True)
 
     class Meta:

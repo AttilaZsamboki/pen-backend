@@ -156,12 +156,6 @@ class SettingsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AppointmentsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Appointments
-        fields = "__all__"
-
-
 class SalesmenSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Salesmen
@@ -172,7 +166,7 @@ class SlotSerializer(serializers.ModelSerializer):
     level = serializers.IntegerField(required=False, read_only=True, default=0)
 
     class Meta:
-        model = models.OpenSlots
+        model = models.Slots
         fields = "__all__"  # or list the fields you want ['field1', 'field2', ...]
 
 
@@ -187,10 +181,4 @@ class BestSlotsSerializer(serializers.ModelSerializer):
 class SchedulerSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SchedulerSettings
-        fields = "__all__"
-
-
-class AppointmentsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Appointments
         fields = "__all__"

@@ -1292,14 +1292,6 @@ class SettingsList(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
-class AppointmentList(generics.ListCreateAPIView):
-    serializer_class = serializers.AppointmentsSerializer
-    queryset = models.Appointments.objects.all()
-    permission_classes = [AllowAny]
-    authentication_classes = [CustomJWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-
 class MiniCrmProxy(APIView):
     def put(self, request, adatlap_id):
         data = mini_crm_proxy(request.data, adatlap_id, True)
@@ -1326,9 +1318,9 @@ class GaranciaWebhook(APIView):
         return Response({"status": "success"}, status=HTTP_200_OK)
 
 
-class OpenSlots(APIView):
+class Slots(APIView):
     def get(self, request, external_id):
-        open_slots = models.OpenSlots.objects.filter(external_id=external_id)
+        open_slots = models.Slots.objects.filter(external_id=external_id)
         for slot in open_slots:
             best_slot = models.BestSlots.objects.filter(slot=slot.id)
             if best_slot.exists():
@@ -1341,40 +1333,3 @@ class SchedulerSettings(generics.ListAPIView):
     queryset = models.SchedulerSettings.objects.all()
     permission_classes = [AllowAny]
     filter_fields = "__all__"
-
-
-class CreateAppointment(generics.CreateAPIView):
-    serializer_class = serializers.AppointmentsSerializer
-    queryset = models.Appointments.objects.all()
-    permission_classes = [AllowAny]
-
-
-class Appointments(APIView):
-    def get(self, request, external_id):
-        appointments = models.Appointments.objects.filter(external_id=external_id)
-        if not appointments:
-            return Response(status=HTTP_404_NOT_FOUND)
-        return Response(
-            serializers.AppointmentsSerializer(appointments, many=True).data
-        )
-
-    def put(self, request, external_id):
-        appointments = models.Appointments.objects.filter(external_id=external_id)
-        if not appointments:
-            return Response(status=HTTP_404_NOT_FOUND)
-        appointments.delete()
-        for i in request.data:
-            salesman = models.Salesmen.objects.filter(id=i["user"])
-            if not salesman.exists():
-                return Response(status=HTTP_404_NOT_FOUND)
-            models.Appointments.objects.create(
-                external_id=external_id, user=salesman.first(), date=i["date"]
-            )
-        return Response(status=HTTP_200_OK)
-
-    def delete(self, request, external_id):
-        appointments = models.Appointments.objects.filter(external_id=external_id)
-        if not appointments:
-            return Response(status=HTTP_404_NOT_FOUND)
-        appointments.delete()
-        return Response(status=HTTP_200_OK)

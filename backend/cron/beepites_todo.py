@@ -10,6 +10,7 @@ from ..models import Orders, MiniCrmAdatlapok, Felmeresek
 import traceback
 
 
+## Nem használjuk már, de a kód még jó, ezért nem töröljük ki
 def main():
     script_name = "pen_beepites_todo"
     log("Beépítés feladatok készítése elindult", "INFO", script_name=script_name)
@@ -17,7 +18,6 @@ def main():
         CategoryId=29,
         Beepitok__isnull=False,
         DateTime1953__isnull=False,
-        RendelesSzama__isnull=False,
     ).values()
     for adatlap in adatlapok:
         existing_todos = list_to_dos(

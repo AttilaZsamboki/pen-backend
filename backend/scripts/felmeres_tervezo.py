@@ -3,11 +3,10 @@ from ..utils.google_routes import Client
 import os
 import time
 from ..utils.logs import log
-from ..models import Appointments
 from ..models import (
     MiniCrmAdatlapok,
     Routes,
-    OpenSlots,
+    Slots,
     Salesmen,
     Skills,
     UserSkills,
@@ -383,7 +382,7 @@ class Generation:
             return possible_hours
 
     def get_possible_dates(self, chromosome: Individual.Chromosome):
-        OpenSlots.objects.filter(external_id=chromosome.id).delete()
+        Slots.objects.filter(external_id=chromosome.id).delete()
         possible_dates = []
         for date in self.dates:
             for felmero in self.qualified_salesmen:
@@ -397,18 +396,14 @@ class Generation:
                     if gap_appointments:
                         for i in gap_appointments:
                             possible_dates.append({"felmero": felmero, "date": i})
-                            OpenSlots(
-                                external_id=chromosome.id, at=i, user=felmero
-                            ).save()
+                            Slots(external_id=chromosome.id, at=i, user=felmero).save()
                     a = self.check_working_hours(
                         date, felmero=felmero, chromosome=chromosome
                     )
                     if a:
                         for i in a:
                             possible_dates.append({"felmero": felmero, "date": i})
-                            OpenSlots(
-                                external_id=chromosome.id, at=i, user=felmero
-                            ).save()
+                            Slots(external_id=chromosome.id, at=i, user=felmero).save()
         return possible_dates
 
     def create_distance_matrix(self, test=False):
@@ -676,7 +671,7 @@ class Generation:
                 if len(slots) > self.num_best_slots or i == len(sorted_fitnesses) - 1:
                     break
             for i, slot in enumerate(slots):
-                open_slot_obj = OpenSlots.objects.filter(
+                open_slot_obj = Slots.objects.filter(
                     external_id=id, at=slot.date, user=slot.felmero
                 )
                 if open_slot_obj.exists():
@@ -719,7 +714,7 @@ class MiniCRMConnector:
         self.id_field = id_field
         self.fixed_appointment_condition = fixed_appointment_condition
         self.new_aplicant_condition = new_aplicant_condition
-        self.appointments = Appointments.objects.all()
+        self.appointments = Slots.objects.filter(booked=True)
 
     def fix_appointments(self) -> List[Generation.Individual.Chromosome]:
         return [
@@ -761,7 +756,7 @@ class MiniCRMConnector:
             [
                 Generation.Individual.Chromosome(
                     dates=[
-                        j.date
+                        j.at
                         for j in self.appointments
                         if j.external_id == i.external_id
                     ],
