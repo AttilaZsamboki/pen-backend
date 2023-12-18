@@ -1737,7 +1737,7 @@ class MiniCrmTodos(models.Model):
 
 class Salesmen(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
-    zip = models.IntegerField()
+    zip = models.CharField(max_length=4)
 
     class Meta:
         managed = False

@@ -33,7 +33,7 @@ class Generation:
                 self.id = id
                 self.dates: List[datetime] = dates
                 self.date: datetime = date
-                self.zip = zip
+                self.zip: str = zip
                 self.felmero: Salesmen = felmero
 
             def random_date(self):
@@ -71,14 +71,15 @@ class Generation:
             for i in range(len(self.data)):
                 origin = 0 if i == 0 else self.data[i - 1].zip
                 dest = self.data[i].zip
-                if is_number(origin) and is_number(dest):
-                    print(origin, dest)
-                    distance = self.outer_instace.matrix.filter(
-                        Q(origin_zip=origin, dest_zip=dest)
-                        | Q(origin_zip=dest, dest_zip=origin)
-                    )
-                    if distance.exists():
-                        distances.append(distance.first().duration)
+                if origin and dest:
+                    distance = [
+                        route
+                        for route in self.outer_instace.all_routes
+                        if (route.origin_zip == origin and route.dest_zip == dest)
+                        or (route.origin_zip == dest and route.dest_zip == origin)
+                    ]
+                    if distance:
+                        distances.append(distance[0].duration)
 
             return sum(distances)
 
@@ -184,42 +185,54 @@ class Generation:
             jobs_on_day.sort(key=lambda x: x.date)
 
             first_appointment = jobs_on_day[0]
-            if not is_number(first_appointment.zip):
+            if not first_appointment.zip:
                 return
-            z = self.matrix.filter(
-                Q(
-                    origin_zip=self.start_city,
-                    dest_zip=float(first_appointment.zip),
+            z = [
+                route
+                for route in self.all_routes
+                if (
+                    (
+                        route.origin_zip == felmero.zip
+                        and route.dest_zip == first_appointment.zip
+                    )
+                    or (
+                        route.origin_zip == first_appointment.zip
+                        and route.dest_zip == felmero.zip
+                    )
                 )
-                | Q(
-                    origin_zip=float(first_appointment.zip),
-                    dest_zip=self.start_city,
-                )
-            )
-            if not z.exists():
+            ]
+            if not z:
                 return
 
-            z = z.first().duration
-            a = datetime.combine(
-                date, datetime.strptime(self.first_appointment, "%H:%M").time()
-            ) - timedelta(seconds=z)
+            z = z[0].duration
+            a = min(
+                datetime.combine(
+                    date, datetime.strptime(self.first_appointment, "%H:%M").time()
+                ),
+                first_appointment.date - timedelta(seconds=z),
+            )
 
             last_appointment = jobs_on_day[-1]
-            x = self.matrix.filter(
-                Q(
-                    origin_zip=chromosome.zip,
-                    dest_zip=last_appointment.zip,
+            x = [
+                route
+                for route in self.all_routes
+                if (
+                    (
+                        route.origin_zip == chromosome.zip
+                        and route.dest_zip == last_appointment.zip
+                    )
+                    or (
+                        route.origin_zip == last_appointment.zip
+                        and route.dest_zip == chromosome.zip
+                    )
                 )
-                | Q(
-                    origin_zip=last_appointment.zip,
-                    dest_zip=chromosome.zip,
-                )
-            )
-            if not x.exists():
+            ]
+
+            if not x:
                 return
 
-            x = x.first().duration
-            y = self.get_time_home(chromosome)
+            x = x[0].duration
+            y = self.get_time_home(chromosome, felmero=felmero)
             b = (
                 last_appointment.date.replace(minute=0, second=0)
                 + max(timedelta(minutes=plus_time), timedelta(seconds=x))
@@ -249,7 +262,7 @@ class Generation:
             return list(set(possible_hours))
         else:
             plus_time = 0
-            time_home = self.get_time_home(chromosome)
+            time_home = self.get_time_home(chromosome, felmero=felmero)
             if not time_home:
                 return possible_hours
             while True:
@@ -277,25 +290,33 @@ class Generation:
                     break
             return possible_hours
 
-    def get_time_home(self, chromosome: Individual.Chromosome):
-        time_home = self.matrix.filter(
-            Q(origin_zip=self.start_city, dest_zip=chromosome.zip)
-            | Q(
-                origin_zip=chromosome.zip,
-                dest_zip=self.start_city,
+    def get_time_home(
+        self, chromosome: Individual.Chromosome, felmero: Salesmen = None
+    ):
+        time_home = [
+            route
+            for route in self.all_routes
+            if (
+                (route.origin_zip == felmero.zip and route.dest_zip == chromosome.zip)
+                or (
+                    route.origin_zip == chromosome.zip and route.dest_zip == felmero.zip
+                )
             )
-        )
-        if not time_home.exists():
+        ]
+
+        if not time_home:
             return
-        return time_home.first().duration
+
+        return time_home[0].duration
 
     def get_gap_appointment(
         self, chromosome: Individual.Chromosome, date: dt_date, felmero: Salesmen
     ):
+        all_routes = self.all_routes
         jobs_on_day = [
             self.Individual.Chromosome(
                 felmero=felmero,
-                zip=self.start_city,
+                zip=felmero.zip,
                 id="XXX",
                 date=datetime.combine(date, datetime.min.time()),
                 dates=[],
@@ -308,38 +329,47 @@ class Generation:
         possible_hours = []
         if jobs_on_day:
             jobs_on_day.sort(key=lambda x: x.date)
-            for i in range(len(jobs_on_day)):
-                if i + 1 == len(jobs_on_day):
+            len_jobs_on_day = len(jobs_on_day)
+            for i in range(len_jobs_on_day):
+                if i + 1 == len_jobs_on_day:
                     continue
                 job = jobs_on_day[i]
                 next_job = jobs_on_day[i + 1]
-                if is_number(job.zip) and is_number(next_job.zip):
-                    num_job_zip = float(job.zip)
-                    num_next_job_zip = float(next_job.zip)
-                    x = self.matrix.filter(
-                        Q(
-                            origin_zip=num_job_zip,
-                            dest_zip=chromosome.zip,
+                if job.zip and next_job.zip:
+                    x = [
+                        route
+                        for route in all_routes
+                        if (
+                            (
+                                route.origin_zip == job.zip
+                                and route.dest_zip == chromosome.zip
+                            )
+                            or (
+                                route.origin_zip == chromosome.zip
+                                and route.dest_zip == job.zip
+                            )
                         )
-                        | Q(
-                            origin_zip=chromosome.zip,
-                            dest_zip=num_job_zip,
+                    ]
+
+                    y = [
+                        route
+                        for route in all_routes
+                        if (
+                            (
+                                route.origin_zip == chromosome.zip
+                                and route.dest_zip == next_job.zip
+                            )
+                            or (
+                                route.origin_zip == next_job.zip
+                                and route.dest_zip == chromosome.zip
+                            )
                         )
-                    )
-                    y = self.matrix.filter(
-                        Q(
-                            origin_zip=chromosome.zip,
-                            dest_zip=num_next_job_zip,
-                        )
-                        | Q(
-                            origin_zip=num_next_job_zip,
-                            dest_zip=chromosome.zip,
-                        )
-                    )
-                    if not x.exists() or not y.exists():
+                    ]
+
+                    if not x or not y:
                         continue
-                    x = x.first().duration
-                    y = y.first().duration
+                    x = x[0].duration
+                    y = y[0].duration
 
                     time_between_jobs = (
                         (next_job.date - job.date)
@@ -382,8 +412,12 @@ class Generation:
             return possible_hours
 
     def get_possible_dates(self, chromosome: Individual.Chromosome):
+        start_time = time.time()
+        print("Deleting old slots...")
         Slots.objects.filter(external_id=chromosome.id).delete()
+        print("Getting possible dates...", time.time() - start_time)
         possible_dates = []
+        slots_to_save = []
         for date in self.dates:
             for felmero in self.qualified_salesmen:
                 if (
@@ -396,32 +430,36 @@ class Generation:
                     if gap_appointments:
                         for i in gap_appointments:
                             possible_dates.append({"felmero": felmero, "date": i})
-                            Slots(external_id=chromosome.id, at=i, user=felmero).save()
+                            slots_to_save.append(
+                                Slots(external_id=chromosome.id, at=i, user=felmero)
+                            )
                     a = self.check_working_hours(
                         date, felmero=felmero, chromosome=chromosome
                     )
                     if a:
                         for i in a:
                             possible_dates.append({"felmero": felmero, "date": i})
-                            Slots(external_id=chromosome.id, at=i, user=felmero).save()
+                            slots_to_save.append(
+                                Slots(external_id=chromosome.id, at=i, user=felmero)
+                            )
+        Slots.objects.bulk_create(slots_to_save)
         return possible_dates
 
     def create_distance_matrix(self, test=False):
+        print("Creating distance matrix...")
         for day in self.dates:
+            print(day)
             adatlapok = [
                 i
                 for i in self.data
                 if (i.dates == ["*"] or day in [j.date() for j in i.dates])
             ]
-            addresses = [self.start_city] + [
+            addresses: List[str] = [i.zip for i in self.qualified_salesmen] + [
                 i.zip for i in adatlapok if len(i.dates) > 1 or i.date == "*"
             ]
 
             def sort_key(x: Generation.Individual.Chromosome):
-                if isinstance(x.date, dt_date):
-                    return x.date
-                else:
-                    return datetime.min.date()
+                return x.date if isinstance(x.date, dt_date) else datetime.min.date()
 
             fixed_adatalapok = [
                 i for i in adatlapok if len(i.dates) == 1 and i.date != "*"
@@ -447,15 +485,23 @@ class Generation:
                             addresses.append(adatlap.zip)
             for origin in list(set(addresses)):
                 for destination in addresses:
-                    if (
-                        origin != destination
-                        and is_number(origin)
-                        and is_number(destination)
-                    ):
-                        if not self.matrix.filter(
-                            Q(origin_zip=origin, dest_zip=destination)
-                            | Q(origin_zip=destination, dest_zip=origin)
-                        ).exists():
+                    if origin != destination:
+                        if not len(
+                            [
+                                route
+                                for route in self.all_routes
+                                if (
+                                    (
+                                        route.origin_zip == origin
+                                        and route.dest_zip == destination
+                                    )
+                                    or (
+                                        route.origin_zip == destination
+                                        and route.dest_zip == origin
+                                    )
+                                )
+                            ]
+                        ):
                             if test:
                                 save = Routes(
                                     origin_zip=origin,
@@ -475,6 +521,7 @@ class Generation:
                                 # )
                                 pass
                             save.save()
+                            self.all_routes.append(save)
 
     def generate_route(self):
         routes = None
@@ -504,7 +551,6 @@ class Generation:
 
     def __init__(
         self,
-        start_city,
         initial_population_size,
         population_size,
         max_generations,
@@ -525,7 +571,6 @@ class Generation:
         self.max_generations = max_generations
         self.tournament_size = tournament_size
         self.initial_population_size = initial_population_size
-        self.start_city = start_city
         self.max_felmeres_per_day = max_felmeres_per_day
         self.number_of_work_hours = number_of_work_hours
         self.time_for_one_appointment = time_for_one_appointment
@@ -573,8 +618,7 @@ class Generation:
             )
         )
 
-        self.start_city = start_city
-        self.matrix = Routes.objects.all()
+        self.all_routes = list(Routes.objects.all())
 
     def crossover(self, parent1: Individual, parent2: Individual):
         size = len(parent1.data)
@@ -603,8 +647,9 @@ class Generation:
             if i.dates == ["*"]:
                 possible_dates = self.get_possible_dates(i)
                 if possible_dates:
+                    num_possible_dates = len(possible_dates)
                     rand_date = possible_dates[
-                        np.random.randint(low=0, high=len(possible_dates))
+                        np.random.randint(low=0, high=num_possible_dates)
                     ]
                     i.date = rand_date["date"]
                     i.felmero = rand_date["felmero"]
@@ -612,11 +657,11 @@ class Generation:
     def main(self, test=False):
         start_time = time.time()
 
-        print("Assigning new applicants dates...")
-        self.assign_new_applicants_dates()
-
         if not test:
             self.create_distance_matrix(test)
+
+        print("Assigning new applicants dates...")
+        self.assign_new_applicants_dates()
 
         self.population = [
             self.generate_route() for _ in range(self.initial_population_size)
@@ -787,16 +832,15 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 10
-initial_population_size = 10
-max_generations = 10
-tournament_size = 2
+population_size = 1
+initial_population_size = 1
+max_generations = 1
+tournament_size = 4
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
 max_felmeres_per_day = 5
 first_appointment = "08:00"
-start_city = "2181"
 needed_skill = Skills.objects.get(id=1)
 minicrm_conn = MiniCRMConnector(
     felmero_field="Felmero2",
@@ -814,7 +858,6 @@ allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(
-    start_city=start_city,
     initial_population_size=initial_population_size,
     max_generations=max_generations,
     tournament_size=tournament_size,
@@ -829,4 +872,4 @@ result = Generation(
     plan_timespan=plan_timespan,
     num_best_slots=num_best_slots,
     allow_weekends=allow_weekends,
-).main(test=True)
+).assign_new_applicants_dates()

@@ -1,11 +1,11 @@
 import datetime
 import json
-import uuid
 import os
 import random
 import re
 import string
 import traceback
+import uuid
 import xml.etree.ElementTree as ET
 
 import boto3
@@ -30,19 +30,19 @@ from rest_framework.status import (
 from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
-from .auth0backend import CustomJWTAuthentication
 
 from . import models, serializers
+from .auth0backend import CustomJWTAuthentication
+from .scripts.api_scripts import mini_crm_proxy
 from .utils.calculate_distance import calculate_distance_fun
 from .utils.logs import log
 from .utils.minicrm import (
+    address_details,
+    address_ids,
     contact_details,
     get_all_adatlap_details,
     update_offer_order,
-    address_ids,
-    address_details,
 )
-from .scripts.api_scripts import mini_crm_proxy
 from .utils.utils import replace_self_closing_tags
 
 # Create your views here.
@@ -1339,3 +1339,47 @@ class SchedulerSettings(generics.ListAPIView):
     queryset = models.SchedulerSettings.objects.all()
     permission_classes = [AllowAny]
     filter_fields = "__all__"
+
+
+import requests
+from rest_framework.decorators import api_view
+
+
+@csrf_exempt
+@api_view(["POST"])
+def minicrm_proxy(request):
+    log(
+        "Minicrm proxy meghívva",
+        "INFO",
+        "pen_minicrm_proxy",
+        request.body.decode("utf-8"),
+    )
+    endpoint = request.GET.get("endpoint")
+
+    if endpoint == "XML":
+        headers = {
+            "Authorization": os.environ["MINICRM_AUTH"],
+            "Content-Type": "application/json",
+        }
+
+        payload = json.loads(request.body)
+        log(
+            "XML request küldése",
+            "INFO",
+            "pen_minicrm_proxy",
+            details="XML",
+            data=payload,
+        )
+
+        response = requests.post(
+            "https://r3.minicrm.hu/Api/SyncFeed/119/Upload",
+            headers=headers,
+            data=payload,
+        )
+
+        if response.ok:
+            return JsonResponse(response.json(), safe=False)
+        else:
+            return JsonResponse({"error": "Error " + response.text}, status=400)
+
+    return JsonResponse({"error": "Missing endpoint"}, status=400)

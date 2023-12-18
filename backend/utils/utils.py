@@ -80,7 +80,7 @@ def is_number(n):
     if n is None:
         return False
     try:
-        float(n)
+        int(n)
         return True
     except ValueError:
         return False
