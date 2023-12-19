@@ -15,7 +15,7 @@ def main():
     script_name = "pen_beepites_todo"
     log("Beépítés feladatok készítése elindult", "INFO", script_name=script_name)
     adatlapok = MiniCrmAdatlapok.objects.filter(
-        CategoryId=29,
+        Enum1951="4374",
         Beepitok__isnull=False,
         DateTime1953__isnull=False,
     ).values()
@@ -80,6 +80,7 @@ def main():
 
         for beepito in beepitok:
             comment = f"""Új beépítési munkát kaptál
+
 Ügyfél: {adatlap["Name"]}
 Cím: {address["PostalCode"]}  {address["City"]}. {address["Address"]}
 Tel: {contact["Phone"]} 
@@ -88,15 +89,21 @@ Email: {contact["Email"]} 
 Beépítők: {adatlap["Beepitok"]} 
 Beépítés ideje: {adatlap["DateTime1953"]} 
 Fizetési mód: {adatlap["FizetesiMod3"]}
-Ki mérte fel: {adatlap["KiMerteFel2"]} 
 
-Raktár: https://app.clouderp.hu/v2/order?view=68&search={adatlap["RendelesSzama"]}
+Teljes bruttó összeg: {str(round_to_five(order.grossOrderTotal))}Ft{f'''
+Ha kedvezményt adunk a kedvezményes összeg, amit az ügyféltől el kell kérni: {round_to_five(order.grossOrderTotal - order.grossOrderTotal * 0.1)}Ft''' if adatlap["FizetesiMod3"] != "Átutalás" else ""}
+
+Ki mérte fel: {adatlap["KiMerteFel2"]} 
 Felmérés: {adatlap["FelmeresLink"]} 
 Utcakép: {adatlap["Utcakep"]}
 
-Megrendelés bruttó: {str(round_to_five(order.grossOrderTotal))}Ft
-Megrendelés nettó: {round_to_five(order.netOrderTotal)}Ft
-Kedvezményes összeg: {round_to_five(order.grossOrderTotal - order.grossOrderTotal * 0.1)}Ft
+Garancia típusa: {adatlap["GaranciaTipusa"]}
+{f'''Indoklás: {adatlap["Indoklás"]}
+''' if adatlap["GaranciaTipusa"] == "Teljes Garancia" else ""}
+Kiépítés feltétele: {adatlap["KiepitesFeltetele"]}{f'''
+Feltétel: {adatlap["KiepitesFeltetelLeirasa"]}
+Igazolva: {adatlap["KiepitesFelteteleIgazolva"]}
+''' if adatlap["KiepitesFeltetele"] != "Nincs" else ""}
 """
             resp = create_to_do(
                 adatlap["Id"],

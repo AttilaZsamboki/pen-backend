@@ -1680,6 +1680,10 @@ class MiniCrmAdatlapok(models.Model):
     LastEvent = models.TextField(blank=True, null=True)
     StatusGroup = models.TextField(blank=True, null=True)
     VisszafizetesDatuma = models.TextField(blank=True, null=True)
+    GaranciaTipusa = models.TextField(blank=True, null=True)
+    KiepitesFeltetele = models.TextField(blank=True, null=True)
+    KiepitesFeltetelLeirasa = models.TextField(blank=True, null=True)
+    KiepitesFelteteleIgazolva = models.TextField(blank=True, null=True)
 
     @property
     def StatusIdStr(self):

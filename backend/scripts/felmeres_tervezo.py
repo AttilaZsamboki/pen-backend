@@ -1,23 +1,18 @@
-import numpy as np
-from ..utils.google_routes import Client
 import os
 import time
-from ..utils.logs import log
-from ..models import (
-    MiniCrmAdatlapok,
-    Routes,
-    Slots,
-    Salesmen,
-    Skills,
-    UserSkills,
-    BestSlots,
-    UnschedulableTimes,
-    SchedulerSettings,
-)
-from ..utils.utils import is_number, round_to_30
-from datetime import datetime, timedelta, date as dt_date
-from django.db.models import Q
+from datetime import date as dt_date
+from datetime import datetime, timedelta
 from typing import List
+
+import numpy as np
+from django.db.models import Q
+
+from ..models import (BestSlots, MiniCrmAdatlapok, Routes, Salesmen,
+                      SchedulerSettings, Skills, Slots, UnschedulableTimes,
+                      UserSkills)
+from ..utils.google_routes import Client
+from ..utils.logs import log
+from ..utils.utils import round_to_30
 
 ## Todo: NE FELEJTSD EL ODAíRNI A VÉGÉRE A T-t!!!!!!!
 gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KE"))

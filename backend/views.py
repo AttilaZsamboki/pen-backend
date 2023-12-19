@@ -46,6 +46,22 @@ from .utils.minicrm import (
 from .utils.utils import replace_self_closing_tags
 
 # Create your views here.
+from typing import List, Dict
+
+
+def map_wh_fields(data: Dict, field_names: List[str]):
+    def map_wh_field(data, field_name):
+        return (
+            data["Schema"][field_name][data["Data"][field_name]]
+            if data["Data"][field_name]
+            else None
+        )
+
+    [
+        data["Data"].update({field_name: map_wh_field(data, field_name)})
+        for field_name in field_names
+    ]
+    return data
 
 
 def save_webhook(request, process_data=None):
@@ -125,13 +141,6 @@ class OrderWebhook(APIView):
             json.dumps(data),
         )
         try:
-            valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-            filtered_data = {
-                k: v
-                for k, v in data["Data"].items()
-                if k in valid_fields
-                if k not in ["Beepitok", "FizetesiMod3"]
-            }
             name_mapping = data["Schema"]["Beepitok"]
 
             def get_names(value):
@@ -143,14 +152,21 @@ class OrderWebhook(APIView):
                         value -= int(key)
                 return names
 
-            beeptiok = ", ".join(get_names(data["Data"]["Beepitok"]))
+            data = map_wh_fields(
+                data,
+                [
+                    "FizetesiMod3",
+                    "GaranciaTipusa",
+                    "KiepitesFeltetele",
+                    "KiepitesFelteteleIgazolva",
+                ],
+            )
+            print(data["Data"])
+            valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
+            filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
+
+            filtered_data["Beepitok"] = ", ".join(get_names(data["Data"]["Beepitok"]))
             models.MiniCrmAdatlapok(
-                Beepitok=beeptiok,
-                FizetesiMod3=data["Schema"]["FizetesiMod3"][
-                    data["Data"]["FizetesiMod3"]
-                ]
-                if data["Data"]["FizetesiMod3"]
-                else None,
                 **filtered_data,
             ).save()
             models.Orders(
