@@ -1,5 +1,6 @@
 from django.db import models
 from .utils.minicrm_str_to_text import status_map
+from .utils.gmail import gmail_authenticate, send_email
 
 
 # Create your models here.
@@ -15,6 +16,17 @@ class Logs(models.Model):
     class Meta:
         managed = False
         db_table = "logs"
+
+    def save(self, *args, **kwargs):
+        service = gmail_authenticate()
+        if self.status == "ERROR":
+            send_email(
+                service=service,
+                destination="zsamboki.attila.jr@gmail.com",
+                obj="Sikertelen script: " + self.script_name,
+                body=f"{self.value} \n {f'Részletek: {self.details}' if self.details else ''}",
+            )
+        super(Logs, self).save(*args, **kwargs)
 
 
 class FelmeresQuestions(models.Model):
@@ -340,7 +352,7 @@ class Felmeresek(models.Model):
         models.DO_NOTHING,
         db_column="adatlap_id",
     )
-    template = models.ForeignKey(
+    template: Templates = models.ForeignKey(
         "Templates", models.DO_NOTHING, db_column="template", blank=True, null=True
     )
     type = models.CharField(max_length=255, blank=True, null=True)

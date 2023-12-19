@@ -1,18 +1,18 @@
-from ..utils.logs import log
 import datetime
+import json
 import os
 import random
+from typing import List
 from xml.dom import minidom
 from xml.etree.ElementTree import Element, SubElement, tostring
-from typing import List
 
 import dotenv
 import requests
 from django.db.models import Q
 
-from ..models import Felmeresek, FelmeresItems, MiniCrmAdatlapok
+from ..utils.logs import log
 from ..utils.minicrm import contact_details
-from ..utils.minicrm_str_to_text import status_map
+from ..models import Felmeresek, FelmeresItems, MiniCrmAdatlapok  # noqa
 
 dotenv.load_dotenv()
 
@@ -47,6 +47,7 @@ def assemble_offer_xml(
         return
     contact_data = contact_data["response"]
     date = datetime.datetime.now() + datetime.timedelta(days=30)
+    validity_date = (date + datetime.timedelta(days=31)).strftime("%Y-%m-%d")
 
     projects = Element("Projects")
     project = SubElement(projects, "Project")
@@ -74,7 +75,7 @@ def assemble_offer_xml(
     )
     SubElement(offer, "CurrencyCode").text = "HUF"
     SubElement(offer, "Subject").text = felmeres.subject
-    SubElement(offer, "Performance").text = date.strftime("%Y-%m-%d")
+    SubElement(offer, "Performance").text = validity_date
     SubElement(offer, "Prompt").text = date.strftime("%Y-%m-%d")
     SubElement(offer, "Status").text = "2895"
 
@@ -115,6 +116,10 @@ def assemble_offer_xml(
         project_element, "KapcsolodoFelmeres"
     ).text = "https://app.peneszmentesites.hu/" + str(felmeres.id)
     SubElement(project_element, "ArajanlatMegjegyzes").text = felmeres.description
+    SubElement(project_element, "KiallitasDatuma5").text = (
+        date.year + "-" + date.month + "-" + date.day
+    )
+    SubElement(project_element, "Ervenyesseg").text = validity_date
 
     xml_string = prettify(projects)
 
@@ -132,18 +137,11 @@ def assemble_offer_xml(
 def main():
     for felmeres in felmeresek:
         log(
-            "Árajánlat generálása",
-            "INFO",
+            "Nem jött létre az ajánlat a minicrm-ben",
+            "ERROR",
             "pen_check_offer_created",
-            "Felmérés: " + str(felmeres.id) + " - " + str(felmeres.adatlap_id),
+            details=felmeres.id,
         )
-        assemble_offer_xml(
-            adatlap=felmeres.adatlap_id,
-            items=FelmeresItems.objects.filter(adatlap_id=felmeres.id),
-            felmeres=felmeres,
-            template_name=felmeres.template.name if felmeres.template else None,
-        )
-        return
 
 
 main()
