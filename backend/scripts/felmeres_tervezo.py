@@ -7,9 +7,17 @@ from typing import List
 import numpy as np
 from django.db.models import Q
 
-from ..models import (BestSlots, MiniCrmAdatlapok, Routes, Salesmen,
-                      SchedulerSettings, Skills, Slots, UnschedulableTimes,
-                      UserSkills)
+from ..models import (
+    BestSlots,
+    MiniCrmAdatlapok,
+    Routes,
+    Salesmen,
+    SchedulerSettings,
+    Skills,
+    Slots,
+    UnschedulableTimes,
+    UserSkills,
+)
 from ..utils.google_routes import Client
 from ..utils.logs import log
 from ..utils.utils import round_to_30
@@ -827,9 +835,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1
-initial_population_size = 1
-max_generations = 1
+population_size = 10
+initial_population_size = 10
+max_generations = 10
 tournament_size = 4
 
 number_of_work_hours = 8
