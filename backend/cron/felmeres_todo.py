@@ -126,16 +126,16 @@ Ha már elvégezted a feladatot akkor zárd le ezt a teendőt!"""
 
 
 models = [
-    # {
-    #     "status_id": "3023",
-    #     "filter_adatlapok": filter_adatlapok,
-    #     "update_adatlap": update_adatlap,
-    #     "script_name": "pen_felmeres",
-    #     "user_field": "Felmero2",
-    #     "todo_comment": todo_comment,
-    #     "deadline_field": "FelmeresIdopontja2",
-    #     "type": lambda _: 225,
-    # }
+    {
+        "status_id": "3023",
+        "filter_adatlapok": filter_adatlapok,
+        "update_adatlap": update_adatlap,
+        "script_name": "pen_felmeres",
+        "user_field": "Felmero2",
+        "todo_comment": felmeres_todo_comment,
+        "deadline_field": "FelmeresIdopontja2",
+        "type": lambda _: 225,
+    },
     {
         "status_id": "3129",
         "script_name": "pen_garancia",
@@ -147,7 +147,7 @@ models = [
         "type": lambda adatlap: [
             j for j, k in todo_map.items() if k == adatlap.BejelentesTipusa
         ],
-    }
+    },
 ]
 
 for i in models:
