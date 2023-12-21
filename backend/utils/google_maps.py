@@ -19,7 +19,7 @@ def calculate_distance(start, end, mode="driving", waypoints=None, priorty="dura
     except (googlemaps.exceptions.ApiError, googlemaps.exceptions.HTTPError) as e:
         log(
             "Hiba a Google Maps API-al való kommunikáció során",
-            status="ERROR",
+            status="WARNING",
             script_name="pen_calculate_distance",
             details=e,
         )

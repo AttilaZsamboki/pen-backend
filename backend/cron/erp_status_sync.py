@@ -5,7 +5,9 @@ from ..models import Orders, Order, MiniCrmAdatlapok
 
 def main():
     log("MiniCRM ERP státusz szinkron megkezdődött", "INFO", "pen_erp_status_sync")
-    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=29, Enum1951=4374).values()
+    adatlapok = MiniCrmAdatlapok.objects.filter(
+        CategoryId=29, Enum1951=4374, ClouderpMegrendeles__isnull=True
+    ).values()
     if not adatlapok:
         log("Nincs új adatlap a MiniCRM-ben", "INFO", "pen_erp_status_sync")
         return

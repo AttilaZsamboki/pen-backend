@@ -1,6 +1,6 @@
 from ..utils.logs import log
 from ..utils.minicrm import get_all_adatlap_details
-from ..utils.calculate_distance import calculate_distance_fun
+from ..utils.calculate_distance import calculate_distance_fn
 
 
 def criteria(adatlap):
@@ -19,7 +19,7 @@ def main():
         category_id=23, criteria=criteria, status_id=2927
     )
     for adatlap in adatlapok:
-        stat = calculate_distance_fun(adatlap, source="cron")
+        stat = calculate_distance_fn(adatlap, source="cron")
         if stat == "Error":
             log(
                 "Penészmentesítés távolságszámítás sikertelen",

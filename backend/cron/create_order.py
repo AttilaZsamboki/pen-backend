@@ -1,6 +1,6 @@
 from ..utils.logs import log
 from ..utils.minicrm import create_order
-from ..utils.minicrm_str_to_text import warranty_type_map
+from ..utils.minicrm_str_to_text import garancia_type_map
 
 from ..models import Offers, Felmeresek, MiniCrmAdatlapok
 
@@ -47,10 +47,10 @@ def main(adatlap: MiniCrmAdatlapok):
                 "FelmeresLink": "https://app.peneszmentesites.hu/" + str(id),
                 "KiMerteFel2": felmeres.adatlap_id.Felmero2,
                 "FelmeresDatuma2": felmeres.adatlap_id.FelmeresIdopontja2,
-                "GaranciaTipusa": warranty_type_map[felmeres.warranty]
-                if felmeres.warranty
+                "GaranciaTipusa": garancia_type_map[felmeres.garancia]
+                if felmeres.garancia
                 else None,
-                "Indoklas": felmeres.warranty_reason,
+                "Indoklas": felmeres.garancia_reason,
                 "KiepitesFeltetele": "Van" if felmeres.is_conditional else "Nincs",
                 "KiepitesFeltetelLeirasa": felmeres.condition,
             },

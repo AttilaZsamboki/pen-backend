@@ -172,6 +172,8 @@ def address_list(contact_id, script_name=None, description=None):
 def billing_address(contact_id):
     addresses = address_list(contact_id=contact_id)
     for address in addresses:
+        if type(address) == str:
+            return None
         if address["Type"] == "Számlázási cím":
             return address
 

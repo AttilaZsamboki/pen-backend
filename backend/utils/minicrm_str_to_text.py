@@ -31,9 +31,13 @@ todo_map = {
     240: "Rendszerhiba E2",
     238: "Pénzügy számlázás",
     246: "Pénzügy visszatérítés",
+    263: "Rendszerbővítés",
+    269: "Karbantartás",
+    267: "Készülékhiba",
+    268: "Rendszergarancia",
 }
 
-warranty_type_map = {
+garancia_type_map = {
     "Teljes garancia": "Teljes",
     "Feltételes garancia": "Részleges",
     "Eszköz garancia": "Eszköz",

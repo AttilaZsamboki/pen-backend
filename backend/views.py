@@ -34,7 +34,7 @@ from rest_framework_xml.renderers import XMLRenderer
 from . import models, serializers
 from .auth0backend import CustomJWTAuthentication
 from .scripts.api_scripts import mini_crm_proxy
-from .utils.calculate_distance import calculate_distance_fun
+from .utils.calculate_distance import calculate_distance_fn
 from .utils.logs import log
 from .utils.minicrm import (
     address_details,
@@ -64,44 +64,55 @@ def map_wh_fields(data: Dict, field_names: List[str]):
     return data
 
 
-def save_webhook(request, process_data=None):
+def save_webhook(adatlap, process_data=None, name="felmeres"):
     log(
         "Penészmentesítés MiniCRM webhook meghívva",
         "INFO",
-        "pen_felmeres_webhook",
-        request.body.decode("utf-8"),
+        f"pen_{name}_webhook",
+        details=adatlap["Id"],
+        data=adatlap,
     )
-    all_data = json.loads(request.body.decode("utf-8"))
-
     if process_data:
-        data = process_data(all_data)
-    else:
-        data = all_data["Data"]
+        adatlap = process_data(adatlap)
     valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-    filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+    filtered_data = {k: v for k, v in adatlap.items() if k in valid_fields}
 
     models.MiniCrmAdatlapok(
         **filtered_data,
     ).save()
-    return data
+    return adatlap
 
 
 class CalculateDistance(APIView):
     def post(self, request):
-        def process_data(all_data):
-            data = all_data["Data"]
-            if data["Felmero2"]:
-                data["Felmero2"] = all_data["Schema"]["Felmero2"][data["Felmero2"]]
-            if data["FizetesiMod2"]:
-                data["FizetesiMod2"] = all_data["Schema"]["FizetesiMod2"][
-                    data["FizetesiMod2"]
-                ]
-            return data
-
-        data = save_webhook(request, process_data=process_data)
+        data = map_wh_fields(
+            json.loads(request.body),
+            [
+                "Felmero2",
+                "FizetesiMod2",
+            ],
+        )
+        save_webhook(data)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
-            response = calculate_distance_fun(data)
+
+            def update_data(duration, distance, fee, street_view_url, county, address):
+                return {
+                    "IngatlanKepe": "https://pen.dataupload.xyz/static/images/google_street_view/street_view.jpg",
+                    "UtazasiIdoKozponttol": duration,
+                    "Tavolsag": distance,
+                    "FelmeresiDij": fee,
+                    "StreetViewUrl": street_view_url,
+                    "BruttoFelmeresiDij": round(fee * 1.27),
+                    "UtvonalAKozponttol": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={address}&travelmode=driving",
+                    "Megye": county,
+                }
+
+            response = calculate_distance_fn(
+                data,
+                address=lambda x: f"{x['Cim2']} {x['Telepules']}, {x['Iranyitoszam']} {x['Orszag']}",
+                update_data=update_data,
+            )
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
         return Response({"status": "success"}, status=HTTP_200_OK)
@@ -161,7 +172,6 @@ class OrderWebhook(APIView):
                     "KiepitesFelteteleIgazolva",
                 ],
             )
-            print(data["Data"])
             valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
             filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
 
@@ -991,8 +1001,8 @@ class UnasSetProduct(APIView):
                 log(
                     "Unas rendelések lekérdezése sikertelen",
                     "ERROR",
-                    "pen_unas_get_order",
-                    e,
+                    "pen_unas_set_product",
+                    details=traceback.format_exc(),
                 )
                 return Response("Hibás Token " + str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
@@ -1319,16 +1329,36 @@ class MiniCrmProxy(APIView):
 
 class GaranciaWebhook(APIView):
     def post(self, request):
-        log(
-            "Garancia webhook meghívva",
-            "INFO",
-            "pen_garancia_webhook",
-            data=json.loads(request.body),
-        )
-        data = save_webhook(request)
+        adatlap = json.loads(request.body)
+        log("Garancia webhook meghívva", "INFO", "pen_garancia_webhook", data=adatlap)
+        adatlap = map_wh_fields(
+            adatlap, {"BejelentesTipusa", "GaranciaFelmerestVegzi"}
+        )["Data"]
+        save_webhook(adatlap, name="garancia")
 
-        if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
-            response = calculate_distance_fun(data)
+        if (
+            adatlap["StatusId"] == "3121"
+            and adatlap["UtvonalAKozponttol2"] is None
+            and adatlap["BejelentesTipusa"] != "Kapcsolat"
+        ):
+
+            def update_data(duration, distance, fee, street_view_url, county, address):
+                return {
+                    "UtazasiIdoKozponttol2": duration,
+                    "TavolsagKm": distance,
+                    "NettoFelmeresiDij": fee,
+                    "BruttoFelmeresiDij2": round(fee * 1.27),
+                    "UtvonalAKozponttol2": f"https://www.google.com/maps/dir/?api=1&origin=Nagytétényi+út+218,+Budapest,+1225&destination={address}&travelmode=driving",
+                    "Megye3": county,
+                    "KarbantartasNettoDij": 20000,
+                }
+
+            response = calculate_distance_fn(
+                adatlap,
+                address=lambda x: f"{x['Cim3']} {x['Telepules2']}, {x['Iranyitoszam2']} {x['Orszag2']}",
+                city_field="Telepules2",
+                update_data=update_data,
+            )
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
         return Response({"status": "success"}, status=HTTP_200_OK)

@@ -1,9 +1,7 @@
 from ..utils.minicrm import (
-    get_all_adatlap_details,
     contact_details,
     billing_address,
     update_adatlap_fields,
-    statuses,
 )
 from ..utils.logs import log
 import requests
@@ -11,6 +9,7 @@ import datetime
 import os
 import time
 from dotenv import load_dotenv
+from ..models import MiniCrmAdatlapok
 import traceback
 
 load_dotenv()
@@ -19,8 +18,22 @@ SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
 ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 
-def create_invoice_or_proform(is_proform=True, cash=False):
-    if is_proform:
+def create_invoice_or_proform(
+    messages_field="",
+    update_data=None,
+    note_field="",
+    payment_method_field="",
+    proform_number_field="",
+    status_id="",
+    cash=False,
+    proform=False,
+    zip_field="",
+    city_field="",
+    address_field="",
+    calc_net_price=None,
+    type="",
+):
+    if proform:
         name = "díjbekérő"
         script_name = "proform"
     else:
@@ -31,43 +44,54 @@ def create_invoice_or_proform(is_proform=True, cash=False):
             name = "számla"
             script_name = "invoice"
     log(f"{name.capitalize()} készítésének futtatása", "INFO", f"pen_{script_name}")
-    status_id = 0
-    if cash:
-        status_id = statuses["Felmérés"]["Sikeres felmérés"]
-    elif is_proform:
-        status_id = 3079
-    else:
-        status_id = 3023
+
+    log(
+        f"{name} készítésének futtatása",
+        "INFO",
+        f"pen_{script_name}_{type}",
+    )
 
     def criteria(adatlap):
-        if (not cash and adatlap["FizetesiMod2"] != "Átutalás") or (
-            cash and adatlap["FizetesiMod2"] == "Átutalás"
+        if payment_method_field and (
+            (not cash and adatlap[payment_method_field] != "Átutalás")
+            or (cash and adatlap[payment_method_field] == "Átutalás")
         ):
             return False
-        elif cash and adatlap["DijbekeroSzama2"] != "":
+        elif cash and adatlap[proform_number_field] != "":
             return False
-        elif not cash and not is_proform and adatlap["DijbekeroSzama2"] == "":
+        elif not cash and not proform and adatlap[proform_number_field] == "":
             log(
                 "Nincs díjbekérő száma",
                 "FAILED",
-                f"pen_{script_name}",
+                f"pen_{name['script_name']}_{type}",
                 f"adatlap: {adatlap['Id']}",
             )
             return
         return True
 
-    adatlapok = get_all_adatlap_details(23, status_id, criteria=criteria)
+    adatlapok = [
+        i
+        for i in MiniCrmAdatlapok.objects.filter(
+            StatusId=status_id,
+        ).values()
+        if criteria(i)
+    ]
     if adatlapok == []:
-        log(f"Nincs új {name}", "INFO", f"pen_{script_name}")
+        log(f"Nincs új {name}", "INFO", f"pen_{script_name}_{type}")
         return
     for adatlap in adatlapok:
         try:
-            log("Új adatlap", "INFO", f"pen_{script_name}", f"adatlap: {adatlap['Id']}")
+            log(
+                "Új adatlap",
+                "INFO",
+                f"pen_{script_name}_{type}",
+                f"adatlap: {adatlap['Id']}",
+            )
         except Exception as e:
             log(
                 "Hiba akadt az adatlapok lekérdezése során",
                 "ERROR",
-                f"pen_{script_name}",
+                f"pen_{script_name}_{type}",
                 f"error: {e}. adatlap: {adatlap['Id']}. adatlapok: {adatlapok}",
             )
         try:
@@ -84,35 +108,39 @@ def create_invoice_or_proform(is_proform=True, cash=False):
             )
             if "szlahu_szamlaszam" in query_response.headers.keys():
                 if (
-                    is_proform
+                    proform
                     or query_response.headers["szlahu_szamlaszam"][0] == "E"
                     or cash
                 ):
                     log(
                         f"Már létezik {name}",
                         "INFO",
-                        f"pen_{script_name}",
+                        f"pen_{script_name}_{type}",
                         f"adatlap: {adatlap['Id']}",
                     )
                     update_adatlap_fields(
                         adatlap["Id"],
                         {
-                            (
-                                "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
-                            ): f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}"
+                            messages_field: f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}"
                         },
                     )
                     continue
-            business_contact_id = adatlap["BusinessId"]
+            business_contact_id = adatlap["MainContactId"]
             business_contact = contact_details(business_contact_id)["response"]
             contact = contact_details(adatlap["ContactId"])["response"]
             address = billing_address(business_contact_id)
+            if address is None:
+                log(
+                    "Nincsenek számlázási adatok",
+                    "FAILED",
+                    f"pen_{script_name}_{type}",
+                )
 
             if business_contact is None or address is None:
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
-                    f"pen_{script_name}",
+                    f"pen_{script_name}_{type}",
                     f"adatlap: {adatlap['Id']}",
                 )
                 continue
@@ -124,20 +152,24 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 contact.get("Email"),
                 business_contact.get("VatNumber"),
                 adatlap.get("Name"),
-                adatlap.get("Iranyitoszam"),
-                adatlap.get("Telepules"),
-                adatlap.get("Cim2"),
+                adatlap.get(zip_field),
+                adatlap.get(city_field),
+                adatlap.get(address_field),
                 adatlap.get("Id"),
                 contact.get("Phone"),
             ]:
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
-                    f"pen_{script_name}",
+                    f"pen_{script_name}_{type}",
                     f"adatlap: {adatlap['Id']}",
                 )
                 continue
 
+            net_price = calc_net_price(adatlap)
+            if not net_price:
+                log("Nincs nettó ár", "FAILED", f"pen_{script_name}_{type}")
+                return
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
             <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
                 <beallitasok>
@@ -161,16 +193,16 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <szamlaNyelve>hu</szamlaNyelve>
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                                     -->
-                    <megjegyzes><![CDATA[{adatlap["DijbekeroMegjegyzes2"] if is_proform else adatlap["SzamlaMegjegyzes"]}]]></megjegyzes>
+                    <megjegyzes><![CDATA[{adatlap[note_field] if proform else adatlap[note_field]}]]></megjegyzes>
                     <rendelesSzam>{adatlap["Id"]}</rendelesSzam>
                     <!-- order number -->
-                    <dijbekeroSzamlaszam>{adatlap["DijbekeroSzama2"]}</dijbekeroSzamlaszam>
+                    <dijbekeroSzamlaszam>{adatlap[proform_number_field]}</dijbekeroSzamlaszam>
                     <!-- reference to pro forma invoice number -->
                     <vegszamla>false</vegszamla>
                     <!-- invoice (after a deposit invoice) -->
-                    <dijbekero>{'true' if is_proform else 'false'}</dijbekero>
+                    <dijbekero>{'true' if proform else 'false'}</dijbekero>
                     <!-- proform invoice -->
-                    <szamlaszamElotag>TMTSZ</szamlaszamElotag>
+                    <szamlaszamElotag>{"TMTSZ" if ENVIRONMENT == "production" else "ERP"}</szamlaszamElotag>
                     <!-- One of the prefixes from the invoice pad menu  -->
                 </fejlec>
                 <elado>
@@ -202,11 +234,11 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                     <!-- fiscal number/tax number -->
                     <postazasiNev><![CDATA[{adatlap["Name"]}]]></postazasiNev>
                     <!--delivery name/postal name -->
-                    <postazasiIrsz>{adatlap["Iranyitoszam"]}</postazasiIrsz>
+                    <postazasiIrsz>{adatlap[zip_field]}</postazasiIrsz>
                     <!--delivery ZIP code/postal ZIP code -->
-                    <postazasiTelepules><![CDATA[{adatlap["Telepules"]}]]></postazasiTelepules>
+                    <postazasiTelepules><![CDATA[{adatlap[city_field]}]]></postazasiTelepules>
                     <!--delivery city/postal city -->
-                    <postazasiCim><![CDATA[{adatlap["Cim2"]}]]></postazasiCim>
+                    <postazasiCim><![CDATA[{adatlap[address_field]}]]></postazasiCim>
                     <!--delivery address/postal address -->
                     <azonosito>{adatlap["Id"]}</azonosito>
                     <!-- identification -->
@@ -220,11 +252,11 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                         <megnevezes>Felmérés</megnevezes>
                         <mennyiseg>1.0</mennyiseg>
                         <mennyisegiEgyseg>db</mennyisegiEgyseg>
-                        <nettoEgysegar>{adatlap["FelmeresiDij"]}</nettoEgysegar>
+                        <nettoEgysegar>{net_price}</nettoEgysegar>
                         <afakulcs>27</afakulcs>
-                        <nettoErtek>{adatlap["FelmeresiDij"]}</nettoErtek>
-                        <afaErtek>{adatlap["FelmeresiDij"] * 0.27}</afaErtek>
-                        <bruttoErtek>{adatlap["FelmeresiDij"] * 1.27}</bruttoErtek>
+                        <nettoErtek>{net_price}</nettoErtek>
+                        <afaErtek>{net_price * 0.27}</afaErtek>
+                        <bruttoErtek>{net_price * 1.27}</bruttoErtek>
                     </tetel>
                 </tetelek>
             </xmlszamla>
@@ -249,87 +281,176 @@ def create_invoice_or_proform(is_proform=True, cash=False):
                 update_resp = update_adatlap_fields(
                     adatlap["Id"],
                     {
-                        (
-                            "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
-                        ): f"{name.capitalize()} készítése sikertelen volt: {response.text[:800]}"
+                        messages_field: f"{name.capitalize()} készítése sikertelen volt: {response.text[:800]}"
                     },
                 )
                 log(
                     f"{name.capitalize()} készítése sikertelen volt",
                     "ERROR",
-                    f"pen_{script_name}",
+                    f"pen_{script_name}_{type}",
                     f"adatlap: {adatlap['Id']}, error: {response.text}",
                 )
                 continue
-            os.remove(invoice_path)
+            if ENVIRONMENT == "production":
+                os.remove(invoice_path)
             pdf_path = f"{base_path}/static/{szamlaszam}.pdf"
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
             for _ in range(2):
-                update_resp = update_proform_adatlap(
-                    is_proform, name, adatlap, szamlaszam
+                update_resp = update_adatlap_fields(
+                    adatlap["Id"],
+                    update_data(proform, name, adatlap, szamlaszam),
                 )
                 if update_resp["code"] == 400:
                     log(
                         f"Hiba akadt a {name} feltöltésében",
                         "ERROR",
-                        script_name=f"pen_{script_name}",
+                        script_name=f"pen_{script_name}_{type}",
                         details=f"adatlap: {adatlap['Id']}, error: {update_resp['reason']}",
                     )
                     time.sleep(180)
                 else:
                     break
 
-            os.remove(pdf_path)
+            if ENVIRONMENT == "production":
+                os.remove(pdf_path)
         except KeyError as e:
             log(
-                "Nincsenek számlázási adatok",
+                "ERROR",
                 "FAILED",
-                script_name=f"pen_{script_name}",
-                details=f"adatlap: {adatlap['Id']}, error: {traceback.format_exc()}",
+                script_name=f"pen_{script_name}_{type}",
+                details=traceback.format_exc(),
             )
             continue
         except Exception as e:
             log(
                 f"Hiba akadt a {name} feltöltésében",
                 "ERROR",
-                script_name=f"pen_{script_name}",
+                script_name=f"pen_{script_name}_{type}",
                 details=traceback.format_exc(),
             )
             continue
         log(
             f"{name.capitalize()}k feltöltése sikeres",
             "SUCCESS",
-            script_name=f"pen_{script_name}",
+            script_name=f"pen_{script_name}_{type}",
         )
         continue
 
 
-def update_proform_adatlap(is_proform, name, adatlap, szamlaszam):
-    return update_adatlap_fields(
-        adatlap["Id"],
-        {
-            "DijbekeroPdf2"
-            if is_proform
-            else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
-            "StatusId": "Utalásra vár" if is_proform else adatlap["StatusId"],
-            "DijbekeroSzama2" if is_proform else "SzamlaSorszama2": szamlaszam,
-            f"KiallitasDatuma{'' if is_proform else '2'}": datetime.datetime.now().strftime(
-                "%Y-%m-%d"
-            ),
-            "FizetesiHatarido": (
-                datetime.datetime.now() + datetime.timedelta(days=3)
-            ).strftime("%Y-%m-%d")
-            if is_proform
-            else adatlap["FizetesiHatarido"],
-            (
-                "DijbekeroUzenetek" if is_proform else "SzamlaUzenetek"
-            ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
-        },
-    )
+def update_data_garancia(proform, name: str, adatlap, szamlaszam):
+    return {
+        "DijbekeroPdf3"
+        if proform
+        else "SzamlaPdf2": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+        "StatusId": "Utalásra vár" if proform else adatlap["StatusId"],
+        "DijbekeroSzama3" if proform else "SzamlaSorszama": szamlaszam,
+        f"KiallitasDatuma{'3' if proform else '4'}": datetime.datetime.now().strftime(
+            "%Y-%m-%d"
+        ),
+        "FizetesiHatarido2": (
+            datetime.datetime.now() + datetime.timedelta(days=3)
+        ).strftime("%Y-%m-%d")
+        if proform
+        else adatlap["FizetesiHatarido2"],
+        (
+            "DijbekeroUzenetek2" if proform else "SzamlaUzenetek2"
+        ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
+    }
 
 
-create_invoice_or_proform(is_proform=False)
-create_invoice_or_proform(is_proform=True)
-create_invoice_or_proform(is_proform=False, cash=True)
+def update_data_felmeres(proform, name: str, adatlap, szamlaszam):
+    return {
+        "DijbekeroPdf2"
+        if proform
+        else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+        "StatusId": "Utalásra vár" if proform else adatlap["StatusId"],
+        "DijbekeroSzama2" if proform else "SzamlaSorszama2": szamlaszam,
+        f"KiallitasDatuma{'' if proform else '2'}": datetime.datetime.now().strftime(
+            "%Y-%m-%d"
+        ),
+        "FizetesiHatarido": (
+            datetime.datetime.now() + datetime.timedelta(days=3)
+        ).strftime("%Y-%m-%d")
+        if proform
+        else adatlap["FizetesiHatarido"],
+        (
+            "DijbekeroUzenetek" if proform else "SzamlaUzenetek"
+        ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
+    }
+
+
+# Felmérés
+data = {
+    "city_field": "Telepules",
+    "payment_method_field": "FizetesiMod2",
+    "update_data": update_data_felmeres,
+    "zip_field": "Iranyitoszam",
+    "address_field": "Cim2",
+    "calc_net_price": lambda adatlap: adatlap["FelmeresiDij"],
+    "proform_number_field": "DijbekeroSzama2",
+    "type": "felmeres",
+}
+create_invoice_or_proform(
+    status_id=3086,
+    proform=False,
+    cash=True,
+    messages_field="SzamlaUzenetek",
+    note_field="SzamlaMegjegyzes",
+    **data,
+)
+create_invoice_or_proform(
+    status_id=3023,
+    proform=False,
+    cash=False,
+    messages_field="SzamlaUzenetek",
+    note_field="SzamlaMegjegyzes",
+    **data,
+)
+create_invoice_or_proform(
+    status_id=3079,
+    proform=True,
+    cash=False,
+    messages_field="DijbekeroUzenetek",
+    note_field="DijbekeroMegjegyzes2",
+    **data,
+)
+
+
+# Garancia
+def calc_net_price(adatlap):
+    if adatlap["BejelentesTipusa"] == "Rendszergarancia":
+        return adatlap["NettoFelmeresiDij"]
+    elif adatlap["BejelentesTipusa"] == "Karbantartás":
+        return adatlap["NettoFelmeresiDij"] + (
+            adatlap["KarbantartasNettoDij"] if adatlap["KarbantartasNettoDij"] else 0
+        )
+    return None
+
+
+data = {
+    "city_field": "Telepules2",
+    "update_data": update_data_garancia,
+    "zip_field": "Iranyitoszam2",
+    "address_field": "Cim3",
+    "calc_net_price": calc_net_price,
+    "proform_number_field": "DijbekeroSzama3",
+    "type": "garancia",
+}
+create_invoice_or_proform(
+    status_id=3129,
+    proform=False,
+    cash=False,
+    messages_field="SzamlaUzenetek2",
+    note_field="SzamlaMegjegyzes2",
+    **data,
+)
+create_invoice_or_proform(
+    status_id=3127,
+    proform=True,
+    cash=False,
+    messages_field="DijbekeroUzenetek2",
+    note_field="DijbekeroMegjegyzes3",
+    **data,
+)

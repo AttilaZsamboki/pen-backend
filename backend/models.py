@@ -147,11 +147,11 @@ class Products(models.Model):
     country_of_origin = models.FloatField(
         db_column="Country_Of_Origin", blank=True, null=True
     )  # Field name made lowercase.
-    warranty_period = models.FloatField(
-        db_column="Warranty_Period", blank=True, null=True
+    garancia_period = models.FloatField(
+        db_column="garancia_Period", blank=True, null=True
     )  # Field name made lowercase.
-    warranty_period_unit = models.TextField(
-        db_column="Warranty_Period_Unit", blank=True, null=True
+    garancia_period_unit = models.TextField(
+        db_column="garancia_Period_Unit", blank=True, null=True
     )  # Field name made lowercase.
     virtual = models.BigIntegerField(
         db_column="Virtual", blank=True, null=True
@@ -363,8 +363,8 @@ class Felmeresek(models.Model):
     description = models.TextField(blank=True, null=True)
     subject = models.TextField(blank=True, null=True)
     created_by = models.TextField(blank=True, null=True)
-    warranty = models.CharField(max_length=255, blank=True, null=True)
-    warranty_reason = models.TextField(blank=True, null=True)
+    garancia = models.CharField(max_length=255, blank=True, null=True)
+    garancia_reason = models.TextField(blank=True, null=True)
     hourly_wage = models.FloatField(blank=True, null=True)
     is_conditional = models.BooleanField(blank=True, null=True, default=False)
     condition = models.TextField(blank=True, null=True)
@@ -1696,6 +1696,19 @@ class MiniCrmAdatlapok(models.Model):
     KiepitesFeltetele = models.TextField(blank=True, null=True)
     KiepitesFeltetelLeirasa = models.TextField(blank=True, null=True)
     KiepitesFelteteleIgazolva = models.TextField(blank=True, null=True)
+    DijbekeroSzama3 = models.IntegerField(blank=True, null=True)
+    Iranyitoszam2 = models.TextField(blank=True, null=True)
+    Telepules2 = models.TextField(blank=True, null=True)
+    Cim3 = models.TextField(blank=True, null=True)
+    BejelentesTipusa = models.TextField(blank=True, null=True)
+    NettoFelmeresiDij = models.FloatField(blank=True, null=True)
+    SzamlaMegjegyzes2 = models.TextField(blank=True, null=True)
+    KarbantartasNettoDij = models.FloatField(blank=True, null=True)
+    DijbekeroMegjegyzes3 = models.TextField(blank=True, null=True)
+    Orszag2 = models.CharField(max_length=50, blank=True, null=True)
+    BejelentesSzovege = models.TextField(blank=True, null=True)
+    GaranciaFelmerestVegzi = models.CharField(max_length=50, blank=True, null=True)
+    FelmeresDatuma3 = models.DateTimeField(blank=True, null=True)
 
     @property
     def StatusIdStr(self):

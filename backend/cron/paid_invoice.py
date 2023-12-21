@@ -12,13 +12,13 @@ load_dotenv()
 SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
 
 
-def main():
+def main(StatusId="", UpdateAdatlap=None):
     log(
         "Kifizetettt számlák csekkolása megkezdődött",
         script_name="pen_paid_invoice",
         status="INFO",
     )
-    for adatlap in MiniCrmAdatlapok.objects.filter(CategoryId="23", StatusId="3083"):
+    for adatlap in MiniCrmAdatlapok.objects.filter(StatusId=StatusId):
         query_xml = f"""
                     <?xml version="1.0" encoding="UTF-8"?>
                     <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
@@ -56,15 +56,7 @@ def main():
                     status="INFO",
                     details="Adatlap ID: " + str(adatlap.Id),
                 )
-                resp = update_adatlap_fields(
-                    adatlap.Id,
-                    {
-                        "StatusId": "3023",
-                        "BefizetesMegerkezett": "Igen",
-                        "DijbekeroUzenetek": adatlap.DijbekeroUzenetek
-                        + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}",
-                    },
-                )
+                resp = update_adatlap_fields(adatlap.Id, UpdateAdatlap(adatlap))
                 if resp["code"] == 200:
                     log(
                         "Adatlap frissítve",
@@ -81,4 +73,30 @@ def main():
                     )
 
 
-main()
+def update_felmeres_adatlap(adatlap: MiniCrmAdatlapok):
+    return {
+        "StatusId": "3023",
+        "BefizetesMegerkezett": "Igen",
+        "DijbekeroUzenetek": adatlap.DijbekeroUzenetek
+        + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}",
+    }
+
+
+def update_garancia_adatlap(adatlap: MiniCrmAdatlapok):
+    return {
+        "StatusId": "3129",
+        "BefizetesMegerkezett2": "Igen",
+        "DijbekeroUzenetek2": (
+            adatlap.DijbekeroUzenetek if adatlap.DijbekeroUzenetek else ""
+        )
+        + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}",
+    }
+
+
+modules = [
+    {"StatusId": "3083", "UpdateAdatlap": update_felmeres_adatlap},
+    {"StatusId": "3128", "UpdateAdatlap": update_garancia_adatlap},
+]
+
+for i in modules:
+    main(**i)

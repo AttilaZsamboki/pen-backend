@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 from django.db.models import Q
 
+from ..utils.logs import log
 from ..models import (
     BestSlots,
     MiniCrmAdatlapok,
@@ -19,7 +20,6 @@ from ..models import (
     UserSkills,
 )
 from ..utils.google_routes import Client
-from ..utils.logs import log
 from ..utils.utils import round_to_30
 
 ## Todo: NE FELEJTSD EL ODAíRNI A VÉGÉRE A T-t!!!!!!!
@@ -54,7 +54,12 @@ class Generation:
                 return str(self.__dict__)
 
         def __init__(self, outer_instance, data=None):
-            self.data = [self.Chromosome(**i.__dict__) for i in data if i is not None]
+            if data:
+                self.data = [
+                    self.Chromosome(**i.__dict__) for i in data if i is not None
+                ]
+            else:
+                self.data = None
             self.outer_instace: Generation = outer_instance
 
         def sort_route(self):
@@ -125,12 +130,14 @@ class Generation:
                                 ]
                                 data[i].date = new_date["date"]
                                 data[i].felmero = new_date["felmero"]
-                    else:
-                        new_date = self.data[i].random_date()
-                        data[i].date = new_date
-                    Generation.Individual(data=data, outer_instance=self).sort_route()
-                    break
-            return self.data
+                        else:
+                            new_date = self.data[i].random_date()
+                            data[i].date = new_date
+                        Generation.Individual(
+                            data=data, outer_instance=self
+                        ).sort_route()
+                        break
+            return self
 
     def count_appointments_on_date(self, date, salesman: Salesmen):
         return len(
@@ -422,6 +429,10 @@ class Generation:
         possible_dates = []
         slots_to_save = []
         for date in self.dates:
+            if date < datetime.date(
+                datetime.now() + timedelta(days=self.selection_within_time_period)
+            ):
+                continue
             for felmero in self.qualified_salesmen:
                 if (
                     self.count_appointments_on_date(date, felmero)
@@ -527,7 +538,7 @@ class Generation:
                             self.all_routes.append(save)
 
     def generate_route(self):
-        routes = None
+        routes = self.Individual(self)
         for day in self.dates:
             day_cities = self.Individual(
                 outer_instance=self,
@@ -543,7 +554,7 @@ class Generation:
             )
 
             self.Individual(data=day_cities.data, outer_instance=self).sort_route()
-            if routes is None:
+            if routes.data is None:
                 routes = self.Individual(data=day_cities.data, outer_instance=self)
             else:
                 routes = self.Individual(
@@ -568,6 +579,8 @@ class Generation:
         plan_timespan=31,
         num_best_slots=5,
         allow_weekends=False,
+        selection_within_time_period=3,
+        elitism_size=10,
     ):
         # Parameters
         self.population_size = population_size
@@ -584,6 +597,8 @@ class Generation:
         self.plan_timespan = plan_timespan
         self.num_best_slots = num_best_slots
         self.allow_weekends = allow_weekends
+        self.selection_within_time_period = selection_within_time_period
+        self.elitism_size = elitism_size
 
         self.qualified_salesmen = [
             i
@@ -591,7 +606,7 @@ class Generation:
             if UserSkills.objects.filter(user=i, skill=self.needed_skill).exists()
         ]
 
-        self.dates = list(
+        self.dates: List[dt_date] = list(
             set(
                 [
                     (datetime.now() + timedelta(days=date)).date()
@@ -671,7 +686,18 @@ class Generation:
         ]
 
         for _ in range(self.max_generations):
-            new_population = []
+            fitnesses = np.array(
+                [route.calculate_fitness() for route in self.population]
+            )
+
+            sorted_fitnesses = np.argsort(fitnesses)[::-1]
+            population: List[Generation.Individual] = [
+                self.population[i] for i in sorted_fitnesses
+            ]
+
+            elites = population[: self.elitism_size]
+
+            new_population: List[Generation.Individual] = []
             for _ in range(population_size):
                 print("Generating new population...")
                 print("Tournament selection...")
@@ -685,61 +711,46 @@ class Generation:
                 print("Mutation...")
                 child = child.mutate()
 
-                new_population.append(
-                    [
-                        child[i]
-                        for i in range(len(child))
-                        if i == 0
-                        or not (child[i - 1].zip is None and child[i].zip is None)
-                    ]
-                )
-            population = new_population
+                new_population.append(child)
+            self.population = new_population + elites
 
         print("Calculating fitnesses...")
-        fitnesses = [route.calculate_fitness() for route in self.population]
-        sorted_fitnesses = sorted(
-            enumerate(fitnesses), key=lambda x: x[1], reverse=True
-        )
+        fitnesses = np.array([route.calculate_fitness() for route in self.population])
+        print(fitnesses)
+
+        sorted_fitnesses = np.argsort(fitnesses)[::-1]
+        population: List[Generation.Individual] = [
+            self.population[i] for i in sorted_fitnesses
+        ]
         BestSlots.objects.all().delete()
-        for id in list(set([i.id for i in self.data])):
-            slots = []
-            for i in range(len(sorted_fitnesses)):
-                if sorted_fitnesses[i][1] >= len(population):
-                    break
-                index = sorted_fitnesses[i][0]
-                if index < len(population):
-                    for chromosome in population[index]:
+        for i in self.data:
+            if i.dates == ["*"]:
+                slots: List[Slots] = []
+                for individual in population:
+                    for chromosome in individual.data:
                         if (
-                            chromosome.id == id
+                            chromosome.id == i.id
                             and chromosome.date != "*"
-                            and chromosome.date not in [i.date for i in slots]
+                            and chromosome.date not in slots
                         ):
-                            slots.append(chromosome)
-
-                if len(slots) > self.num_best_slots or i == len(sorted_fitnesses) - 1:
-                    break
-            for i, slot in enumerate(slots):
-                open_slot_obj = Slots.objects.filter(
-                    external_id=id, at=slot.date, user=slot.felmero
-                )
-                if open_slot_obj.exists():
-                    BestSlots(
-                        slot=open_slot_obj.first(),
-                        level=i + 1,
-                    ).save()
-
-        best_route_index = np.argmax(fitnesses)
-
-        best_route = population[best_route_index]
+                            slots.append(chromosome.date)
+                            open_slot_obj, created = Slots.objects.get_or_create(
+                                external_id=i.id,
+                                at=chromosome.date,
+                                user=chromosome.felmero,
+                            )
+                            BestSlots(slot=open_slot_obj, level=len(slots)).save()
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
 
-        return Generation.Individual(data=best_route, outer_instance=self)
+        return self.population[np.argmax(fitnesses)]
 
     def tournament_selection(self):
         indices = np.random.choice(len(self.population), self.tournament_size)
-        tournament_individuals = [self.population[i] for i in indices]
+        tournament_individuals: List[Generation.Individual] = [
+            self.population[i] for i in indices
+        ]
         tournament_fitnesses = [self.population[i].calculate_fitness() for i in indices]
 
         winner_index = np.argmax(tournament_fitnesses)
@@ -835,10 +846,11 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 10
-initial_population_size = 10
-max_generations = 10
+population_size = 100
+initial_population_size = 100
+max_generations = 100
 tournament_size = 4
+elitism_size = 10
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
@@ -858,6 +870,7 @@ minicrm_conn = MiniCRMConnector(
 num_best_slots = 5
 plan_timespan = 90
 allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
+selection_within_time_period = 3
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(
@@ -875,4 +888,6 @@ result = Generation(
     plan_timespan=plan_timespan,
     num_best_slots=num_best_slots,
     allow_weekends=allow_weekends,
-).assign_new_applicants_dates()
+    selection_within_time_period=selection_within_time_period,
+    elitism_size=elitism_size,
+).main(test=True)
