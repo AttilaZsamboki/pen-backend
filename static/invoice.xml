@@ -7,10 +7,10 @@
                 </beallitasok>
                 <fejlec>
                     <!-- header -->
-                    <keltDatum>2023-12-21</keltDatum>
-                    <teljesitesDatum>2023-12-21</teljesitesDatum>
+                    <keltDatum>2023-12-22</keltDatum>
+                    <teljesitesDatum>2023-12-22</teljesitesDatum>
                     <!-- creating date, in this exact format -->
-                    <fizetesiHataridoDatum>2023-12-24</fizetesiHataridoDatum>
+                    <fizetesiHataridoDatum>2023-12-25</fizetesiHataridoDatum>
                     <!-- due date -->
                     <fizmod>Átutalás</fizmod>
                     <!-- payment type: it can be seen in case you create the invoice
@@ -22,9 +22,9 @@
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                                     -->
                     <megjegyzes><![CDATA[None]]></megjegyzes>
-                    <rendelesSzam>45027</rendelesSzam>
+                    <rendelesSzam>44832</rendelesSzam>
                     <!-- order number -->
-                    <dijbekeroSzamlaszam>None</dijbekeroSzamlaszam>
+                    <dijbekeroSzamlaszam>D-TMTSZ-224</dijbekeroSzamlaszam>
                     <!-- reference to pro forma invoice number -->
                     <vegszamla>false</vegszamla>
                     <!-- invoice (after a deposit invoice) -->
@@ -48,29 +48,29 @@
                 </elado>
                 <vevo>
                     <!--Buyer details -->
-                    <nev><![CDATA[Valami Bt.]]></nev>
+                    <nev><![CDATA[Varga-Radnay Katalin]]></nev>
                     <!-- name -->
-                    <irsz><![CDATA[2181]]></irsz>
+                    <irsz><![CDATA[1118]]></irsz>
                     <!-- ZIP code -->
-                    <telepules><![CDATA[Iklad]]></telepules>
+                    <telepules><![CDATA[BUDAPEST]]></telepules>
                     <!-- city -->
-                    <cim><![CDATA[Petőfi utca 38/B]]></cim>
+                    <cim><![CDATA[CSIKI-HEGYEK 24 3/7]]></cim>
                     <!-- address -->
-                    <email><![CDATA[zsamboki.attila.jr@gmail.com]]></email>
+                    <email><![CDATA[vargaek13@gmail.com]]></email>
                     <!-- should we send the e-mail to the customer (by email) -->
-                    <adoszam>123123123</adoszam>
+                    <adoszam></adoszam>
                     <!-- fiscal number/tax number -->
-                    <postazasiNev><![CDATA[Valami Bt. (Attila Zsámboki) (másolat) (másolat) (másolat)]]></postazasiNev>
+                    <postazasiNev><![CDATA[Varga-Radnay Katalin]]></postazasiNev>
                     <!--delivery name/postal name -->
-                    <postazasiIrsz>2181</postazasiIrsz>
+                    <postazasiIrsz>1118</postazasiIrsz>
                     <!--delivery ZIP code/postal ZIP code -->
-                    <postazasiTelepules><![CDATA[Iklad]]></postazasiTelepules>
+                    <postazasiTelepules><![CDATA[BUDAPEST]]></postazasiTelepules>
                     <!--delivery city/postal city -->
-                    <postazasiCim><![CDATA[Petőfi utca 38/B]]></postazasiCim>
+                    <postazasiCim><![CDATA[CSIKI-HEGYEK 24 3/7]]></postazasiCim>
                     <!--delivery address/postal address -->
-                    <azonosito>45027</azonosito>
+                    <azonosito>44832</azonosito>
                     <!-- identification -->
-                    <telefonszam>+36 20 405 3013</telefonszam>
+                    <telefonszam>+36 20 477 7328</telefonszam>
                     <!-- phone number -->
                 </vevo>
                 <tetelek>
@@ -80,11 +80,11 @@
                         <megnevezes>Felmérés</megnevezes>
                         <mennyiseg>1.0</mennyiseg>
                         <mennyisegiEgyseg>db</mennyisegiEgyseg>
-                        <nettoEgysegar>25000.0</nettoEgysegar>
+                        <nettoEgysegar>20000</nettoEgysegar>
                         <afakulcs>27</afakulcs>
-                        <nettoErtek>25000.0</nettoErtek>
-                        <afaErtek>6750.0</afaErtek>
-                        <bruttoErtek>31750.0</bruttoErtek>
+                        <nettoErtek>20000</nettoErtek>
+                        <afaErtek>5400.0</afaErtek>
+                        <bruttoErtek>25400.0</bruttoErtek>
                     </tetel>
                 </tetelek>
             </xmlszamla>

@@ -45,25 +45,25 @@ def create_invoice_or_proform(
             script_name = "invoice"
     log(f"{name.capitalize()} készítésének futtatása", "INFO", f"pen_{script_name}")
 
-    log(
-        f"{name} készítésének futtatása",
-        "INFO",
-        f"pen_{script_name}_{type}",
-    )
-
     def criteria(adatlap):
         if payment_method_field and (
             (not cash and adatlap[payment_method_field] != "Átutalás")
             or (cash and adatlap[payment_method_field] == "Átutalás")
         ):
+            log(
+                "Nem megfelelő fizetési mód",
+                "FAILED",
+                f"pen_{script_name}_{type}",
+            )
             return False
         elif cash and adatlap[proform_number_field] != "":
+            log("Már létezik díjbekérő", "FAILED", f"pen_{script_name}_{type}")
             return False
         elif not cash and not proform and adatlap[proform_number_field] == "":
             log(
                 "Nincs díjbekérő száma",
                 "FAILED",
-                f"pen_{name['script_name']}_{type}",
+                f"pen_{script_name}_{type}",
                 f"adatlap: {adatlap['Id']}",
             )
             return

@@ -65,13 +65,6 @@ def map_wh_fields(data: Dict, field_names: List[str]):
 
 
 def save_webhook(adatlap, process_data=None, name="felmeres"):
-    log(
-        "Penészmentesítés MiniCRM webhook meghívva",
-        "INFO",
-        f"pen_{name}_webhook",
-        details=adatlap["Id"],
-        data=adatlap,
-    )
     if process_data:
         adatlap = process_data(adatlap)
     valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
@@ -85,13 +78,15 @@ def save_webhook(adatlap, process_data=None, name="felmeres"):
 
 class CalculateDistance(APIView):
     def post(self, request):
+        data = json.loads(request.data)
+        log("Távolság számítás meghívva", "INFO", "pen_calculate_distance", data=data)
         data = map_wh_fields(
-            json.loads(request.body),
+            data,
             [
                 "Felmero2",
                 "FizetesiMod2",
             ],
-        )
+        )["Data"]
         save_webhook(data)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
