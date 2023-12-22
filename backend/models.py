@@ -99,7 +99,7 @@ class Products(models.Model):
     short_description = models.TextField(
         db_column="Short_Description", blank=True, null=True
     )  # Field name made lowercase.
-    images = models.BigIntegerField(
+    images = models.TextField(
         db_column="Images", blank=True, null=True
     )  # Field name made lowercase.
     unit = models.TextField(
@@ -147,11 +147,11 @@ class Products(models.Model):
     country_of_origin = models.FloatField(
         db_column="Country_Of_Origin", blank=True, null=True
     )  # Field name made lowercase.
-    garancia_period = models.FloatField(
-        db_column="garancia_Period", blank=True, null=True
+    warranty_period = models.FloatField(
+        db_column="Warranty_Period", blank=True, null=True
     )  # Field name made lowercase.
-    garancia_period_unit = models.TextField(
-        db_column="garancia_Period_Unit", blank=True, null=True
+    warranty_period_unit = models.TextField(
+        db_column="Warranty_Period_Unit", blank=True, null=True
     )  # Field name made lowercase.
     virtual = models.BigIntegerField(
         db_column="Virtual", blank=True, null=True
@@ -217,10 +217,10 @@ class Products(models.Model):
     sale_price_list_alapertelmezett_price_huf = models.FloatField(
         db_column="Sale_Price_List___alapertelmezett___Price_HUF", blank=True, null=True
     )  # Field name made lowercase. Field renamed because it contained more than one '_' in a row.
-    sale_price_list_alapertelmezett_vat = models.FloatField(
+    sale_price_list_alapertelmezett_vat = models.TextField(
         db_column="Sale_Price_List___alapertelmezett___VAT", blank=True, null=True
     )  # Field name made lowercase. Field renamed because it contained more than one '_' in a row.
-    sale_price_list_alapertelmezett_vat_field = models.FloatField(
+    sale_price_list_alapertelmezett_vat_field = models.TextField(
         db_column="Sale_Price_List___alapertelmezett___VAT_", blank=True, null=True
     )  # Field name made lowercase. Field renamed because it contained more than one '_' in a row. Field renamed because it ended with '_'.
     sale_price_list_alapertelmezett_from_date = models.FloatField(

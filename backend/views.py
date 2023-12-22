@@ -79,7 +79,7 @@ def save_webhook(adatlap, process_data=None, name="felmeres"):
 class CalculateDistance(APIView):
     def post(self, request):
         data = json.loads(request.body)
-        log("Távolság számítás meghívva", "INFO", "pen_calculate_distance", data=data)
+        log("Távolság számítás meghívva", "INFO", "pen_felmeres_webhook", data=data)
         data = map_wh_fields(
             data,
             [
