@@ -1389,38 +1389,36 @@ from rest_framework.decorators import api_view
 @csrf_exempt
 @api_view(["POST"])
 def minicrm_proxy(request):
+    data = request.body.decode("utf-8")
     log(
         "Minicrm proxy meghívva",
         "INFO",
         "pen_minicrm_proxy",
-        request.body.decode("utf-8"),
+        data,
     )
     endpoint = request.GET.get("endpoint")
 
     if endpoint == "XML":
-        headers = {
-            "Authorization": os.environ["MINICRM_AUTH"],
-            "Content-Type": "application/json",
-        }
-
-        payload = json.loads(request.body)
-        log(
-            "XML request küldése",
-            "INFO",
-            "pen_minicrm_proxy",
-            details="XML",
-            data=payload,
-        )
+        system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
+        api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
         response = requests.post(
-            "https://r3.minicrm.hu/Api/SyncFeed/119/Upload",
-            headers=headers,
-            data=payload,
+            f"https://r3.minicrm.hu/Api/SyncFeed/119/Upload",
+            auth=(system_id, api_key),
+            data=data.encode("utf-8"),
+            headers={"Content-Type": "application/xml"},
         )
 
         if response.ok:
-            return JsonResponse(response.json(), safe=False)
+            log("Minicrm proxy sikeres", "INFO", "pen_minicrm_proxy", response.text)
+            return Response(response.json())
         else:
-            return JsonResponse({"error": "Error " + response.text}, status=400)
+            log(
+                "Minicrm proxy sikertelen",
+                "ERROR",
+                "pen_minicrm_proxy",
+                response.text,
+            )
+            return Response({"error": "Error " + response.text}, status=400)
 
-    return JsonResponse({"error": "Missing endpoint"}, status=400)
+    return Response({"error": "Missing endpoint"}, status=400)
