@@ -1709,6 +1709,7 @@ class MiniCrmAdatlapok(models.Model):
     BejelentesSzovege = models.TextField(blank=True, null=True)
     GaranciaFelmerestVegzi = models.CharField(max_length=50, blank=True, null=True)
     FelmeresDatuma3 = models.DateTimeField(blank=True, null=True)
+    SzamlazasIngatlanCimre2 = models.CharField(max_length=100, blank=True, null=True)
 
     @property
     def StatusIdStr(self):
@@ -1776,7 +1777,9 @@ class Salesmen(models.Model):
 class Slots(models.Model):
     external_id = models.TextField()
     at = models.DateTimeField(blank=True, null=True)
-    user: Salesmen = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
+    user: Salesmen = models.ForeignKey(
+        "Salesmen", models.DO_NOTHING, blank=True, null=True
+    )
     booked = models.BooleanField(blank=True, null=True)
 
     class Meta:

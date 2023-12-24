@@ -52,7 +52,7 @@ from typing import List, Dict
 def map_wh_fields(data: Dict, field_names: List[str]):
     def map_wh_field(data, field_name):
         return (
-            data["Schema"][field_name][data["Data"][field_name]]
+            data["Schema"][field_name][str(data["Data"][field_name])]
             if data["Data"][field_name]
             else None
         )
@@ -82,10 +82,7 @@ class CalculateDistance(APIView):
         log("Távolság számítás meghívva", "INFO", "pen_felmeres_webhook", data=data)
         data = map_wh_fields(
             data,
-            [
-                "Felmero2",
-                "FizetesiMod2",
-            ],
+            ["Felmero2", "FizetesiMod2", "SzamlazasIngatlanCimre2"],
         )["Data"]
         save_webhook(data)
 
