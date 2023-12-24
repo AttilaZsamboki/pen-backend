@@ -656,7 +656,7 @@ def get_unas_order_data(type):
             )
             return f"<Error>{kapcsolat['response']}</Error>"
         kapcsolat = kapcsolat["response"]
-        if adatlap["MainContactId"]:
+        if adatlap["MainContactId"] != adatlap["ContactId"]:
             business_kapcsolat = contact_details(
                 contact_id=adatlap["MainContactId"],
                 script_name=script_name,

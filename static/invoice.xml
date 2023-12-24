@@ -7,10 +7,10 @@
                 </beallitasok>
                 <fejlec>
                     <!-- header -->
-                    <keltDatum>2023-12-22</keltDatum>
-                    <teljesitesDatum>2023-12-22</teljesitesDatum>
+                    <keltDatum>2023-12-24</keltDatum>
+                    <teljesitesDatum>2023-12-24</teljesitesDatum>
                     <!-- creating date, in this exact format -->
-                    <fizetesiHataridoDatum>2023-12-25</fizetesiHataridoDatum>
+                    <fizetesiHataridoDatum>2023-12-27</fizetesiHataridoDatum>
                     <!-- due date -->
                     <fizmod>Átutalás</fizmod>
                     <!-- payment type: it can be seen in case you create the invoice
@@ -22,13 +22,13 @@
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                                     -->
                     <megjegyzes><![CDATA[None]]></megjegyzes>
-                    <rendelesSzam>44832</rendelesSzam>
+                    <rendelesSzam>43392</rendelesSzam>
                     <!-- order number -->
-                    <dijbekeroSzamlaszam>D-TMTSZ-224</dijbekeroSzamlaszam>
+                    <dijbekeroSzamlaszam>D-TMTSZ-177</dijbekeroSzamlaszam>
                     <!-- reference to pro forma invoice number -->
                     <vegszamla>false</vegszamla>
                     <!-- invoice (after a deposit invoice) -->
-                    <dijbekero>false</dijbekero>
+                    <dijbekero>true</dijbekero>
                     <!-- proform invoice -->
                     <szamlaszamElotag>ERP</szamlaszamElotag>
                     <!-- One of the prefixes from the invoice pad menu  -->
@@ -48,29 +48,29 @@
                 </elado>
                 <vevo>
                     <!--Buyer details -->
-                    <nev><![CDATA[Varga-Radnay Katalin]]></nev>
+                    <nev><![CDATA[Tesztelő Zsámboki]]></nev>
                     <!-- name -->
-                    <irsz><![CDATA[1118]]></irsz>
+                    <irsz><![CDATA[1201]]></irsz>
                     <!-- ZIP code -->
-                    <telepules><![CDATA[BUDAPEST]]></telepules>
+                    <telepules><![CDATA[Budapest]]></telepules>
                     <!-- city -->
-                    <cim><![CDATA[CSIKI-HEGYEK 24 3/7]]></cim>
+                    <cim><![CDATA[Átlós utca 124]]></cim>
                     <!-- address -->
-                    <email><![CDATA[vargaek13@gmail.com]]></email>
+                    <email><![CDATA[zsamboki+teszt102001@gmail.com]]></email>
                     <!-- should we send the e-mail to the customer (by email) -->
                     <adoszam></adoszam>
                     <!-- fiscal number/tax number -->
-                    <postazasiNev><![CDATA[Varga-Radnay Katalin]]></postazasiNev>
+                    <postazasiNev><![CDATA[Tesztelő Elek]]></postazasiNev>
                     <!--delivery name/postal name -->
-                    <postazasiIrsz>1118</postazasiIrsz>
+                    <postazasiIrsz>120</postazasiIrsz>
                     <!--delivery ZIP code/postal ZIP code -->
-                    <postazasiTelepules><![CDATA[BUDAPEST]]></postazasiTelepules>
+                    <postazasiTelepules><![CDATA[Budapest]]></postazasiTelepules>
                     <!--delivery city/postal city -->
-                    <postazasiCim><![CDATA[CSIKI-HEGYEK 24 3/7]]></postazasiCim>
+                    <postazasiCim><![CDATA[Átlós utca 12]]></postazasiCim>
                     <!--delivery address/postal address -->
-                    <azonosito>44832</azonosito>
+                    <azonosito>43392</azonosito>
                     <!-- identification -->
-                    <telefonszam>+36 20 477 7328</telefonszam>
+                    <telefonszam>+36 70 948 8100</telefonszam>
                     <!-- phone number -->
                 </vevo>
                 <tetelek>

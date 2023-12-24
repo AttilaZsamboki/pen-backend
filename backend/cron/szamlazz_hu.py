@@ -1,7 +1,8 @@
 from ..utils.minicrm import (
     contact_details,
-    billing_address,
+    get_address,
     update_adatlap_fields,
+    address_list,
 )
 from ..utils.logs import log
 import requests
@@ -15,6 +16,7 @@ import traceback
 load_dotenv()
 
 SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
+TESZT_SZAMLA_AGENT_KULCS = os.environ.get("TESZT_SZAMLA_AGENT_KULCS")
 ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 
@@ -32,6 +34,7 @@ def create_invoice_or_proform(
     address_field="",
     calc_net_price=None,
     type="",
+    test=False,
 ):
     if proform:
         name = "díjbekérő"
@@ -80,25 +83,17 @@ def create_invoice_or_proform(
         log(f"Nincs új {name}", "INFO", f"pen_{script_name}_{type}")
         return
     for adatlap in adatlapok:
-        try:
-            log(
-                "Új adatlap",
-                "INFO",
-                f"pen_{script_name}_{type}",
-                f"adatlap: {adatlap['Id']}",
-            )
-        except Exception as e:
-            log(
-                "Hiba akadt az adatlapok lekérdezése során",
-                "ERROR",
-                f"pen_{script_name}_{type}",
-                f"error: {e}. adatlap: {adatlap['Id']}. adatlapok: {adatlapok}",
-            )
+        log(
+            "Új adatlap",
+            "INFO",
+            f"pen_{script_name}_{type}",
+            f"adatlap: {adatlap['Id']}",
+        )
         try:
             query_xml = f"""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
-                    <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
+                    <szamlaagentkulcs>{SZAMLA_AGENT_KULCS if not test else TESZT_SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
                     <rendelesSzam>{adatlap["Id"]}</rendelesSzam>
                 </xmlszamlaxml>
             """.strip()
@@ -127,16 +122,28 @@ def create_invoice_or_proform(
                     continue
             business_contact_id = adatlap["MainContactId"]
             business_contact = contact_details(business_contact_id)["response"]
-            contact = contact_details(adatlap["ContactId"])["response"]
-            address = billing_address(business_contact_id)
+            if business_contact_id != adatlap["ContactId"]:
+                contact = contact_details(adatlap["ContactId"])["response"]
+                address = get_address(business_contact_id)
+            else:
+                contact = business_contact
+                contact["Name"] = contact["FirstName"] + " " + contact["LastName"]
+                address = address_list(business_contact_id)
+                if address is None:
+                    log(
+                        "Nincsen cím",
+                        "FAILED",
+                        f"pen_{script_name}_{type}",
+                    )
+                address = address[0]
             if address is None:
                 log(
-                    "Nincsenek számlázási adatok",
+                    "Nincsen cím",
                     "FAILED",
                     f"pen_{script_name}_{type}",
                 )
 
-            if business_contact is None or address is None:
+            if business_contact is None:
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
@@ -144,13 +151,13 @@ def create_invoice_or_proform(
                     f"adatlap: {adatlap['Id']}",
                 )
                 continue
+
             if None in [
                 business_contact.get("Name"),
                 address.get("PostalCode"),
                 address.get("City"),
                 address.get("Address"),
                 contact.get("Email"),
-                business_contact.get("VatNumber"),
                 adatlap.get("Name"),
                 adatlap.get(zip_field),
                 adatlap.get(city_field),
@@ -158,6 +165,19 @@ def create_invoice_or_proform(
                 adatlap.get("Id"),
                 contact.get("Phone"),
             ]:
+                print(
+                    business_contact.get("Name"),
+                    address.get("PostalCode"),
+                    address.get("City"),
+                    address.get("Address"),
+                    contact.get("Email"),
+                    adatlap.get("Name"),
+                    adatlap.get(zip_field),
+                    adatlap.get(city_field),
+                    adatlap.get(address_field),
+                    adatlap.get("Id"),
+                    contact.get("Phone"),
+                )
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
@@ -173,7 +193,7 @@ def create_invoice_or_proform(
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
             <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
                 <beallitasok>
-                    <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
+                    <szamlaagentkulcs>{SZAMLA_AGENT_KULCS if not test else TESZT_SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
                     <eszamla>true</eszamla>
                     <szamlaLetoltes>true</szamlaLetoltes>
                 </beallitasok>
@@ -202,7 +222,7 @@ def create_invoice_or_proform(
                     <!-- invoice (after a deposit invoice) -->
                     <dijbekero>{'true' if proform else 'false'}</dijbekero>
                     <!-- proform invoice -->
-                    <szamlaszamElotag>{"TMTSZ" if ENVIRONMENT == "production" else "ERP"}</szamlaszamElotag>
+                    <szamlaszamElotag>{"TMTSZ" if ENVIRONMENT == "production" and not test else "ERP"}</szamlaszamElotag>
                     <!-- One of the prefixes from the invoice pad menu  -->
                 </fejlec>
                 <elado>
@@ -392,26 +412,27 @@ data = {
     "proform_number_field": "DijbekeroSzama2",
     "type": "felmeres",
 }
-create_invoice_or_proform(
-    status_id=3086,
-    proform=False,
-    cash=True,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
-create_invoice_or_proform(
-    status_id=3023,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
+# create_invoice_or_proform(
+#     status_id=3086,
+#     proform=False,
+#     cash=True,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
+# create_invoice_or_proform(
+#     status_id=3023,
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
 create_invoice_or_proform(
     status_id=3079,
     proform=True,
     cash=False,
+    test=True,
     messages_field="DijbekeroUzenetek",
     note_field="DijbekeroMegjegyzes2",
     **data,
@@ -437,20 +458,21 @@ data = {
     "calc_net_price": calc_net_price,
     "proform_number_field": "DijbekeroSzama3",
     "type": "garancia",
+    "test": True,
 }
-create_invoice_or_proform(
-    status_id=3129,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek2",
-    note_field="SzamlaMegjegyzes2",
-    **data,
-)
-create_invoice_or_proform(
-    status_id=3127,
-    proform=True,
-    cash=False,
-    messages_field="DijbekeroUzenetek2",
-    note_field="DijbekeroMegjegyzes3",
-    **data,
-)
+# create_invoice_or_proform(
+#     status_id=3129,
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek2",
+#     note_field="SzamlaMegjegyzes2",
+#     **data,
+# )
+# create_invoice_or_proform(
+#     status_id=3127,
+#     proform=True,
+#     cash=False,
+#     messages_field="DijbekeroUzenetek2",
+#     note_field="DijbekeroMegjegyzes3",
+#     **data,
+# )

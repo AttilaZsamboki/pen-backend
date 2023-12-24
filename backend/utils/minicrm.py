@@ -169,13 +169,14 @@ def address_list(contact_id, script_name=None, description=None):
     ]
 
 
-def billing_address(contact_id):
+def get_address(contact_id, type="Számlázási cím"):
     addresses = address_list(contact_id=contact_id)
     for address in addresses:
         if type(address) == str:
             return None
-        if address["Type"] == "Számlázási cím":
+        if address["Type"] == type:
             return address
+    return None
 
 
 def create_to_do(adatlap_id, user, type, comment, deadline, script_name=None):
