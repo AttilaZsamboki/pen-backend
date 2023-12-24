@@ -31,7 +31,12 @@ def main(
 
     for adatlap in adatlapok:
         if MiniCrmTodos.objects.filter(projectid=adatlap.Id).exists() is False:
-            urlap = {"url": None}
+            log(
+                "Új feladat létrehozása",
+                "INFO",
+                script_name=script_name,
+                details=adatlap.Id,
+            )
             if update_adatlap is not None:
                 urlap = update_adatlap_fields(
                     id=adatlap.Id,
@@ -63,14 +68,12 @@ def main(
                 )
                 continue
             contact = contact["response"]
-            todo_comment = todo_comment(
-                adatlap=adatlap, contact=contact, url=urlap["url"]
-            )
+            todo_comment_str = todo_comment(adatlap=adatlap, contact=contact)
             todo = create_to_do(
                 adatlap_id=adatlap.Id,
                 user=adatlap.__dict__[user_field],
                 type=type(adatlap),
-                comment=todo_comment,
+                comment=todo_comment_str,
                 deadline=adatlap.__dict__[deadline_field],
                 script_name=script_name,
             )
@@ -106,11 +109,11 @@ def update_adatlap(adatlap: MiniCrmAdatlapok):
     }
 
 
-def felmeres_todo_comment(adatlap: MiniCrmAdatlapok, contact: dict, url: str):
-    return f"Új felmérést kaptál\nNév: {adatlap['Name']}\nCím: {adatlap['Iranyitoszam']} {adatlap['Telepules']} {adatlap['Cim2']}, {adatlap['Orszag']}\nFizetési mód: {adatlap['FizetesiMod2']}\nÖsszeg: {adatlap['FelmeresiDij']} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: {url}\nUtcakép: {adatlap['StreetViewUrl']}\nTel: {contact['Phone']}"
+def felmeres_todo_comment(adatlap: MiniCrmAdatlapok, contact: dict):
+    return f"Új felmérést kaptál\nNév: {adatlap.Name}\nCím: {adatlap.Iranyitoszam} {adatlap.Telepules} {adatlap.Cim2}, {adatlap.Orszag}\nFizetési mód: {adatlap.FizetesiMod2}\nÖsszeg: {adatlap.FelmeresiDij} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: https://app.peneszmentesites.hu/new?page=1&adatlap_id={str(adatlap.Id)}\nUtcakép: {adatlap.StreetViewUrl}\nTel: {contact['Phone']}"
 
 
-def garancia_todo_comment(adatlap: MiniCrmAdatlapok, contact: dict, url: str):
+def garancia_todo_comment(adatlap: MiniCrmAdatlapok, contact: dict):
     return f"""Új {adatlap.BejelentesTipusa} feladatot kaptál!
 
 Név: {contact["FirstName"]} {contact["LastName"]}

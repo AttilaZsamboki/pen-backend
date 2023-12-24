@@ -43,11 +43,10 @@ class Generation:
                 if self.dates:
                     if len(self.dates) == 1:
                         return self.dates[0]
-                    return (
-                        self.dates[np.random.randint(low=0, high=len(self.dates))]
-                        if len(self.dates) != 0
-                        else self.dates[0]
-                    )
+                    while True:
+                        i = self.dates[np.random.randint(low=0, high=len(self.dates))]
+                        if i != self.date:
+                            return i
                 return None
 
             def __str__(self):
@@ -114,30 +113,27 @@ class Generation:
 
         def mutate(self):
             size = len(self.data)
-            data = self.data.copy()
             while True:
                 i = np.random.randint(0, size)
-                dates = data[i].dates
+                dates = self.data[i].dates
                 if len(dates):
+                    print(len(dates))
                     if len(dates) == 1:
                         if dates[0] == "*":
                             possible_dates = self.outer_instace.get_possible_dates(
-                                data[i]
+                                self.data[i]
                             )
                             if possible_dates:
                                 new_date = possible_dates[
                                     np.random.randint(low=0, high=len(possible_dates))
                                 ]
-                                data[i].date = new_date["date"]
-                                data[i].felmero = new_date["felmero"]
-                        else:
-                            new_date = self.data[i].random_date()
-                            data[i].date = new_date
-                        Generation.Individual(
-                            data=data, outer_instance=self
-                        ).sort_route()
-                        break
-            return self
+                                self.data[i].date = new_date["date"]
+                                self.data[i].felmero = new_date["felmero"]
+                    else:
+                        new_date = self.data[i].random_date()
+                        self.data[i].date = new_date
+                    self.sort_route()
+                    return self
 
     def count_appointments_on_date(self, date, salesman: Salesmen):
         return len(
@@ -436,7 +432,7 @@ class Generation:
             for felmero in self.qualified_salesmen:
                 if (
                     self.count_appointments_on_date(date, felmero)
-                    < self.max_felmeres_per_day
+                    < self.max_appointment_per_day
                 ):
                     gap_appointments = self.get_gap_appointment(
                         chromosome, date, felmero=felmero
@@ -544,6 +540,8 @@ class Generation:
                 outer_instance=self,
                 data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
+            if not day_cities.data:
+                return
             home = self.Individual.Chromosome(
                 date=datetime.combine(day, datetime.min.time()),
                 dates=[],
@@ -565,17 +563,17 @@ class Generation:
 
     def __init__(
         self,
-        initial_population_size,
-        population_size,
-        max_generations,
-        tournament_size,
-        max_felmeres_per_day,
-        number_of_work_hours,
-        time_for_one_appointment,
-        first_appointment,
-        needed_skill: Skills,
-        data: List[Individual.Chromosome],
-        fixed_appointments: List[Individual.Chromosome],
+        initial_population_size=None,
+        population_size=None,
+        max_generations=None,
+        tournament_size=None,
+        max_appointment_per_day=0,
+        number_of_work_hours=None,
+        time_for_one_appointment=None,
+        first_appointment=None,
+        needed_skill: Skills = Skills(),
+        data: List[Individual.Chromosome] = [],
+        fixed_appointments: List[Individual.Chromosome] = [],
         plan_timespan=31,
         num_best_slots=5,
         allow_weekends=False,
@@ -587,7 +585,7 @@ class Generation:
         self.max_generations = max_generations
         self.tournament_size = tournament_size
         self.initial_population_size = initial_population_size
-        self.max_felmeres_per_day = max_felmeres_per_day
+        self.max_appointment_per_day = max_appointment_per_day
         self.number_of_work_hours = number_of_work_hours
         self.time_for_one_appointment = time_for_one_appointment
         self.first_appointment = first_appointment
@@ -623,7 +621,7 @@ class Generation:
                                     == (datetime.now() + timedelta(days=date)).date()
                                 ]
                             )
-                            < self.max_felmeres_per_day
+                            < self.max_appointment_per_day
                             for felmero in Salesmen.objects.all()
                         ]
                     )
@@ -675,8 +673,7 @@ class Generation:
     def main(self, test=False):
         start_time = time.time()
 
-        if not test:
-            self.create_distance_matrix(test)
+        self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -686,33 +683,7 @@ class Generation:
         ]
 
         for _ in range(self.max_generations):
-            fitnesses = np.array(
-                [route.calculate_fitness() for route in self.population]
-            )
-
-            sorted_fitnesses = np.argsort(fitnesses)[::-1]
-            population: List[Generation.Individual] = [
-                self.population[i] for i in sorted_fitnesses
-            ]
-
-            elites = population[: self.elitism_size]
-
-            new_population: List[Generation.Individual] = []
-            for _ in range(population_size):
-                print("Generating new population...")
-                print("Tournament selection...")
-                parent1, parent2 = (
-                    self.tournament_selection(),
-                    self.tournament_selection(),
-                )
-
-                print("Crossover...")
-                child = self.crossover(parent1, parent2)
-                print("Mutation...")
-                child = child.mutate()
-
-                new_population.append(child)
-            self.population = new_population + elites
+            self.run_one_generation()
 
         print("Calculating fitnesses...")
         fitnesses = np.array([route.calculate_fitness() for route in self.population])
@@ -745,6 +716,35 @@ class Generation:
         print(f"Execution time: {end_time - start_time} seconds")
 
         return self.population[np.argmax(fitnesses)]
+
+    def run_one_generation(self):
+        fitnesses = np.array(
+            [route.calculate_fitness() for route in self.population if route]
+        )
+
+        sorted_fitnesses = np.argsort(fitnesses)[::-1]
+        population: List[Generation.Individual] = [
+            self.population[i] for i in sorted_fitnesses
+        ]
+
+        elites = population[: self.elitism_size]
+
+        new_population: List[Generation.Individual] = []
+        for _ in range(population_size):
+            print("Generating new population...")
+            print("Tournament selection...")
+            parent1, parent2 = (
+                self.tournament_selection(),
+                self.tournament_selection(),
+            )
+
+            print("Crossover...")
+            child = self.crossover(parent1, parent2)
+            print("Mutation...")
+            child = child.mutate()
+
+            new_population.append(child)
+        self.population = new_population + elites
 
     def tournament_selection(self):
         indices = np.random.choice(len(self.population), self.tournament_size)
@@ -846,9 +846,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 100
-initial_population_size = 100
-max_generations = 100
+population_size = 1
+initial_population_size = 1
+max_generations = 1
 tournament_size = 4
 elitism_size = 10
 
@@ -878,7 +878,7 @@ result = Generation(
     max_generations=max_generations,
     tournament_size=tournament_size,
     population_size=population_size,
-    max_felmeres_per_day=max_felmeres_per_day,
+    max_appointment_per_day=max_felmeres_per_day,
     number_of_work_hours=number_of_work_hours,
     time_for_one_appointment=time_for_one_appointment,
     first_appointment=first_appointment,

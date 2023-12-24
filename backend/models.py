@@ -1776,7 +1776,7 @@ class Salesmen(models.Model):
 class Slots(models.Model):
     external_id = models.TextField()
     at = models.DateTimeField(blank=True, null=True)
-    user = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
+    user: Salesmen = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
     booked = models.BooleanField(blank=True, null=True)
 
     class Meta:
@@ -1835,7 +1835,7 @@ class Skills(models.Model):
 
 
 class BestSlots(models.Model):
-    slot = models.ForeignKey("Slots", models.CASCADE, blank=True, null=True)
+    slot: Slots = models.ForeignKey("Slots", models.CASCADE, blank=True, null=True)
     level = models.IntegerField(blank=True, null=True)
 
     class Meta:
