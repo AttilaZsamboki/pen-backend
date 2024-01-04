@@ -540,6 +540,7 @@ class Generation:
                 outer_instance=self,
                 data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
+            print(day_cities)
             if not day_cities.data:
                 return
             home = self.Individual.Chromosome(
@@ -673,7 +674,8 @@ class Generation:
     def main(self, test=False):
         start_time = time.time()
 
-        self.create_distance_matrix(test)
+        if not test:
+            self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -681,6 +683,7 @@ class Generation:
         self.population = [
             self.generate_route() for _ in range(self.initial_population_size)
         ]
+        print(self.population)
 
         for _ in range(self.max_generations):
             self.run_one_generation()
@@ -715,11 +718,13 @@ class Generation:
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
 
-        return self.population[np.argmax(fitnesses)]
-
     def run_one_generation(self):
         fitnesses = np.array(
-            [route.calculate_fitness() for route in self.population if route]
+            [
+                route.calculate_fitness()
+                for route in self.population
+                if route is not None
+            ]
         )
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
@@ -737,6 +742,8 @@ class Generation:
                 self.tournament_selection(),
                 self.tournament_selection(),
             )
+            if not parent1 or not parent2:
+                continue
 
             print("Crossover...")
             child = self.crossover(parent1, parent2)
@@ -751,7 +758,14 @@ class Generation:
         tournament_individuals: List[Generation.Individual] = [
             self.population[i] for i in indices
         ]
-        tournament_fitnesses = [self.population[i].calculate_fitness() for i in indices]
+        # print(tournament_individuals)
+        tournament_fitnesses = [
+            self.population[i].calculate_fitness()
+            for i in indices
+            if self.population[i] is not None
+        ]
+        if not tournament_fitnesses:
+            return None
 
         winner_index = np.argmax(tournament_fitnesses)
         return tournament_individuals[winner_index]
@@ -846,9 +860,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1
-initial_population_size = 1
-max_generations = 1
+population_size = 100
+initial_population_size = 100
+max_generations = 100
 tournament_size = 4
 elitism_size = 10
 

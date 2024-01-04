@@ -82,10 +82,18 @@ def calculate_distance_fn(
             script_name,
         )
     else:
-        log(
-            "Penészmentesítés MiniCRM webhook sikertelen",
-            "ERROR",
-            script_name,
-            response["reason"],
-        )
+        if response["reason"] == "Too Many Requests":
+            log(
+                "Penészmentesítés MiniCRM webhook sikertelen",
+                "WARNING",
+                script_name,
+                response["reason"],
+            )
+        else:
+            log(
+                "Penészmentesítés MiniCRM webhook sikertelen",
+                "ERROR",
+                script_name,
+                response["reason"],
+            )
     return "Success"

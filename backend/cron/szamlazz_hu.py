@@ -38,7 +38,7 @@ def create_invoice_or_proform(
 ):
     if proform:
         name = "díjbekérő"
-        script_name = "proform"
+        script_name = f"pen_{script_name}_{type}"
     else:
         if cash:
             name = "készpénzes számla"
@@ -46,7 +46,7 @@ def create_invoice_or_proform(
         else:
             name = "számla"
             script_name = "invoice"
-    log(f"{name.capitalize()} készítésének futtatása", "INFO", f"pen_{script_name}")
+    log(f"{name.capitalize()} készítésének futtatása", "INFO", script_name)
 
     def def_criteria(adatlap: MiniCrmAdatlapok):
         if criteria(adatlap):
@@ -61,7 +61,7 @@ def create_invoice_or_proform(
                 )
                 return False
             elif cash and adatlap.__dict__[proform_number_field] != "":
-                log("Már létezik díjbekérő", "FAILED", f"pen_{script_name}_{type}")
+                log("Már létezik díjbekérő", "FAILED", script_name=script_name)
                 return False
             elif (
                 not cash
@@ -418,7 +418,7 @@ data = {
 }
 
 create_invoice_or_proform(
-    status_id=3086,
+    criteria=lambda adatlap: adatlap.StatusId == 3086,
     proform=False,
     cash=True,
     messages_field="SzamlaUzenetek",
@@ -426,7 +426,7 @@ create_invoice_or_proform(
     **data,
 )
 create_invoice_or_proform(
-    status_id=3023,
+    criteria=lambda adatlap: adatlap.StatusId == 3023,
     proform=False,
     cash=False,
     messages_field="SzamlaUzenetek",
@@ -465,7 +465,7 @@ data = {
     "test": True,
 }
 create_invoice_or_proform(
-    status_id=3129,
+    criteria=lambda adatlap: adatlap.StatusId == 3129,
     proform=False,
     cash=False,
     messages_field="SzamlaUzenetek2",
@@ -473,7 +473,7 @@ create_invoice_or_proform(
     **data,
 )
 create_invoice_or_proform(
-    status_id=3127,
+    criteria=lambda adatlap: adatlap.StatusId == 3127,
     proform=True,
     cash=False,
     messages_field="DijbekeroUzenetek2",
