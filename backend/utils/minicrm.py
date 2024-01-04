@@ -169,12 +169,12 @@ def address_list(contact_id, script_name=None, description=None):
     ]
 
 
-def get_address(contact_id, type="Számlázási cím"):
+def get_address(contact_id, typeof="Számlázási cím"):
     addresses = address_list(contact_id=contact_id)
     for address in addresses:
         if type(address) == str:
             return None
-        if address["Type"] == type:
+        if address["Type"] == typeof:
             return address
     return None
 
