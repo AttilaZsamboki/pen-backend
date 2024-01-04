@@ -393,17 +393,15 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 
 # Felmérés
 def proform_criteria(adatlap: MiniCrmAdatlapok):
-    if adatlap.Id == 45066:
-        if adatlap.StatusId == 3079:
-            return True
-        elif adatlap.StatusId == 3082 and (
-            datetime.datetime.now()
-            - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
-            > datetime.timedelta(days=3)
-            or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
-        ):
-            return True
-    return False
+    if adatlap.StatusId == 3079:
+        return True
+    elif adatlap.StatusId == 3082 and (
+        datetime.datetime.now()
+        - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
+        > datetime.timedelta(days=3)
+        or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
+    ):
+        return True
 
 
 data = {
