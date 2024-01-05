@@ -125,6 +125,14 @@ def create_invoice_or_proform(
                     )
                     continue
             business_contact_id = adatlap.MainContactId
+            if business_contact_id is None:
+                log(
+                    "Nincsenek számlázási adatok",
+                    "FAILED",
+                    script_name,
+                    f"adatlap: {adatlap.Id}",
+                )
+                continue
             business_contact = contact_details(business_contact_id)
             if business_contact["status"] == "Error":
                 if business_contact["response"] == "Too many requests":

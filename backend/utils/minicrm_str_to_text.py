@@ -35,6 +35,7 @@ todo_map = {
     269: "Karbantartás",
     267: "Készülékhiba",
     268: "Rendszergarancia",
+    245: "Rendszerhiba E5",
 }
 
 garancia_type_map = {

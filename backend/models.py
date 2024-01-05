@@ -1758,7 +1758,7 @@ class FelmeresMunkadijak(models.Model):
 
 
 class MiniCrmTodos(models.Model):
-    projectid = models.IntegerField(db_column="ProjectId")  # Field name made lowercase.
+    todo_id = models.CharField(max_length=255)  # Field name made lowercase.
 
     class Meta:
         managed = False
