@@ -38,7 +38,7 @@ def create_invoice_or_proform(
 ):
     if proform:
         name = "díjbekérő"
-        script_name = f"pen_{script_name}_{type}"
+        script_name = f"pen_proform_{type}"
     else:
         if cash:
             name = "készpénzes számla"
@@ -132,12 +132,13 @@ def create_invoice_or_proform(
                 contact = business_contact
                 contact["Name"] = contact["FirstName"] + " " + contact["LastName"]
                 address = address_list(business_contact_id)
-                if address is None:
+                if address is None or address == []:
                     log(
                         "Nincsen cím",
                         "FAILED",
                         f"pen_{script_name}_{type}",
                     )
+                    continue
                 address = address[0]
             if address is None:
                 log(
@@ -145,6 +146,7 @@ def create_invoice_or_proform(
                     "FAILED",
                     f"pen_{script_name}_{type}",
                 )
+                continue
 
             if business_contact is None:
                 log(
