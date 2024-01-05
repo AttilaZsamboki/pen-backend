@@ -971,6 +971,7 @@ class UnasSetProduct(APIView):
                             "sku": element.find("Sku").text,
                         }
                         for element in root.iter("Product")
+                        if element
                     ]
                     response = (
                         """<?xml version="1.0" encoding="UTF-8" ?>
