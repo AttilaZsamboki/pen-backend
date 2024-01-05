@@ -124,7 +124,18 @@ def create_invoice_or_proform(
                     )
                     continue
             business_contact_id = adatlap.MainContactId
-            business_contact = contact_details(business_contact_id)["response"]
+            business_contact = contact_details(business_contact_id)
+            if business_contact["status"] == "Error":
+                if business_contact["response"] == "Too many requests":
+                    log("Túl sok kérés", "FAILED", script_name)
+                    continue
+                log(
+                    "Hiba akadt a számlázási adatok lekérdezésében",
+                    "ERROR",
+                    script_name,
+                    business_contact["response"],
+                )
+                continue
             if business_contact_id != adatlap.ContactId:
                 contact = contact_details(adatlap.ContactId)["response"]
                 address = get_address(business_contact_id)
@@ -136,7 +147,7 @@ def create_invoice_or_proform(
                     log(
                         "Nincsen cím",
                         "FAILED",
-                        f"pen_{script_name}_{type}",
+                        script_name,
                     )
                     continue
                 address = address[0]
@@ -417,22 +428,22 @@ data = {
     "type": "felmeres",
 }
 
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3086,
-    proform=False,
-    cash=True,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3023,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3086,
+#     proform=False,
+#     cash=True,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3023,
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
 create_invoice_or_proform(
     proform=True,
     cash=False,

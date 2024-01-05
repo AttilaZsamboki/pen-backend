@@ -72,7 +72,7 @@ def main():
         if contact == "Error" or contact["status"] == "Error":
             log(
                 "Hiba akadt a kapcsolattartó lekérdezése közben",
-                "ERROR",
+                "WARNING",
                 script_name=script_name,
             )
             return
