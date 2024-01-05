@@ -149,9 +149,13 @@ def create_invoice_or_proform(
             if business_contact_id != adatlap.ContactId:
                 contact = contact_details(adatlap.ContactId)["response"]
                 address = get_address(business_contact_id)
-            else:
+            if business_contact_id == adatlap.ContactId or not address:
                 contact = business_contact
-                contact["Name"] = contact["FirstName"] + " " + contact["LastName"]
+                contact["Name"] = (
+                    contact["FirstName"] + " " + contact["LastName"]
+                    if not contact.get("Name")
+                    else contact["Name"]
+                )
                 address = address_list(business_contact_id)
                 if address is None or address == []:
                     log(
@@ -349,7 +353,7 @@ def create_invoice_or_proform(
                 os.remove(pdf_path)
         except KeyError as e:
             log(
-                "Hiba akadt a {name} készítésében",
+                f"Hiba akadt a {name} készítésében",
                 "ERROR",
                 script_name=script_name,
                 details=traceback.format_exc(),
@@ -413,11 +417,15 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 def proform_criteria(adatlap: MiniCrmAdatlapok):
     if adatlap.StatusId == 3079:
         return True
-    elif adatlap.StatusId == 3082 and (
-        datetime.datetime.now()
-        - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
-        > datetime.timedelta(days=3)
-        or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
+    elif (
+        adatlap.StatusId == 3082
+        and (
+            datetime.datetime.now()
+            - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
+            > datetime.timedelta(days=3)
+            or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
+        )
+        and adatlap.Id == 44932
     ):
         return True
 
@@ -433,22 +441,22 @@ data = {
     "type": "felmeres",
 }
 
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3086,
-    proform=False,
-    cash=True,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3023,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3086,
+#     proform=False,
+#     cash=True,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3023,
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
 create_invoice_or_proform(
     proform=True,
     cash=False,
