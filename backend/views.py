@@ -624,8 +624,7 @@ class UnasLogin(APIView):
 
 def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
-        Q(Enum1951=4374) | Q(StatusId=3008),
-        CategoryId=29,
+        Q(Enum1951=4374) | Q(StatusId=3008), CategoryId=29, Deleted="0"
     ).values()
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
@@ -670,7 +669,9 @@ def get_unas_order_data(type):
             business_kapcsolat = business_kapcsolat["response"]
         else:
             business_kapcsolat = {
-                "Name": kapcsolat["LastName"] + " " + kapcsolat["FirstName"],
+                "Name": kapcsolat["LastName"] + " " + kapcsolat["FirstName"]
+                if not kapcsolat.get("Name")
+                else kapcsolat.get("Name"),
                 "EUVatNumber": "",
                 **kapcsolat,
             }
@@ -712,6 +713,10 @@ def get_unas_order_data(type):
         felmeres = models.Felmeresek.objects.filter(
             id=adatlap["FelmeresLink"].split("/")[-1] if adatlap["FelmeresLink"] else 0
         ).first()
+        if felmeres is None:
+            log("Nem található felmérés", "ERROR", script_name, adatlap["Id"])
+            continue
+        print(felmeres)
 
         # Add the data to the datas list
 
