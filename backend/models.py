@@ -23,7 +23,7 @@ class Logs(models.Model):
             send_email(
                 service=service,
                 destination="zsamboki.attila.jr@gmail.com",
-                obj="Sikertelen script: " + self.script_name,
+                obj=f"Sikertelen script: {self.script_name}",
                 body=f"{self.value} \n {f'Részletek: {self.details}' if self.details else ''}",
             )
         super(Logs, self).save(*args, **kwargs)

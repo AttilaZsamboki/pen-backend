@@ -136,6 +136,7 @@ def create_invoice_or_proform(
                     business_contact["response"],
                 )
                 continue
+            business_contact = business_contact["response"]
             if business_contact_id != adatlap.ContactId:
                 contact = contact_details(adatlap.ContactId)["response"]
                 address = get_address(business_contact_id)
@@ -308,10 +309,10 @@ def create_invoice_or_proform(
                     },
                 )
                 log(
-                    f"{name.capitalize()} készítése sikertelen volt",
-                    "ERROR",
-                    f"pen_{script_name}_{type}",
-                    f"adatlap: {adatlap.Id}, error: {response.text}",
+                    f"Már létezik {name}",
+                    "INFO",
+                    {script_name},
+                    response.text[:800],
                 )
                 continue
             if ENVIRONMENT == "production":
@@ -321,16 +322,18 @@ def create_invoice_or_proform(
                 f.write(response.content)
                 f.close()
             for _ in range(2):
+                update_request_payload = update_data(proform, name, adatlap, szamlaszam)
                 update_resp = update_adatlap_fields(
                     adatlap.Id,
-                    update_data(proform, name, adatlap, szamlaszam),
+                    update_request_payload,
                 )
                 if update_resp["code"] == 400:
                     log(
                         f"Hiba akadt a {name} feltöltésében",
                         "ERROR",
-                        script_name=f"pen_{script_name}_{type}",
+                        script_name=script_name,
                         details=f"adatlap: {adatlap.Id}, error: {update_resp['reason']}",
+                        data=update_request_payload,
                     )
                     time.sleep(180)
                 else:
@@ -340,9 +343,9 @@ def create_invoice_or_proform(
                 os.remove(pdf_path)
         except KeyError as e:
             log(
+                "Hiba akadt a {name} készítésében",
                 "ERROR",
-                "FAILED",
-                script_name=f"pen_{script_name}_{type}",
+                script_name=script_name,
                 details=traceback.format_exc(),
             )
             continue
