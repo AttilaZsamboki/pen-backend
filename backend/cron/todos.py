@@ -9,7 +9,7 @@ from ..models import MiniCrmAdatlapok, MiniCrmTodos
 
 
 def main(
-    status_id,
+    status_id=None,
     filter_adatlapok=lambda _: True,
     update_adatlap=None,
     script_name=None,
@@ -23,8 +23,12 @@ def main(
 
     adatlapok = [
         i
-        for i in MiniCrmAdatlapok.objects.filter(
-            StatusId=status_id,
+        for i in (
+            MiniCrmAdatlapok.objects.filter(
+                StatusId=status_id,
+            )
+            if status_id is not None
+            else MiniCrmAdatlapok.objects.all()
         )
         if filter_adatlapok(i)
     ]

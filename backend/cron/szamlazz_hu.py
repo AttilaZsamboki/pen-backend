@@ -38,7 +38,7 @@ def create_invoice_or_proform(
 ):
     if proform:
         name = "díjbekérő"
-        script_name = f"pen_proform_{type}"
+        script_name = "proform"
     else:
         if cash:
             name = "készpénzes számla"
@@ -46,6 +46,7 @@ def create_invoice_or_proform(
         else:
             name = "számla"
             script_name = "invoice"
+    script_name = f"pen_{script_name}_{type}"
     log(f"{name.capitalize()} készítésének futtatása", "INFO", script_name)
 
     def def_criteria(adatlap: MiniCrmAdatlapok):
@@ -57,7 +58,7 @@ def create_invoice_or_proform(
                 log(
                     "Nem megfelelő fizetési mód",
                     "FAILED",
-                    f"pen_{script_name}_{type}",
+                    script_name,
                 )
                 return False
             elif cash and adatlap.__dict__[proform_number_field] != "":
@@ -71,7 +72,7 @@ def create_invoice_or_proform(
                 log(
                     "Nincs díjbekérő száma",
                     "FAILED",
-                    f"pen_{script_name}_{type}",
+                    script_name,
                     f"adatlap: {adatlap.Id}",
                 )
                 return False
@@ -83,13 +84,13 @@ def create_invoice_or_proform(
         i for i in MiniCrmAdatlapok.objects.filter(Deleted="0") if def_criteria(i)
     ]
     if adatlapok == []:
-        log(f"Nincs új {name}", "INFO", f"pen_{script_name}_{type}")
+        log(f"Nincs új {name}", "INFO", script_name)
         return
     for adatlap in adatlapok:
         log(
             "Új adatlap",
             "INFO",
-            f"pen_{script_name}_{type}",
+            script_name,
             f"adatlap: {adatlap.Id}",
         )
         try:
@@ -113,7 +114,7 @@ def create_invoice_or_proform(
                     log(
                         f"Már létezik {name}",
                         "INFO",
-                        f"pen_{script_name}_{type}",
+                        script_name,
                         f"adatlap: {adatlap.Id}",
                     )
                     update_adatlap_fields(
@@ -153,19 +154,16 @@ def create_invoice_or_proform(
                     continue
                 address = address[0]
             if address is None:
-                log(
-                    "Nincsen cím",
-                    "FAILED",
-                    f"pen_{script_name}_{type}",
-                )
+                log("Nincsen cím", "FAILED", script_name)
                 continue
 
             if business_contact is None:
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
-                    f"pen_{script_name}_{type}",
+                    script_name,
                     f"adatlap: {adatlap.Id}",
+                    business_contact,
                 )
                 continue
 
@@ -185,14 +183,14 @@ def create_invoice_or_proform(
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",
-                    f"pen_{script_name}_{type}",
+                    script_name,
                     f"adatlap: {adatlap.Id}",
                 )
                 continue
 
             net_price = calc_net_price(adatlap)
             if not net_price:
-                log("Nincs nettó ár", "FAILED", f"pen_{script_name}_{type}")
+                log("Nincs nettó ár", "FAILED", script_name)
                 return
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
             <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
@@ -353,15 +351,11 @@ def create_invoice_or_proform(
             log(
                 f"Hiba akadt a {name} feltöltésében",
                 "ERROR",
-                script_name=f"pen_{script_name}_{type}",
+                script_name=script_name,
                 details=traceback.format_exc(),
             )
             continue
-        log(
-            f"{name.capitalize()}k feltöltése sikeres",
-            "SUCCESS",
-            script_name=f"pen_{script_name}_{type}",
-        )
+        log(f"{name.capitalize()}k feltöltése sikeres", "SUCCESS", script_name)
         continue
 
 
@@ -431,22 +425,22 @@ data = {
     "type": "felmeres",
 }
 
-# create_invoice_or_proform(
-#     criteria=lambda adatlap: adatlap.StatusId == 3086,
-#     proform=False,
-#     cash=True,
-#     messages_field="SzamlaUzenetek",
-#     note_field="SzamlaMegjegyzes",
-#     **data,
-# )
-# create_invoice_or_proform(
-#     criteria=lambda adatlap: adatlap.StatusId == 3023,
-#     proform=False,
-#     cash=False,
-#     messages_field="SzamlaUzenetek",
-#     note_field="SzamlaMegjegyzes",
-#     **data,
-# )
+create_invoice_or_proform(
+    criteria=lambda adatlap: adatlap.StatusId == 3086,
+    proform=False,
+    cash=True,
+    messages_field="SzamlaUzenetek",
+    note_field="SzamlaMegjegyzes",
+    **data,
+)
+create_invoice_or_proform(
+    criteria=lambda adatlap: adatlap.StatusId == 3023,
+    proform=False,
+    cash=False,
+    messages_field="SzamlaUzenetek",
+    note_field="SzamlaMegjegyzes",
+    **data,
+)
 create_invoice_or_proform(
     proform=True,
     cash=False,
