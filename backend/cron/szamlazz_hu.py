@@ -417,15 +417,11 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 def proform_criteria(adatlap: MiniCrmAdatlapok):
     if adatlap.StatusId == 3079:
         return True
-    elif (
-        adatlap.StatusId == 3082
-        and (
-            datetime.datetime.now()
-            - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
-            > datetime.timedelta(days=3)
-            or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
-        )
-        and adatlap.Id == 44932
+    elif adatlap.StatusId == 3082 and (
+        datetime.datetime.now()
+        - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
+        > datetime.timedelta(days=3)
+        or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
     ):
         return True
 
@@ -441,22 +437,22 @@ data = {
     "type": "felmeres",
 }
 
-# create_invoice_or_proform(
-#     criteria=lambda adatlap: adatlap.StatusId == 3086,
-#     proform=False,
-#     cash=True,
-#     messages_field="SzamlaUzenetek",
-#     note_field="SzamlaMegjegyzes",
-#     **data,
-# )
-# create_invoice_or_proform(
-#     criteria=lambda adatlap: adatlap.StatusId == 3023,
-#     proform=False,
-#     cash=False,
-#     messages_field="SzamlaUzenetek",
-#     note_field="SzamlaMegjegyzes",
-#     **data,
-# )
+create_invoice_or_proform(
+    criteria=lambda adatlap: adatlap.StatusId == 3086,
+    proform=False,
+    cash=True,
+    messages_field="SzamlaUzenetek",
+    note_field="SzamlaMegjegyzes",
+    **data,
+)
+create_invoice_or_proform(
+    criteria=lambda adatlap: adatlap.StatusId == 3023,
+    proform=False,
+    cash=False,
+    messages_field="SzamlaUzenetek",
+    note_field="SzamlaMegjegyzes",
+    **data,
+)
 create_invoice_or_proform(
     proform=True,
     cash=False,
