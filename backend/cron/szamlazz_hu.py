@@ -420,7 +420,7 @@ def proform_criteria(adatlap: MiniCrmAdatlapok):
     elif adatlap.StatusId == 3082 and (
         datetime.datetime.now()
         - datetime.datetime.strptime(adatlap.StatusUpdatedAt, "%Y-%m-%d %H:%M:%S")
-        > datetime.timedelta(days=3)
+        > datetime.timedelta(days=1)
         or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
     ):
         return True
