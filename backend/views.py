@@ -968,7 +968,9 @@ class UnasSetProduct(APIView):
                     products = [
                         {
                             "id": element.find("local_id").text,
-                            "sku": element.find("Sku").text,
+                            "sku": element.find("Sku").text
+                            if element.find("Sku")
+                            else "",
                         }
                         for element in root.iter("Product")
                         if element
