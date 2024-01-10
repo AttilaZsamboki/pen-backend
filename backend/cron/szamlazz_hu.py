@@ -415,7 +415,11 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 
 # Felmérés
 def proform_criteria(adatlap: MiniCrmAdatlapok):
-    if adatlap.StatusId == 3079:
+    if (
+        adatlap.StatusId == 3079
+        and adatlap.FelmeresIdopontja2 - datetime.timedelta(days=10)
+        < datetime.datetime.now()
+    ):
         return True
     elif adatlap.StatusId == 3082 and (
         datetime.datetime.now()
