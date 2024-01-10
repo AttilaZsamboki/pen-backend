@@ -138,9 +138,9 @@ def main():
     for felmeres in felmeresek:
         log(
             "Nem jött létre az ajánlat a minicrm-ben",
-            "ERROR",
+            "URGENT ERROR",
             "pen_check_offer_created",
-            details=felmeres.id,
+            details=f"\nFelmérés: https://app.peneszmentesites.hu/{felmeres.id}.\nAdatalap: https://r3.minicrm.hu/119/#Project-23/{felmeres.adatlap_id.Id}",
         )
 
 

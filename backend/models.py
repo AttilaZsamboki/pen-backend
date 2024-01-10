@@ -19,10 +19,13 @@ class Logs(models.Model):
 
     def save(self, *args, **kwargs):
         service = gmail_authenticate()
-        if self.status == "ERROR":
+        if "ERROR" in self.status:
+            destination = "zsamboki.attila.jr@gmail.com"
+            if self.status == "URGENT ERROR":
+                destination += " ,zsamboki@gmail.com"
             send_email(
                 service=service,
-                destination="zsamboki.attila.jr@gmail.com",
+                destination=destination,
                 obj=f"Sikertelen script: {self.script_name}",
                 body=f"{self.value} \n {f'Részletek: {self.details}' if self.details else ''}",
             )
@@ -343,49 +346,6 @@ class ProductTemplate(models.Model):
         managed = False
         db_table = "pen_product_template"
         unique_together = (("product", "template", "type"),)
-
-
-class Felmeresek(models.Model):
-    id = models.AutoField(primary_key=True)
-    adatlap_id = models.ForeignKey(
-        "MinicrmAdatlapok",
-        models.DO_NOTHING,
-        db_column="adatlap_id",
-    )
-    template: Templates = models.ForeignKey(
-        "Templates", models.DO_NOTHING, db_column="template", blank=True, null=True
-    )
-    type = models.CharField(max_length=255, blank=True, null=True)
-    status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
-    created_at = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateField(blank=True, null=True)
-    name = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    subject = models.TextField(blank=True, null=True)
-    created_by = models.TextField(blank=True, null=True)
-    garancia = models.CharField(max_length=255, blank=True, null=True)
-    garancia_reason = models.TextField(blank=True, null=True)
-    hourly_wage = models.FloatField(blank=True, null=True)
-    is_conditional = models.BooleanField(blank=True, null=True, default=False)
-    condition = models.TextField(blank=True, null=True)
-
-    @property
-    def netOrderTotal(self):
-        return sum(
-            item.netTotal for item in self.felmeresitems_set.exclude(type="Discount")
-        ) + sum(item.value * item.amount for item in self.felmeresmunkadijak_set.all())
-
-    @property
-    def grossOrderTotal(self):
-        total = self.netOrderTotal * 1.27
-        discount = self.felmeresitems_set.filter(type="Discount")
-        if discount.exists() and discount.first().netPrice != 0:
-            return total * (1 - (discount.first().netPrice / 100))
-        return total
-
-    class Meta:
-        managed = False
-        db_table = "pen_felmeresek"
 
 
 class FelmeresItems(models.Model):
@@ -1867,3 +1827,46 @@ class UnschedulableTimes(models.Model):
     class Meta:
         managed = False
         db_table = "pen_unschedulable_times"
+
+
+class Felmeresek(models.Model):
+    id = models.AutoField(primary_key=True)
+    adatlap_id: MiniCrmAdatlapok = models.ForeignKey(
+        "MinicrmAdatlapok",
+        models.DO_NOTHING,
+        db_column="adatlap_id",
+    )
+    template: Templates = models.ForeignKey(
+        "Templates", models.DO_NOTHING, db_column="template", blank=True, null=True
+    )
+    type = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=255, blank=True, null=True, default="DRAFT")
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateField(blank=True, null=True)
+    name = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    subject = models.TextField(blank=True, null=True)
+    created_by = models.TextField(blank=True, null=True)
+    garancia = models.CharField(max_length=255, blank=True, null=True)
+    garancia_reason = models.TextField(blank=True, null=True)
+    hourly_wage = models.FloatField(blank=True, null=True)
+    is_conditional = models.BooleanField(blank=True, null=True, default=False)
+    condition = models.TextField(blank=True, null=True)
+
+    @property
+    def netOrderTotal(self):
+        return sum(
+            item.netTotal for item in self.felmeresitems_set.exclude(type="Discount")
+        ) + sum(item.value * item.amount for item in self.felmeresmunkadijak_set.all())
+
+    @property
+    def grossOrderTotal(self):
+        total = self.netOrderTotal * 1.27
+        discount = self.felmeresitems_set.filter(type="Discount")
+        if discount.exists() and discount.first().netPrice != 0:
+            return total * (1 - (discount.first().netPrice / 100))
+        return total
+
+    class Meta:
+        managed = False
+        db_table = "pen_felmeresek"

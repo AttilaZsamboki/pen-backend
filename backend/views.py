@@ -1052,25 +1052,15 @@ class CancelOffer(APIView):
             "pen_cancel_offer",
             request.body.decode("utf-8"),
         )
-        adatlap_id = request.data["adatlap_id"]
 
-        def critera(adatlap):
-            return adatlap["Felmeresid"] == adatlap_id
-
-        offer_adatlap = get_all_adatlap_details(category_id=21, criteria=critera)
-        if len(offer_adatlap) == 0:
-            log(
-                "MiniCRM ajánlat sztornózása sikertelen",
-                "ERROR",
-                "pen_cancel_offer",
-                "Nincs ilyen ajánlat",
-            )
+        felmeres = models.Felmeresek.objects.filter(id=request.data["adatlap_id"])
+        if not felmeres.exists():
+            log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer")
             return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
-        offer_adatlap = offer_adatlap[0]
-
-        offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).id
         update_resp = update_offer_order(
-            offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True
+            offer_id=felmeres.first().adatlap_id.Id,
+            fields={"StatusId": "Sztornózva"},
+            project=True,
         )
         if update_resp.status_code != 200:
             log(
@@ -1080,7 +1070,7 @@ class CancelOffer(APIView):
                 update_resp.text,
             )
             return Response(update_resp.text, HTTP_400_BAD_REQUEST)
-        models.Felmeresek.objects.filter(id=adatlap_id).update(status="CANCELLED")
+        felmeres.update(status="CANCELLED")
         return Response("Sikeres sztornózás", HTTP_200_OK)
 
     def get(self, request):

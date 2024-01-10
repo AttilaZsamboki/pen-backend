@@ -239,6 +239,8 @@ class Generation:
 
             x = x[0].duration
             y = self.get_time_home(chromosome, felmero=felmero)
+            if not y:
+                return
             b = (
                 last_appointment.date.replace(minute=0, second=0)
                 + max(timedelta(minutes=plus_time), timedelta(seconds=x))
@@ -674,8 +676,8 @@ class Generation:
     def main(self, test=False):
         start_time = time.time()
 
-        if not test:
-            self.create_distance_matrix(test)
+        # if not test:
+        self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -702,18 +704,21 @@ class Generation:
                 slots: List[Slots] = []
                 for individual in population:
                     for chromosome in individual.data:
-                        if (
-                            chromosome.id == i.id
-                            and chromosome.date != "*"
-                            and chromosome.date not in slots
-                        ):
-                            slots.append(chromosome.date)
-                            open_slot_obj, created = Slots.objects.get_or_create(
-                                external_id=i.id,
-                                at=chromosome.date,
-                                user=chromosome.felmero,
-                            )
-                            BestSlots(slot=open_slot_obj, level=len(slots)).save()
+                        if chromosome.id == i.id:
+                            if chromosome.date != "*" and chromosome.date not in slots:
+                                slots.append(chromosome.date)
+                                open_slot_obj, created = Slots.objects.get_or_create(
+                                    external_id=i.id,
+                                    at=chromosome.date,
+                                    user=chromosome.felmero,
+                                )
+                                BestSlots(slot=open_slot_obj, level=len(slots)).save()
+                            else:
+                                if Slots.objects.get(
+                                    external_id=i.id, at=chromosome.date
+                                ).booked:
+                                    continue
+                                print("No slots found for", i.id, i.zip, i.date)
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
@@ -860,9 +865,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 100
-initial_population_size = 100
-max_generations = 100
+population_size = 5
+initial_population_size = 5
+max_generations = 5
 tournament_size = 4
 elitism_size = 10
 
