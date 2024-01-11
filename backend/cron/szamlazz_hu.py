@@ -35,6 +35,9 @@ def create_invoice_or_proform(
     type="",
     test=False,
     criteria=lambda adatlap: True,
+    payment_deadline=lambda _: (
+        datetime.datetime.now() + datetime.timedelta(days=3)
+    ).strftime("%Y-%m-%d"),
 ):
     if proform:
         name = "díjbekérő"
@@ -216,7 +219,7 @@ def create_invoice_or_proform(
                     <keltDatum>{datetime.datetime.now().strftime("%Y-%m-%d")}</keltDatum>
                     <teljesitesDatum>{datetime.datetime.now().strftime("%Y-%m-%d")}</teljesitesDatum>
                     <!-- creating date, in this exact format -->
-                    <fizetesiHataridoDatum>{(datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")}</fizetesiHataridoDatum>
+                    <fizetesiHataridoDatum>{payment_deadline(adatlap)}</fizetesiHataridoDatum>
                     <!-- due date -->
                     <fizmod>Átutalás</fizmod>
                     <!-- payment type: it can be seen in case you create the invoice
@@ -415,11 +418,7 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 
 # Felmérés
 def proform_criteria(adatlap: MiniCrmAdatlapok):
-    if (
-        adatlap.StatusId == 3079
-        and adatlap.FelmeresIdopontja2 - datetime.timedelta(days=10)
-        < datetime.datetime.now()
-    ):
+    if adatlap.StatusId == 3079:
         return True
     elif adatlap.StatusId == 3082 and (
         datetime.datetime.now()
@@ -428,6 +427,13 @@ def proform_criteria(adatlap: MiniCrmAdatlapok):
         or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
     ):
         return True
+
+
+def proform_deadline(adatlap: MiniCrmAdatlapok):
+    date = adatlap.FelmeresIdopontja2 - datetime.timedelta(days=10)
+    if date < datetime.datetime.now():
+        return datetime.datetime.now() + datetime.timedelta(days=3)
+    return date
 
 
 data = {
@@ -463,6 +469,7 @@ create_invoice_or_proform(
     criteria=proform_criteria,
     messages_field="DijbekeroUzenetek",
     note_field="DijbekeroMegjegyzes2",
+    payment_deadline=proform_deadline,
     **data,
 )
 
