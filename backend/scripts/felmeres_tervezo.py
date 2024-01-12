@@ -1,4 +1,5 @@
 import os
+import json
 import time
 from datetime import date as dt_date
 from datetime import datetime, timedelta
@@ -676,8 +677,8 @@ class Generation:
     def main(self, test=False):
         start_time = time.time()
 
-        # if not test:
-        self.create_distance_matrix(test)
+        if not test:
+            self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -698,6 +699,18 @@ class Generation:
         population: List[Generation.Individual] = [
             self.population[i] for i in sorted_fitnesses
         ]
+
+        population_dicts = [
+            [i.__dict__ for i in individual] for individual in population
+        ]
+
+        json_file_path = "population_data.json"
+
+        # Write the list of dictionaries to a JSON file
+        with open(json_file_path, "w") as json_file:
+            json.dump(population_dicts, json_file, indent=4)
+
+        print(f"Population data saved to {json_file_path}")
         BestSlots.objects.all().delete()
         for i in self.data:
             if i.dates == ["*"]:
@@ -714,9 +727,9 @@ class Generation:
                                 )
                                 BestSlots(slot=open_slot_obj, level=len(slots)).save()
                             else:
-                                if Slots.objects.get(
+                                if Slots.objects.filter(
                                     external_id=i.id, at=chromosome.date
-                                ).booked:
+                                ).exists():
                                     continue
                                 print("No slots found for", i.id, i.zip, i.date)
 
@@ -865,9 +878,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 5
-initial_population_size = 5
-max_generations = 5
+population_size = 1
+initial_population_size = 1
+max_generations = 1
 tournament_size = 4
 elitism_size = 10
 
