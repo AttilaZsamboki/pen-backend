@@ -1,4 +1,4 @@
-from ..utils.minicrm import get_all_adatlap, update_order_status
+from ..utils.minicrm import update_order_status
 from ..utils.logs import log
 from ..models import Orders, Order, MiniCrmAdatlapok
 
@@ -23,7 +23,7 @@ def main():
         except Order.DoesNotExist:
             log(
                 "Nem található megfelelő rendelés",
-                "ERROR",
+                "WARNING",
                 "pen_erp_status_sync",
                 adatlap["Id"],
             )

@@ -533,8 +533,8 @@ class Generation:
                                 #     duration=response[0].parse_duration(),
                                 # )
                                 pass
-                            save.save()
                             self.all_routes.append(save)
+        Routes.objects.bulk_create(self.all_routes)
 
     def generate_route(self):
         routes = self.Individual(self)
@@ -677,8 +677,8 @@ class Generation:
     def main(self, test=False):
         start_time = time.time()
 
-        if not test:
-            self.create_distance_matrix(test)
+        # if not test:
+        self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -701,7 +701,7 @@ class Generation:
         ]
 
         population_dicts = [
-            [i.__dict__ for i in individual] for individual in population
+            [str(i.__dict__) for i in individual.data] for individual in population
         ]
 
         json_file_path = "population_data.json"

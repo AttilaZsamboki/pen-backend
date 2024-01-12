@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from ..models import MiniCrmAdatlapok
 from ..utils.minicrm import update_adatlap_fields
 import datetime
+import traceback
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ def main(StatusId="", UpdateAdatlap=None):
         query_xml = f"""
                     <?xml version="1.0" encoding="UTF-8"?>
                     <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
-                        <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
+                        <szamlaagentkulcs>thxbyhf59635mwck877xndynbgc8y8g4pwp3jntau9</szamlaagentkulcs>
                         <rendelesSzam>{adatlap.Id}</rendelesSzam>
                     </xmlszamlaxml>
                 """.strip()
@@ -45,11 +46,11 @@ def main(StatusId="", UpdateAdatlap=None):
         ns = {"szamla": "http://www.szamlazz.hu/szamla"}
 
         # Use the namespace in the search string
-        brutto = root.find(".//szamla:brutto", ns).text
+        brutto = root.find(".//szamla:brutto", ns)
         osszeg = root.find(".//szamla:osszeg", ns)
 
-        if osszeg is not None:
-            if brutto == osszeg.text:
+        if osszeg is not None and brutto is not None:
+            if brutto.text == osszeg.text:
                 log(
                     "Kifizetett számla",
                     script_name="pen_paid_invoice",
@@ -94,9 +95,17 @@ def update_garancia_adatlap(adatlap: MiniCrmAdatlapok):
 
 
 modules = [
-    {"StatusId": "3083", "UpdateAdatlap": update_felmeres_adatlap},
-    {"StatusId": "3128", "UpdateAdatlap": update_garancia_adatlap},
+    {"StatusId": 3083, "UpdateAdatlap": update_felmeres_adatlap},
+    {"StatusId": 3128, "UpdateAdatlap": update_garancia_adatlap},
 ]
 
-for i in modules:
-    main(**i)
+try:
+    for i in modules:
+        main(**i)
+except Exception as e:
+    log(
+        "Kifizetett számlák csekkolása sikertelen",
+        script_name="pen_paid_invoice",
+        status="ERROR",
+        details=traceback.format_exc(),
+    )
