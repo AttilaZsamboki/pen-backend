@@ -395,27 +395,6 @@ def update_data_garancia(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
     }
 
 
-def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam):
-    return {
-        "DijbekeroPdf2"
-        if proform
-        else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
-        "StatusId": "Utalásra vár" if proform else adatlap.StatusId,
-        "DijbekeroSzama2" if proform else "SzamlaSorszama2": szamlaszam,
-        f"KiallitasDatuma{'' if proform else '2'}": datetime.datetime.now().strftime(
-            "%Y-%m-%d"
-        ),
-        "FizetesiHatarido": (
-            datetime.datetime.now() + datetime.timedelta(days=3)
-        ).strftime("%Y-%m-%d")
-        if proform
-        else adatlap.FizetesiHatarido,
-        (
-            "DijbekeroUzenetek" if proform else "SzamlaUzenetek"
-        ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
-    }
-
-
 # Felmérés
 def proform_criteria(adatlap: MiniCrmAdatlapok):
     if adatlap.StatusId == 3079:
@@ -439,6 +418,25 @@ def proform_deadline(adatlap: MiniCrmAdatlapok):
             "%Y-%m-%d"
         )
     return date.strftime("%Y-%m-%d")
+
+
+def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam):
+    return {
+        "DijbekeroPdf2"
+        if proform
+        else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+        "StatusId": "Utalásra vár" if proform else adatlap.StatusId,
+        "DijbekeroSzama2" if proform else "SzamlaSorszama2": szamlaszam,
+        f"KiallitasDatuma{'' if proform else '2'}": datetime.datetime.now().strftime(
+            "%Y-%m-%d"
+        ),
+        "FizetesiHatarido": proform_deadline(adatlap)
+        if proform
+        else adatlap.FizetesiHatarido,
+        (
+            "DijbekeroUzenetek" if proform else "SzamlaUzenetek"
+        ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
+    }
 
 
 data = {
