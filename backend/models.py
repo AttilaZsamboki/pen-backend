@@ -1870,3 +1870,15 @@ class Felmeresek(models.Model):
     class Meta:
         managed = False
         db_table = "pen_felmeresek"
+
+
+class Chromosomes(models.Model):
+    external_id = models.TextField(blank=True, null=True)
+    dates = models.TextField(blank=True, null=True)
+    date = models.TextField(blank=True, null=True)
+    zip = models.TextField(blank=True, null=True)
+    felmero = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_chromosomes"

@@ -1,5 +1,5 @@
 import os
-import json
+import pandas as pd
 import time
 from datetime import date as dt_date
 from datetime import datetime, timedelta
@@ -19,6 +19,7 @@ from ..models import (
     Slots,
     UnschedulableTimes,
     UserSkills,
+    Chromosomes as ChromosomeModel,
 )
 from ..utils.google_routes import Client
 from ..utils.utils import round_to_30
@@ -33,8 +34,8 @@ from datetime import timedelta
 class Generation:
     class Individual:
         class Chromosome:
-            def __init__(self, dates, id=0, zip=None, date=None, felmero=None):
-                self.id = id
+            def __init__(self, dates, external_id=0, zip=None, date=None, felmero=None):
+                self.external_id = external_id
                 self.dates: List[datetime] = dates
                 self.date: datetime = date
                 self.zip: str = zip
@@ -102,10 +103,10 @@ class Generation:
             route = [
                 (
                     i.date,
-                    i.id,
+                    i.external_id,
                     i.zip,
                 )
-                if i.id != 0 or print_starting_city
+                if i.external_id != 0 or print_starting_city
                 else " - "
                 for i in self.data
             ]
@@ -326,7 +327,7 @@ class Generation:
             self.Individual.Chromosome(
                 felmero=felmero,
                 zip=felmero.zip,
-                id="XXX",
+                external_id="XXX",
                 date=datetime.combine(date, datetime.min.time()),
                 dates=[],
             )
@@ -393,19 +394,21 @@ class Generation:
                             + timedelta(
                                 minutes=(
                                     self.time_for_one_appointment
-                                    if job.id != "XXX"
+                                    if job.external_id != "XXX"
                                     else 0
                                 )
                                 + plus_time
                             )
-                            + timedelta(seconds=x if job.id != "XXX" else 0)
+                            + timedelta(seconds=x if job.external_id != "XXX" else 0)
                         )
 
                         if time_between_jobs >= timedelta(
                             minutes=self.time_for_one_appointment
-                            * (2 if job.id != "XXX" else 1)
+                            * (2 if job.external_id != "XXX" else 1)
                             + plus_time
-                        ) + timedelta(seconds=(x if job.id != "XXX" else 0) + y):
+                        ) + timedelta(
+                            seconds=(x if job.external_id != "XXX" else 0) + y
+                        ):
                             if time_of_appointment >= datetime.combine(
                                 date,
                                 datetime.strptime(
@@ -423,7 +426,7 @@ class Generation:
     def get_possible_dates(self, chromosome: Individual.Chromosome):
         start_time = time.time()
         print("Deleting old slots...")
-        Slots.objects.filter(external_id=chromosome.id).delete()
+        Slots.objects.filter(external_id=chromosome.external_id).delete()
         print("Getting possible dates...", time.time() - start_time)
         possible_dates = []
         slots_to_save = []
@@ -444,7 +447,11 @@ class Generation:
                         for i in gap_appointments:
                             possible_dates.append({"felmero": felmero, "date": i})
                             slots_to_save.append(
-                                Slots(external_id=chromosome.id, at=i, user=felmero)
+                                Slots(
+                                    external_id=chromosome.external_id,
+                                    at=i,
+                                    user=felmero,
+                                )
                             )
                     a = self.check_working_hours(
                         date, felmero=felmero, chromosome=chromosome
@@ -453,13 +460,18 @@ class Generation:
                         for i in a:
                             possible_dates.append({"felmero": felmero, "date": i})
                             slots_to_save.append(
-                                Slots(external_id=chromosome.id, at=i, user=felmero)
+                                Slots(
+                                    external_id=chromosome.external_id,
+                                    at=i,
+                                    user=felmero,
+                                )
                             )
         Slots.objects.bulk_create(slots_to_save)
         return possible_dates
 
     def create_distance_matrix(self, test=False):
         print("Creating distance matrix...")
+        routes_to_save = []
         for day in self.dates:
             print(day)
             adatlapok = [
@@ -534,7 +546,8 @@ class Generation:
                                 # )
                                 pass
                             self.all_routes.append(save)
-        Routes.objects.bulk_create(self.all_routes)
+                            routes_to_save.append(save)
+        Routes.objects.bulk_create(routes_to_save)
 
     def generate_route(self):
         routes = self.Individual(self)
@@ -653,7 +666,11 @@ class Generation:
 
         for i in range(start, end):
             if len(parent1.data[i].dates):
-                child_gene = [j for j in child.data if j.id == parent1.data[i].id]
+                child_gene = [
+                    j
+                    for j in child.data
+                    if j.external_id == parent1.data[i].external_id
+                ]
                 child_gene[0].date, child_gene[0].felmero = (
                     parent1.data[i].date,
                     parent1.data[i].felmero,
@@ -678,7 +695,7 @@ class Generation:
         start_time = time.time()
 
         # if not test:
-        self.create_distance_matrix(test)
+        # self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -699,39 +716,32 @@ class Generation:
         population: List[Generation.Individual] = [
             self.population[i] for i in sorted_fitnesses
         ]
+        print(population)
 
-        population_dicts = [
-            [str(i.__dict__) for i in individual.data] for individual in population
-        ]
-
-        json_file_path = "population_data.json"
-
-        # Write the list of dictionaries to a JSON file
-        with open(json_file_path, "w") as json_file:
-            json.dump(population_dicts, json_file, indent=4)
-
-        print(f"Population data saved to {json_file_path}")
+        [ChromosomeModel(**j.__dict__).save() for i in population for j in i.data]
         BestSlots.objects.all().delete()
         for i in self.data:
             if i.dates == ["*"]:
                 slots: List[Slots] = []
                 for individual in population:
                     for chromosome in individual.data:
-                        if chromosome.id == i.id:
+                        if chromosome.external_id == i.external_id:
                             if chromosome.date != "*" and chromosome.date not in slots:
                                 slots.append(chromosome.date)
                                 open_slot_obj, created = Slots.objects.get_or_create(
-                                    external_id=i.id,
+                                    external_id=i.external_id,
                                     at=chromosome.date,
                                     user=chromosome.felmero,
                                 )
                                 BestSlots(slot=open_slot_obj, level=len(slots)).save()
                             else:
                                 if Slots.objects.filter(
-                                    external_id=i.id, at=chromosome.date
+                                    external_id=i.external_id, at=chromosome.date
                                 ).exists():
                                     continue
-                                print("No slots found for", i.id, i.zip, i.date)
+                                print(
+                                    "No slots found for", i.external_id, i.zip, i.date
+                                )
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
@@ -812,7 +822,7 @@ class MiniCRMConnector:
             Generation.Individual.Chromosome(
                 dates=[i[self.date_field]],
                 date=i[self.date_field],
-                id=i[self.id_field],
+                external_id=i[self.id_field],
                 zip=i[self.zip_field],
                 felmero=Salesmen.objects.get(name=i[self.felmero_field]),
             )
@@ -833,7 +843,7 @@ class MiniCRMConnector:
         new_applicants = [
             Generation.Individual.Chromosome(
                 dates=["*"],
-                id=i[self.id_field],
+                external_id=i[self.id_field],
                 zip=i[self.zip_field],
             )
             for i in MiniCrmAdatlapok.objects.filter(
@@ -857,7 +867,7 @@ class MiniCRMConnector:
                     date=MiniCrmAdatlapok.objects.filter(Id=i.external_id).values()[0][
                         self.date_field
                     ],
-                    id=i.external_id,
+                    external_id=i.external_id,
                     felmero=i.user,
                 )
                 for i in self.appointments.distinct("external_id")

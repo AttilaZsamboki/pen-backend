@@ -23,7 +23,7 @@ def main(StatusId="", UpdateAdatlap=None):
         query_xml = f"""
                     <?xml version="1.0" encoding="UTF-8"?>
                     <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
-                        <szamlaagentkulcs>thxbyhf59635mwck877xndynbgc8y8g4pwp3jntau9</szamlaagentkulcs>
+                        <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
                         <rendelesSzam>{adatlap.Id}</rendelesSzam>
                     </xmlszamlaxml>
                 """.strip()
@@ -79,6 +79,8 @@ def update_felmeres_adatlap(adatlap: MiniCrmAdatlapok):
         "StatusId": "3023",
         "BefizetesMegerkezett": "Igen",
         "DijbekeroUzenetek": adatlap.DijbekeroUzenetek
+        if adatlap.DijbekeroUzenetek
+        else ""
         + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}",
     }
 
