@@ -324,7 +324,7 @@ def create_invoice_or_proform(
                 log(
                     f"Már létezik {name}",
                     "INFO",
-                    {script_name},
+                    script_name,
                     response.text[:800],
                 )
                 continue

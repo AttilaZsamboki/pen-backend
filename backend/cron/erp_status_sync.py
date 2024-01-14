@@ -1,12 +1,16 @@
 from ..utils.minicrm import update_order_status
 from ..utils.logs import log
 from ..models import Orders, Order, MiniCrmAdatlapok
+from django.db.models import Q
 
 
 def main():
     log("MiniCRM ERP státusz szinkron megkezdődött", "INFO", "pen_erp_status_sync")
     adatlapok = MiniCrmAdatlapok.objects.filter(
-        CategoryId=29, Enum1951=4374, Deleted=0
+        ~Q(StatusId=3009),
+        CategoryId=29,
+        Enum1951=4374,
+        Deleted=0,
     ).values()
     if not adatlapok:
         log("Nincs új adatlap a MiniCRM-ben", "INFO", "pen_erp_status_sync")

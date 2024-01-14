@@ -471,7 +471,6 @@ class Generation:
 
     def create_distance_matrix(self, test=False):
         print("Creating distance matrix...")
-        routes_to_save = []
         for day in self.dates:
             print(day)
             adatlapok = [
@@ -546,8 +545,7 @@ class Generation:
                                 # )
                                 pass
                             self.all_routes.append(save)
-                            routes_to_save.append(save)
-        Routes.objects.bulk_create(routes_to_save)
+                            save.save()
 
     def generate_route(self):
         routes = self.Individual(self)
@@ -695,7 +693,7 @@ class Generation:
         start_time = time.time()
 
         # if not test:
-        # self.create_distance_matrix(test)
+        self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -722,26 +720,28 @@ class Generation:
         BestSlots.objects.all().delete()
         for i in self.data:
             if i.dates == ["*"]:
-                slots: List[Slots] = []
+                slots = []
                 for individual in population:
                     for chromosome in individual.data:
-                        if chromosome.external_id == i.external_id:
-                            if chromosome.date != "*" and chromosome.date not in slots:
-                                slots.append(chromosome.date)
+                        if (
+                            chromosome.external_id == i.external_id
+                            and str(i.external_id)
+                            + str(chromosome.date)
+                            + str(chromosome.felmero)
+                            not in slots
+                        ):
+                            if chromosome.date != "*":
                                 open_slot_obj, created = Slots.objects.get_or_create(
                                     external_id=i.external_id,
                                     at=chromosome.date,
                                     user=chromosome.felmero,
                                 )
-                                BestSlots(slot=open_slot_obj, level=len(slots)).save()
-                            else:
-                                if Slots.objects.filter(
-                                    external_id=i.external_id, at=chromosome.date
-                                ).exists():
-                                    continue
-                                print(
-                                    "No slots found for", i.external_id, i.zip, i.date
+                                slots.append(
+                                    str(i.external_id)
+                                    + str(chromosome.date)
+                                    + str(chromosome.felmero)
                                 )
+                                BestSlots(slot=open_slot_obj, level=len(slots)).save()
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
@@ -888,9 +888,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1
-initial_population_size = 1
-max_generations = 1
+population_size = 2
+initial_population_size = 2
+max_generations = 2
 tournament_size = 4
 elitism_size = 10
 
