@@ -84,7 +84,19 @@ class CalculateDistance(APIView):
             data,
             ["Felmero2", "FizetesiMod2", "SzamlazasIngatlanCimre2"],
         )["Data"]
-        save_webhook(data)
+
+        def process_data(adatlap):
+            adatlap = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
+            if adatlap.exists:
+                adatlap = adatlap.first()
+                if adatlap.StatusId != adatlap["StatusId"]:
+                    adatlap["StatusUpdatedAt"] = datetime.datetime.now()
+                else:
+                    adatlap["StatusUpdatedAt"] = adatlap.StatusId
+            else:
+                adatlap["StatusUpdatedAt"] = datetime.datetime.now()
+            return adatlap
+        save_webhook(data, process_data=process_data)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
 
