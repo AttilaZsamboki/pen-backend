@@ -87,7 +87,7 @@ class CalculateDistance(APIView):
 
         def process_data(adatlap):
             adatlap_db = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
-            if adatlap_db.exists:
+            if adatlap_db.exists():
                 adatlap_db = adatlap_db.first()
                 if adatlap_db.StatusId != adatlap["StatusId"]:
                     adatlap["StatusUpdatedAt"] = datetime.datetime.now()
