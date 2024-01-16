@@ -96,7 +96,8 @@ class CalculateDistance(APIView):
             else:
                 adatlap["StatusUpdatedAt"] = datetime.datetime.now()
             return adatlap
-        save_webhook(data, process_data=process_data)
+        # save_webhook(data, process_data=process_data)
+        save_webhook(data)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
 
