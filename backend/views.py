@@ -96,6 +96,7 @@ class CalculateDistance(APIView):
             else:
                 adatlap["StatusUpdatedAt"] = datetime.datetime.now()
             return adatlap
+
         save_webhook(data, process_data=process_data)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
@@ -1156,6 +1157,12 @@ def upload_file(request):
                 status=200,
             )
         except Exception as e:
+            log(
+                "Hiba akadt a képfeltöltés közben",
+                "ERROR",
+                "pen_upload_file",
+                traceback.format_exc(),
+            )
             return JsonResponse({"success": False}, status=500)
     return JsonResponse({"success": False}, status=400)
 

@@ -718,33 +718,53 @@ class Generation:
 
         [ChromosomeModel(**j.__dict__).save() for i in population for j in i.data]
         BestSlots.objects.all().delete()
-        for i in self.data:
-            if i.dates == ["*"]:
-                slots = []
-                for individual in population:
-                    for chromosome in individual.data:
-                        if (
-                            chromosome.external_id == i.external_id
-                            and str(i.external_id)
-                            + str(chromosome.date)
-                            + str(chromosome.felmero)
-                            not in slots
-                        ):
-                            if chromosome.date != "*":
-                                open_slot_obj, created = Slots.objects.get_or_create(
-                                    external_id=i.external_id,
-                                    at=chromosome.date,
-                                    user=chromosome.felmero,
-                                )
-                                slots.append(
-                                    str(i.external_id)
-                                    + str(chromosome.date)
-                                    + str(chromosome.felmero)
-                                )
-                                BestSlots(slot=open_slot_obj, level=len(slots)).save()
+
+        self.process_individuals(self.data, population)
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
+
+    def create_or_get_slot(self, chromosome: Individual.Chromosome, external_id):
+        slot, _ = Slots.objects.get_or_create(
+            external_id=external_id,
+            at=chromosome.date,
+            user=chromosome.felmero,
+        )
+        return slot
+
+    def save_best_slot(self, slot, level):
+        BestSlots(slot=slot, level=level).save()
+
+    def calculate_level(self, chromosome, population):
+        # Count the number of better options for the same external_id
+        level = 1  # Start at 1, as the level should be at least 1
+        for individual in population:
+            for chromo in individual.data:
+                if chromo.external_id == chromosome.external_id and chromo.date != "*":
+                    # Assuming that the first encountered chromosome is the best option
+                    # and the rest are progressively worse.
+                    if chromo == chromosome:
+                        return level
+                    else:
+                        level += 1
+        return level
+
+    def process_individuals(
+        self, data: List[Individual.Chromosome], population: List[Individual]
+    ):
+        for item in data:
+            if item.dates == ["*"]:
+                for individual in population:
+                    for chromosome in individual.data:
+                        if chromosome.external_id == item.external_id:
+                            if chromosome.date != "*":
+                                slot = self.create_or_get_slot(
+                                    chromosome, item.external_id
+                                )
+                                level = self.calculate_level(
+                                    chromosome, population
+                                )  # You need to implement this method
+                                self.save_best_slot(slot, level)
 
     def run_one_generation(self):
         fitnesses = np.array(
