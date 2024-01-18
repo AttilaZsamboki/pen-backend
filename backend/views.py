@@ -92,7 +92,7 @@ class CalculateDistance(APIView):
                 if adatlap_db.StatusId != adatlap["StatusId"]:
                     adatlap["StatusUpdatedAt"] = datetime.datetime.now()
                 else:
-                    adatlap["StatusUpdatedAt"] = adatlap_db.StatusId
+                    adatlap["StatusUpdatedAt"] = adatlap_db.StatusUpdatedAt
             else:
                 adatlap["StatusUpdatedAt"] = datetime.datetime.now()
             return adatlap

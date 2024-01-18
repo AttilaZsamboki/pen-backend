@@ -710,7 +710,7 @@ class MiniCrmAdatlapok(models.Model):
     StatusId = models.IntegerField(blank=True, null=True)
     UserId = models.BigIntegerField(blank=True, null=True)
     Name = models.TextField(blank=True, null=True)
-    StatusUpdatedAt = models.TextField(blank=True, null=True)
+    StatusUpdatedAt = models.DateTimeField(blank=True, null=True)
     IsPrivate = models.TextField(blank=True, null=True)
     Invited = models.TextField(blank=True, null=True)
     Deleted = models.TextField(blank=True, null=True)
