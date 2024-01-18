@@ -2,7 +2,7 @@ from ..utils.logs import log
 from ..utils.utils import get_spreadsheet
 from ..utils.minicrm import update_todo, list_to_dos
 from ..utils.minicrm_str_to_text import todo_map
-from ..models import MiniCrmAdatlapok
+from ..models import MiniCrmAdatlapok, MiniCrmTodos
 
 
 def close_todo(adatlap_id, type):
@@ -32,6 +32,7 @@ def main():
                 continue
 
             def next():
+                log("Teendő lezárása", "INFO", script_name="close_todo")
                 close_todo(data["Id"], data["Type"])
 
             if adatlap.StatusId is None:
@@ -89,6 +90,18 @@ def main():
             ):
                 next()
             elif data["Type"] == "Rendszerhiba E5" and adatlap.StatusId != 3079:
+                next()
+            elif (
+                data["Type"] == "Rendszerhiba E4"
+                and MiniCrmTodos.objects.filter(todo_id=data["Id"]).exists()
+            ):
+                next()
+            elif (
+                data["Type"] == "Rendszerhiba E6"
+                and MiniCrmAdatlapok.objects.filter(
+                    KapcsolodoFelmeres=adatlap.FelmeresAdatok
+                ).exists()
+            ):
                 next()
 
 

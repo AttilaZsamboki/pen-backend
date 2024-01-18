@@ -1434,5 +1434,5 @@ def minicrm_proxy(request):
                 response.text,
             )
             return Response({"error": "Error " + response.text}, status=400)
-
+    log("Minicrm proxy sikertelen", "ERROR", "pen_minicrm_proxy", "Missing endpoint")
     return Response({"error": "Missing endpoint"}, status=400)
