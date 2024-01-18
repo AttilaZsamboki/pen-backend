@@ -752,19 +752,24 @@ class Generation:
     def process_individuals(
         self, data: List[Individual.Chromosome], population: List[Individual]
     ):
-        for item in data:
-            if item.dates == ["*"]:
-                for individual in population:
-                    for chromosome in individual.data:
-                        if chromosome.external_id == item.external_id:
-                            if chromosome.date != "*":
-                                slot = self.create_or_get_slot(
-                                    chromosome, item.external_id
-                                )
-                                level = self.calculate_level(
-                                    chromosome, population
-                                )  # You need to implement this method
-                                self.save_best_slot(slot, level)
+        # for item in data:
+        #     if item.dates == ["*"]:
+        #         for individual in population:
+        #             for chromosome in individual.data:
+        #                 if chromosome.external_id == item.external_id:
+        #                     if chromosome.date != "*":
+        #                         slot = self.create_or_get_slot(
+        #                             chromosome, item.external_id
+        #                         )
+        #                         level = self.calculate_level(
+        #                             chromosome, population
+        #                         )  # You need to implement this method
+        #                         self.save_best_slot(slot, level)
+        for i, individual in enumerate(population):
+            for chromosome in individual.data:
+                if chromosome.date != "*":
+                    slot = self.create_or_get_slot(chromosome, chromosome.external_id)
+                    self.save_best_slot(slot, i + 1)
 
     def run_one_generation(self):
         fitnesses = np.array(
@@ -908,9 +913,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 2
-initial_population_size = 2
-max_generations = 2
+population_size = 1
+initial_population_size = 1
+max_generations = 1
 tournament_size = 4
 elitism_size = 10
 

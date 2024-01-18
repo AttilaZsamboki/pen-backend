@@ -1341,7 +1341,7 @@ class GaranciaWebhook(APIView):
         adatlap = json.loads(request.body)
         log("Garancia webhook meghívva", "INFO", "pen_garancia_webhook", data=adatlap)
         adatlap = map_wh_fields(
-            adatlap, {"BejelentesTipusa", "GaranciaFelmerestVegzi"}
+            adatlap, {"BejelentesTipusa", "GaranciaFelmerestVegzi", "FizetesiMod4"}
         )["Data"]
         save_webhook(adatlap, name="garancia")
 

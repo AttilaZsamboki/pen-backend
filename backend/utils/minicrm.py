@@ -3,7 +3,6 @@ import requests
 import random
 
 from dotenv import load_dotenv
-from ..utils.logs import log_minicrm_request
 
 load_dotenv()
 
@@ -16,6 +15,8 @@ def get_request(
     script_name=None,
     request_description=None,
 ):
+    from ..utils.logs import log_minicrm_request
+
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
@@ -37,6 +38,8 @@ def get_request(
 def update_request(
     id, fields={}, endpoint="Project", isR3=True, method="PUT", script_name=None
 ):
+    from ..utils.logs import log_minicrm_request
+
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
 
@@ -180,6 +183,8 @@ def get_address(contact_id, typeof="Számlázási cím"):
 
 
 def create_to_do(adatlap_id, user, type, comment, deadline, script_name=None):
+    from ..utils.logs import log_minicrm_request
+
     system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
     api_key = os.environ.get("PEN_MINICRM_API_KEY")
     data = {

@@ -484,6 +484,32 @@ def calc_net_price(adatlap: MiniCrmAdatlapok):
     return None
 
 
+def garancia_proform_criteria(adatlap: MiniCrmAdatlapok):
+    if adatlap.StatusId == 3126:
+        if (
+            adatlap.BejelentesTipusa == "Rendszerbővítés"
+            or adatlap.FizetesiMod4 == "Készpénz"
+        ):
+            resp = adatlap.change_status(3129)
+            if resp["code"] == 200:
+                log(
+                    "Sikeresen átállítottam a státuszt a(z) {} adatlapnál.".format(
+                        adatlap.Id
+                    ),
+                    "SUCCESS",
+                    adatlap.Id,
+                )
+            else:
+                log(
+                    "Hiba történt a(z) {} adatlapnál.".format(adatlap.Id),
+                    "ERROR",
+                    adatlap.Id,
+                )
+            return False
+        return True
+    return False
+
+
 data = {
     "city_field": "Telepules2",
     "update_data": update_data_garancia,
@@ -503,7 +529,7 @@ create_invoice_or_proform(
     **data,
 )
 create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3127,
+    criteria=garancia_proform_criteria,
     proform=True,
     cash=False,
     messages_field="DijbekeroUzenetek2",

@@ -1,5 +1,6 @@
 from django.db import models
 from .utils.minicrm_str_to_text import status_map
+from .utils.minicrm import update_adatlap_fields
 from .utils.gmail import gmail_authenticate, send_email
 
 
@@ -1670,12 +1671,17 @@ class MiniCrmAdatlapok(models.Model):
     GaranciaFelmerestVegzi = models.CharField(max_length=50, blank=True, null=True)
     FelmeresDatuma3 = models.DateTimeField(blank=True, null=True)
     SzamlazasIngatlanCimre2 = models.CharField(max_length=100, blank=True, null=True)
+    FizetesiMod4 = models.CharField(max_length=50, blank=True, null=True)
 
     @property
     def StatusIdStr(self):
         if self.StatusId and self.StatusId in status_map.keys():
             return status_map[self.StatusId]
         return ""
+    
+    def change_status(self, status_id):
+        resp = update_adatlap_fields(self.Id, {"StatusId": status_id}, script_name="pen_change_status")
+        return resp
 
     class Meta:
         managed = False
