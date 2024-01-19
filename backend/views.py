@@ -67,6 +67,16 @@ def map_wh_fields(data: Dict, field_names: List[str]):
 def save_webhook(adatlap, process_data=None, name="felmeres"):
     if process_data:
         adatlap = process_data(adatlap)
+    adatlap_db = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
+    if adatlap_db.exists():
+        adatlap_db = adatlap_db.first()
+        if adatlap_db.StatusId != adatlap["StatusId"]:
+            adatlap["StatusUpdatedAt"] = datetime.datetime.now()
+        else:
+            adatlap["StatusUpdatedAt"] = adatlap_db.StatusUpdatedAt
+    else:
+        adatlap["StatusUpdatedAt"] = datetime.datetime.now()
+
     valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
     filtered_data = {k: v for k, v in adatlap.items() if k in valid_fields}
 
@@ -85,19 +95,7 @@ class CalculateDistance(APIView):
             ["Felmero2", "FizetesiMod2", "SzamlazasIngatlanCimre2"],
         )["Data"]
 
-        def process_data(adatlap):
-            adatlap_db = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
-            if adatlap_db.exists():
-                adatlap_db = adatlap_db.first()
-                if adatlap_db.StatusId != adatlap["StatusId"]:
-                    adatlap["StatusUpdatedAt"] = datetime.datetime.now()
-                else:
-                    adatlap["StatusUpdatedAt"] = adatlap_db.StatusUpdatedAt
-            else:
-                adatlap["StatusUpdatedAt"] = datetime.datetime.now()
-            return adatlap
-
-        save_webhook(data, process_data=process_data)
+        save_webhook(data)
 
         if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
 
@@ -177,13 +175,13 @@ class OrderWebhook(APIView):
                     "KiepitesFelteteleIgazolva",
                 ],
             )
-            valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-            filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
 
-            filtered_data["Beepitok"] = ", ".join(get_names(data["Data"]["Beepitok"]))
-            models.MiniCrmAdatlapok(
-                **filtered_data,
-            ).save()
+            def process_data(data):
+                data["Beepitok"] = ", ".join(get_names(data["Beepitok"]))
+                return data
+
+            save_webhook(data["Data"], process_data=process_data)
+
             models.Orders(
                 adatlap_id=data["Id"],
                 order_id=data["Head"]["Id"],
@@ -486,12 +484,7 @@ class OfferWebhook(APIView):
             if data["Data"]["Felmeresid"] is None:
                 return Response("Succesfully received data", status=HTTP_200_OK)
 
-            valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
-            filtered_data = {k: v for k, v in data["Data"].items() if k in valid_fields}
-
-            models.MiniCrmAdatlapok(
-                **filtered_data,
-            ).save()
+            save_webhook(data["Data"])
             models.Offers(
                 adatlap=models.MiniCrmAdatlapok.objects.get(Id=data["Id"]),
                 id=data["Head"]["Id"],
