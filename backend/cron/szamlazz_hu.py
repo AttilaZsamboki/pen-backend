@@ -64,8 +64,8 @@ def create_invoice_or_proform(
                     script_name,
                 )
                 return False
-            elif cash and adatlap.__dict__[proform_number_field] != "":
-                log("Már létezik díjbekérő", "FAILED", script_name=script_name)
+            elif (cash or proform) and adatlap.__dict__[proform_number_field] != "":
+                log("Már létezik " + name, "FAILED", script_name=script_name)
                 return False
             elif (
                 not cash

@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 import time
 from datetime import date as dt_date
 from datetime import datetime, timedelta
@@ -693,7 +692,7 @@ class Generation:
         start_time = time.time()
 
         # if not test:
-        self.create_distance_matrix(test)
+        # self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
@@ -701,39 +700,41 @@ class Generation:
         self.population = [
             self.generate_route() for _ in range(self.initial_population_size)
         ]
-        print(self.population)
+        print("Initial population length: " + str(len(self.population)))
 
         for _ in range(self.max_generations):
             self.run_one_generation()
+        print("Population length: " + str(len(self.population)))
 
         print("Calculating fitnesses...")
         fitnesses = np.array([route.calculate_fitness() for route in self.population])
-        print(fitnesses)
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
         population: List[Generation.Individual] = [
             self.population[i] for i in sorted_fitnesses
         ]
-        print(population)
+        print("Sorted population len:" + str(len(population)))
 
-        [ChromosomeModel(**j.__dict__).save() for i in population for j in i.data]
+        ChromosomeModel.objects.all().delete()
+        [
+            ChromosomeModel(**chromosome.__dict__).save()
+            for individual in population
+            for chromosome in individual.data
+        ]
         BestSlots.objects.all().delete()
 
-        self.process_individuals(self.data, population)
+        self.process_individuals(population)
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
 
-    def create_or_get_slot(self, chromosome: Individual.Chromosome, external_id):
+    def create_or_get_slot(self, chromosome: Individual.Chromosome):
         slot, _ = Slots.objects.get_or_create(
-            external_id=external_id,
+            external_id=chromosome.external_id,
             at=chromosome.date,
             user=chromosome.felmero,
         )
         return slot
-
-    def save_best_slot(self, slot, level):
-        BestSlots(slot=slot, level=level).save()
 
     def calculate_level(self, chromosome, population):
         # Count the number of better options for the same external_id
@@ -749,9 +750,7 @@ class Generation:
                         level += 1
         return level
 
-    def process_individuals(
-        self, data: List[Individual.Chromosome], population: List[Individual]
-    ):
+    def process_individuals(self, population: List[Individual]):
         # for item in data:
         #     if item.dates == ["*"]:
         #         for individual in population:
@@ -765,11 +764,18 @@ class Generation:
         #                             chromosome, population
         #                         )  # You need to implement this method
         #                         self.save_best_slot(slot, level)
+        print("Process individuals..." + str(len(population)))
         for i, individual in enumerate(population):
+            print("Saving individual..." + str(i))
             for chromosome in individual.data:
+                print("Saving chromsome..." + str(chromosome.external_id))
                 if chromosome.date != "*":
-                    slot = self.create_or_get_slot(chromosome, chromosome.external_id)
-                    self.save_best_slot(slot, i + 1)
+                    Slots(
+                        external_id=chromosome.external_id,
+                        at=chromosome.date,
+                        user=chromosome.felmero,
+                        level=i + 1,
+                    ).save()
 
     def run_one_generation(self):
         fitnesses = np.array(
@@ -807,6 +813,8 @@ class Generation:
         self.population = new_population + elites
 
     def tournament_selection(self):
+        if not self.population:
+            return None
         indices = np.random.choice(len(self.population), self.tournament_size)
         tournament_individuals: List[Generation.Individual] = [
             self.population[i] for i in indices
@@ -913,9 +921,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1
-initial_population_size = 1
-max_generations = 1
+population_size = 1000
+initial_population_size = 50
+max_generations = 10
 tournament_size = 4
 elitism_size = 10
 
