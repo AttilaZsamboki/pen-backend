@@ -707,7 +707,7 @@ def get_unas_order_data(type):
                     ids[0], script_name=script_name, description="Cím részlet"
                 )
             else:
-                {
+                cim = {
                     "PostalCode": "",
                     "City": "",
                     "Address": "",

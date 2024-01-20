@@ -279,6 +279,7 @@ class ProductAttributes(models.Model):
     product = models.ForeignKey("Products", models.DO_NOTHING)
     place = models.BooleanField(blank=True, null=True)
     place_options = models.TextField(blank=True, null=True)
+    archived = models.BooleanField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1678,9 +1679,11 @@ class MiniCrmAdatlapok(models.Model):
         if self.StatusId and self.StatusId in status_map.keys():
             return status_map[self.StatusId]
         return ""
-    
+
     def change_status(self, status_id):
-        resp = update_adatlap_fields(self.Id, {"StatusId": status_id}, script_name="pen_change_status")
+        resp = update_adatlap_fields(
+            self.Id, {"StatusId": status_id}, script_name="pen_change_status"
+        )
         return resp
 
     class Meta:
@@ -1885,6 +1888,7 @@ class Chromosomes(models.Model):
     date = models.TextField(blank=True, null=True)
     zip = models.TextField(blank=True, null=True)
     felmero = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
+    fitness = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False

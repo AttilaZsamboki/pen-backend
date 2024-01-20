@@ -921,9 +921,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 1000
-initial_population_size = 50
-max_generations = 10
+population_size = 3
+initial_population_size = 3
+max_generations = 3
 tournament_size = 4
 elitism_size = 10
 
