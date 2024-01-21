@@ -64,8 +64,17 @@ def create_invoice_or_proform(
                     script_name,
                 )
                 return False
-            elif (cash or proform) and adatlap.__dict__[proform_number_field] != "":
-                log("Már létezik " + name, "FAILED", script_name=script_name)
+            elif (
+                (cash or proform)
+                and adatlap.__dict__[proform_number_field] != ""
+                and adatlap.__dict__[proform_number_field] is not None
+            ):
+                log(
+                    "Már létezik " + name,
+                    "FAILED",
+                    script_name=script_name,
+                    details=adatlap.Id,
+                )
                 return False
             elif (
                 not cash
@@ -400,7 +409,7 @@ def proform_criteria(adatlap: MiniCrmAdatlapok):
     if adatlap.StatusId == 3079:
         return True
     elif adatlap.StatusId == 3082 and (
-        (datetime.datetime.now() - adatlap.StatusUpdatedAt) > datetime.timedelta(days=2)
+        (datetime.datetime.now() - adatlap.StatusUpdatedAt) > datetime.timedelta(days=1)
         or adatlap.SzamlazasIngatlanCimre2 == "IGEN"
     ):
         return True
