@@ -89,7 +89,11 @@ def main():
                 and adatlap.VisszafizetesDatuma != ""
             ):
                 next()
-            elif data["Type"] == "Rendszerhiba E5" and adatlap.StatusId != 3079:
+            elif (
+                data["Type"] == "Rendszerhiba E5"
+                and adatlap.StatusId != 3079
+                and adatlap.StatusId != 3082
+            ):
                 next()
             elif (
                 data["Type"] == "Rendszerhiba E4"

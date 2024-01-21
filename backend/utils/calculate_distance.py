@@ -39,6 +39,8 @@ def calculate_distance_fn(
         101: 30000,
         201: 35000,
     }
+    if not distance:
+        return "Error"
     fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
     try:
         resp = get_street_view(location=address)
