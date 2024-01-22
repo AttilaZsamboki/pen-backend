@@ -97,7 +97,6 @@ def create_invoice_or_proform(
     ]
     if proform:
         print(adatlapok)
-    return
     if adatlapok == []:
         log(f"Nincs új {name}", "INFO", script_name)
         return

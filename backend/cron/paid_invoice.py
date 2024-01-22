@@ -10,7 +10,7 @@ import traceback
 
 load_dotenv()
 
-SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
+SZAMLA_AGENT_KULCS = os.environ.get("TESZT_SZAMLA_AGENT_KULCS")
 
 
 def main(StatusId="", UpdateAdatlap=None):

@@ -1658,7 +1658,7 @@ class MiniCrmAdatlapok(models.Model):
     KiepitesFeltetele = models.TextField(blank=True, null=True)
     KiepitesFeltetelLeirasa = models.TextField(blank=True, null=True)
     KiepitesFelteteleIgazolva = models.TextField(blank=True, null=True)
-    DijbekeroSzama3 = models.IntegerField(blank=True, null=True)
+    DijbekeroSzama3 = models.TextField(blank=True, null=True)
     Iranyitoszam2 = models.TextField(blank=True, null=True)
     Telepules2 = models.TextField(blank=True, null=True)
     Cim3 = models.TextField(blank=True, null=True)
@@ -1673,6 +1673,7 @@ class MiniCrmAdatlapok(models.Model):
     FelmeresDatuma3 = models.DateTimeField(blank=True, null=True)
     SzamlazasIngatlanCimre2 = models.CharField(max_length=100, blank=True, null=True)
     FizetesiMod4 = models.CharField(max_length=50, blank=True, null=True)
+    FizetesiHatarido2 = models.DateTimeField(blank=True, null=True)
 
     @property
     def StatusIdStr(self):
