@@ -1,4 +1,4 @@
-from ..utils.minicrm import update_order_status
+from ..utils.minicrm import update_order_status, update_offer_order
 from ..utils.logs import log
 from ..models import Orders, Order, MiniCrmAdatlapok
 from django.db.models import Q
@@ -33,8 +33,11 @@ def main():
             )
             continue
         if order.order_status == "Completed":
+            resp2 = update_offer_order(
+                order.webshop_id, {"Enum1951": "Lezárva"}, type="Order"
+            )
             resp = update_order_status(order.webshop_id)
-            if not resp.ok:
+            if not resp.ok or not resp2["code"] != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
                     "ERROR",
@@ -43,8 +46,11 @@ def main():
                 )
                 continue
         if order.payment_status == "Completed":
+            resp2 = update_offer_order(
+                order.webshop_id, {"Enum1951": "Lezárva"}, type="Order"
+            )
             resp = update_order_status(order.webshop_id, "Paid")
-            if not resp.ok:
+            if not resp.ok or not resp2["code"] != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
                     "ERROR",
