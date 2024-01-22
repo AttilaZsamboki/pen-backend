@@ -95,8 +95,6 @@ def create_invoice_or_proform(
     adatlapok = [
         i for i in MiniCrmAdatlapok.objects.filter(Deleted="0") if def_criteria(i)
     ]
-    if proform:
-        print(adatlapok)
     if adatlapok == []:
         log(f"Nincs új {name}", "INFO", script_name)
         return
@@ -217,7 +215,7 @@ def create_invoice_or_proform(
             net_price = calc_net_price(adatlap)
             if not net_price:
                 log("Nincs nettó ár", "FAILED", script_name)
-                return
+                continue
             xml = f"""<?xml version="1.0" encoding="UTF-8"?>
             <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
                 <beallitasok>
