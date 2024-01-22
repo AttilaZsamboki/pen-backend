@@ -399,7 +399,7 @@ def update_data_garancia(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
             datetime.datetime.now() + datetime.timedelta(days=3)
         ).strftime("%Y-%m-%d")
         if proform
-        else adatlap.FizetesiHatarido2,
+        else adatlap.FizetesiHatarido2.strftime("%Y-%m-%d"),
         (
             "DijbekeroUzenetek2" if proform else "SzamlaUzenetek2"
         ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
