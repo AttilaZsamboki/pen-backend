@@ -280,7 +280,7 @@ statuses = {
 
 
 def update_todo(id, fields, script_name=None):
-    update_request(id=id, fields=fields, endpoint="ToDo", script_name=script_name)
+    return update_request(id=id, fields=fields, endpoint="ToDo", script_name=script_name)
 
 
 def create_order(adatlap, offer_id, adatlap_status=None, project_data=None):

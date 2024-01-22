@@ -21,7 +21,7 @@ def calculate_distance_fn(
     if gmaps_result == "Error":
         log(
             "Penészmentesítés MiniCRM webhook sikertelen",
-            "WARNING",
+            "FAILED",
             script_name,
             f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}",
         )
@@ -29,7 +29,7 @@ def calculate_distance_fn(
     if type(gmaps_result) == str:
         return "Error"
     duration = gmaps_result["duration"] / 60
-    distance = gmaps_result["distance"] // 1000
+    distance = gmaps_result["distance"] / 1000
     formatted_duration = (
         f"{math.floor(duration//60)} óra {math.floor(duration%60)} perc"
     )
@@ -40,6 +40,12 @@ def calculate_distance_fn(
         201: 35000,
     }
     if not distance:
+        log(
+            "Távolság 0",
+            "FAILED",
+            script_name,
+            f"Adatlap id: {data['Id']}. Cím: {address}",
+        )
         return "Error"
     fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
     try:

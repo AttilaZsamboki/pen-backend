@@ -95,6 +95,9 @@ def create_invoice_or_proform(
     adatlapok = [
         i for i in MiniCrmAdatlapok.objects.filter(Deleted="0") if def_criteria(i)
     ]
+    if proform:
+        print(adatlapok)
+    return
     if adatlapok == []:
         log(f"Nincs új {name}", "INFO", script_name)
         return

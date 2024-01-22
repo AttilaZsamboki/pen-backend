@@ -8,11 +8,28 @@ from ..models import MiniCrmAdatlapok, MiniCrmTodos
 def close_todo(adatlap_id, type):
     todos = list_to_dos(
         adatlap_id,
-        criteria=lambda x: x["Status"] == "Open" and todo_map[x["Type"]] == type,
+        criteria=lambda x: x["Status"] == "Open" and todo_map.get(x["Type"]) == type,
     )
     if todos:
         for todo in todos:
-            update_todo(todo["Id"], {"Status": "Closed"})
+            resp = update_todo(todo["Id"], {"Status": "Closed"})
+            if resp.status_code == "200":
+                log(
+                    "Státusz frissítve",
+                    "INFO",
+                    script_name="pen_close_todo",
+                    details=adatlap_id,
+                )
+            else:
+                log(
+                    "Státusz frissítése sikertelen",
+                    "ERROR",
+                    script_name="pen_close_todo",
+                    details=resp.text,
+                    data={"Id": adatlap_id},
+                )
+    else:
+        log("Nincs ilyen teendő", "ERROR", script_name="pen_close_todo", details=type)
 
 
 def main():
@@ -32,7 +49,12 @@ def main():
                 continue
 
             def next():
-                log("Teendő lezárása", "INFO", script_name="close_todo")
+                log(
+                    "Teendő lezárása",
+                    "INFO",
+                    script_name="pen_close_todo",
+                    details=data["Id"],
+                )
                 close_todo(data["Id"], data["Type"])
 
             if adatlap.StatusId is None:

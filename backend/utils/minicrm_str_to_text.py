@@ -38,6 +38,7 @@ todo_map = {
     245: "Rendszerhiba E5",
     244: "Rendszerhiba E4",
     249: "Rendszerhiba E6",
+    235: "Rendszerhiba E1",
 }
 
 garancia_type_map = {
