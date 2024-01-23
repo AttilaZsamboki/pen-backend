@@ -29,7 +29,7 @@ def calculate_distance_fn(
     if type(gmaps_result) == str:
         return "Error"
     duration = gmaps_result["duration"] / 60
-    distance = gmaps_result["distance"] / 1000
+    distance = math.ceil(gmaps_result["distance"] / 1000)
     formatted_duration = (
         f"{math.floor(duration//60)} óra {math.floor(duration%60)} perc"
     )
@@ -77,11 +77,10 @@ def calculate_distance_fn(
             script_name=script_name,
             details=f"Nem található megye a településhez: {data[city_field]}",
         )
-    data_to_update = (
-        update_data(
-            formatted_duration, distance, fee, street_view_url, county, address
-        ),
+    data_to_update = update_data(
+        formatted_duration, distance, fee, street_view_url, county, address
     )
+
     response = update_adatlap_fields(data["Id"], data_to_update)
     if response["code"] == 200:
         log(
