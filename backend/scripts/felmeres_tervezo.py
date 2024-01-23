@@ -118,7 +118,7 @@ class Generation:
                 i = np.random.randint(0, size)
                 dates = self.data[i].dates
                 if len(dates):
-                    print(len(dates))
+                    print("Dátumok mutáció: " + str(len(dates)))
                     if len(dates) == 1:
                         if dates[0] == "*":
                             possible_dates = self.outer_instace.get_possible_dates(
@@ -471,7 +471,7 @@ class Generation:
     def create_distance_matrix(self, test=False):
         print("Creating distance matrix...")
         for day in self.dates:
-            print(day)
+            print("Dátumok: " + day.strftime("%Y-%m-%d %H:%M:%S"))
             adatlapok = [
                 i
                 for i in self.data
@@ -553,9 +553,9 @@ class Generation:
                 outer_instance=self,
                 data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
-            print(day_cities)
             if not day_cities.data:
-                return
+                print("No data for day: " + str(day))
+                continue
             home = self.Individual.Chromosome(
                 date=datetime.combine(day, datetime.min.time()),
                 dates=[],
@@ -692,15 +692,23 @@ class Generation:
         start_time = time.time()
 
         # if not test:
-        # self.create_distance_matrix(test)
+        self.create_distance_matrix(test)
 
         print("Assigning new applicants dates...")
         self.assign_new_applicants_dates()
+        print(
+            "Felmérések dátummal: "
+            + str(len([i.date for i in self.data if i.date != "*" and i.date]))
+            + "/"
+            + str(len(self.data))
+        )
 
         self.population = [
             self.generate_route() for _ in range(self.initial_population_size)
         ]
-        print("Initial population length: " + str(len(self.population)))
+        print(
+            "Initial population length: " + str(len([i for i in self.population if i]))
+        )
 
         for _ in range(self.max_generations):
             self.run_one_generation()
@@ -715,7 +723,6 @@ class Generation:
         ]
         print("Sorted population len:" + str(len(population)))
 
-        ChromosomeModel.objects.all().delete()
         [
             ChromosomeModel(**chromosome.__dict__).save()
             for individual in population
@@ -723,7 +730,7 @@ class Generation:
         ]
         BestSlots.objects.all().delete()
 
-        self.process_individuals(population)
+        self.process_individuals(population, self.data)
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
@@ -750,32 +757,23 @@ class Generation:
                         level += 1
         return level
 
-    def process_individuals(self, population: List[Individual]):
-        # for item in data:
-        #     if item.dates == ["*"]:
-        #         for individual in population:
-        #             for chromosome in individual.data:
-        #                 if chromosome.external_id == item.external_id:
-        #                     if chromosome.date != "*":
-        #                         slot = self.create_or_get_slot(
-        #                             chromosome, item.external_id
-        #                         )
-        #                         level = self.calculate_level(
-        #                             chromosome, population
-        #                         )  # You need to implement this method
-        #                         self.save_best_slot(slot, level)
-        print("Process individuals..." + str(len(population)))
-        for i, individual in enumerate(population):
-            print("Saving individual..." + str(i))
-            for chromosome in individual.data:
-                print("Saving chromsome..." + str(chromosome.external_id))
-                if chromosome.date != "*":
-                    Slots(
-                        external_id=chromosome.external_id,
-                        at=chromosome.date,
-                        user=chromosome.felmero,
-                        level=i + 1,
-                    ).save()
+    def process_individuals(
+        self, population: List[Individual], data: List[Individual.Chromosome]
+    ):
+        for item in data:
+            if item.dates == ["*"]:
+                for individual in population:
+                    for chromosome in individual.data:
+                        if chromosome.external_id == item.external_id:
+                            if chromosome.date != "*":
+                                slot = self.create_or_get_slot(chromosome)
+                                level = self.calculate_level(
+                                    chromosome, population
+                                )  # You need to implement this method
+                                BestSlots(
+                                    slot=slot,
+                                    level=level,
+                                ).save()
 
     def run_one_generation(self):
         fitnesses = np.array(
@@ -785,6 +783,7 @@ class Generation:
                 if route is not None
             ]
         )
+        print(fitnesses)
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
         population: List[Generation.Individual] = [
@@ -795,8 +794,6 @@ class Generation:
 
         new_population: List[Generation.Individual] = []
         for _ in range(population_size):
-            print("Generating new population...")
-            print("Tournament selection...")
             parent1, parent2 = (
                 self.tournament_selection(),
                 self.tournament_selection(),
@@ -921,9 +918,9 @@ class MiniCRMConnector:
         return data
 
 
-population_size = 3
-initial_population_size = 3
-max_generations = 3
+population_size = 10
+initial_population_size = 10
+max_generations = 10
 tournament_size = 4
 elitism_size = 10
 
@@ -938,9 +935,11 @@ minicrm_conn = MiniCRMConnector(
     id_field="Id",
     zip_field="Iranyitoszam",
     fixed_appointment_condition=lambda x: x["FelmeresIdopontja2"] is not None
-    and x["StatusId"] not in [3086, 2929],
+    and x["StatusId"] not in [3086, 2929]
+    and x["Iranyitoszam"],
     new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
-    and x["StatusId"] not in [3086, 2929],
+    and x["StatusId"] not in [3086, 2929]
+    and x["Iranyitoszam"],
 )
 num_best_slots = 5
 plan_timespan = 90

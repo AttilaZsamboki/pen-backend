@@ -77,17 +77,18 @@ def calculate_distance_fn(
             script_name=script_name,
             details=f"Nem található megye a településhez: {data[city_field]}",
         )
-    response = update_adatlap_fields(
-        data["Id"],
+    data_to_update = (
         update_data(
             formatted_duration, distance, fee, street_view_url, county, address
         ),
     )
+    response = update_adatlap_fields(data["Id"], data_to_update)
     if response["code"] == 200:
         log(
             "Penészmentesítés MiniCRM webhook sikeresen lefutott",
             "SUCCESS",
             script_name,
+            data["Id"],
         )
     else:
         if response["reason"] == "Too Many Requests":
@@ -96,6 +97,7 @@ def calculate_distance_fn(
                 "WARNING",
                 script_name,
                 response["reason"],
+                data_to_update,
             )
         else:
             log(
@@ -103,5 +105,6 @@ def calculate_distance_fn(
                 "ERROR",
                 script_name,
                 response["reason"],
+                data_to_update,
             )
     return "Success"
