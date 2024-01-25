@@ -694,15 +694,6 @@ class Generation:
         # if not test:
         self.create_distance_matrix(test)
 
-        print("Assigning new applicants dates...")
-        self.assign_new_applicants_dates()
-        print(
-            "Felmérések dátummal: "
-            + str(len([i.date for i in self.data if i.date != "*" and i.date]))
-            + "/"
-            + str(len(self.data))
-        )
-
         self.population = []
         for _ in range(self.initial_population_size):
             self.assign_new_applicants_dates()  # Reassign dates to introduce variability
@@ -923,11 +914,11 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 5
-population_size = 10
-max_generations = 10
+initial_population_size = 1
+population_size = 15
+max_generations = 1
 tournament_size = 4
-elitism_size = 10
+elitism_size = 1000
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
