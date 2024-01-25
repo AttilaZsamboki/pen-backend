@@ -177,7 +177,7 @@ def create_invoice_or_proform(
                     )
                     continue
                 address = address[0]
-            if address is None:
+            if address is None or type(address) == str:
                 log("Nincsen cím", "FAILED", script_name)
                 continue
 
@@ -362,6 +362,7 @@ def create_invoice_or_proform(
                     break
 
             if ENVIRONMENT == "production":
+                time.sleep(30)
                 os.remove(pdf_path)
         except KeyError as e:
             log(

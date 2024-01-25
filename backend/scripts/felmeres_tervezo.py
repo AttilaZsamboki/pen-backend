@@ -703,9 +703,13 @@ class Generation:
             + str(len(self.data))
         )
 
-        self.population = [
-            self.generate_route() for _ in range(self.initial_population_size)
-        ]
+        self.population = []
+        for _ in range(self.initial_population_size):
+            self.assign_new_applicants_dates()  # Reassign dates to introduce variability
+            new_route = (
+                self.generate_route()
+            )  # Generate a new route with the updated data
+            self.population.append(new_route)
         print(
             "Initial population length: " + str(len([i for i in self.population if i]))
         )
@@ -718,19 +722,20 @@ class Generation:
         fitnesses = np.array([route.calculate_fitness() for route in self.population])
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
-        population: List[Generation.Individual] = [
+        sorted_population: List[Generation.Individual] = [
             self.population[i] for i in sorted_fitnesses
         ]
-        print("Sorted population len:" + str(len(population)))
+        print("Sorted population len:" + str(len(sorted_population)))
 
+        ChromosomeModel.objects.all().delete()
         [
             ChromosomeModel(**chromosome.__dict__).save()
-            for individual in population
+            for individual in self.population
             for chromosome in individual.data
         ]
         BestSlots.objects.all().delete()
 
-        self.process_individuals(population, self.data)
+        self.process_individuals(sorted_population)
 
         end_time = time.time()
         print(f"Execution time: {end_time - start_time} seconds")
@@ -743,33 +748,33 @@ class Generation:
         )
         return slot
 
-    def calculate_level(self, chromosome, population):
-        # Count the number of better options for the same external_id
-        level = 1  # Start at 1, as the level should be at least 1
-        for individual in population:
-            for chromo in individual.data:
-                if chromo.external_id == chromosome.external_id and chromo.date != "*":
-                    # Assuming that the first encountered chromosome is the best option
-                    # and the rest are progressively worse.
-                    if chromo == chromosome:
-                        return level
-                    else:
-                        level += 1
-        return level
-
-    def process_individuals(
-        self, population: List[Individual], data: List[Individual.Chromosome]
-    ):
-        for item in data:
+    def process_individuals(self, population: List[Individual]):
+        saved_slots = {}
+        print("Processing individuals...")
+        for item in self.data:
             if item.dates == ["*"]:
                 for individual in population:
                     for chromosome in individual.data:
-                        if chromosome.external_id == item.external_id:
-                            if chromosome.date != "*":
+                        if str(chromosome.external_id) == str(item.external_id):
+                            if chromosome.date != "*" and (
+                                chromosome.date.strftime("%Y-%m-%d %H:%M")
+                                + " - "
+                                + (
+                                    chromosome.felmero.name
+                                    if chromosome.felmero
+                                    else ""
+                                )
+                            ) not in saved_slots.get(chromosome.external_id, []):
                                 slot = self.create_or_get_slot(chromosome)
-                                level = self.calculate_level(
-                                    chromosome, population
-                                )  # You need to implement this method
+                                saved_slots[chromosome.external_id] = saved_slots.get(
+                                    chromosome.external_id, []
+                                ) + [
+                                    chromosome.date.strftime("%Y-%m-%d %H:%M")
+                                    + " - "
+                                    + chromosome.felmero.name
+                                ]
+                                level = len(saved_slots.get(chromosome.external_id, 0))
+
                                 BestSlots(
                                     slot=slot,
                                     level=level,
@@ -867,7 +872,7 @@ class MiniCRMConnector:
             if self.fixed_appointment_condition(i)
             and i[self.felmero_field]
             and i[self.date_field].date() >= datetime.now().date()
-        ]
+        ][:5]
 
     def main(self) -> List[Generation.Individual.Chromosome]:
         new_applicants = [
@@ -902,8 +907,8 @@ class MiniCRMConnector:
                 )
                 for i in self.appointments.distinct("external_id")
             ]
-            + self.fix_appointments()
-            + new_applicants
+            + self.fix_appointments()[:5]
+            + new_applicants[:5]
         ):
             if not i.zip:
                 continue
@@ -918,8 +923,8 @@ class MiniCRMConnector:
         return data
 
 
+initial_population_size = 5
 population_size = 10
-initial_population_size = 10
 max_generations = 10
 tournament_size = 4
 elitism_size = 10

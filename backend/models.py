@@ -1751,7 +1751,6 @@ class Slots(models.Model):
         "Salesmen", models.DO_NOTHING, blank=True, null=True
     )
     booked = models.BooleanField(blank=True, null=True)
-    level = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -1074,6 +1074,7 @@ class CancelOffer(APIView):
                 "ERROR",
                 "pen_cancel_offer",
                 update_resp.text,
+                {"adatlap_id": request.data["adatlap_id"]},
             )
             return Response(update_resp.text, HTTP_400_BAD_REQUEST)
         felmeres.update(status="CANCELLED")
