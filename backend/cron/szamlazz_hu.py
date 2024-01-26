@@ -32,7 +32,7 @@ def create_invoice_or_proform(
     city_field="",
     address_field="",
     calc_net_price=None,
-    type="",
+    type_name="",
     test=False,
     criteria=lambda adatlap: True,
     payment_deadline=lambda _: (
@@ -49,7 +49,7 @@ def create_invoice_or_proform(
         else:
             name = "számla"
             script_name = "invoice"
-    script_name = f"pen_{script_name}_{type}"
+    script_name = f"pen_{script_name}_{type_name}"
     log(f"{name.capitalize()} készítésének futtatása", "INFO", script_name)
 
     def def_criteria(adatlap: MiniCrmAdatlapok):
@@ -177,6 +177,14 @@ def create_invoice_or_proform(
                     )
                     continue
                 address = address[0]
+                if address == "Error":
+                    log(
+                        "Nem sikerült lekérdezni a címeket",
+                        "FAILED",
+                        script_name,
+                        adatlap.Id,
+                    )
+                    continue
             if address is None or type(address) == str:
                 log("Nincsen cím", "FAILED", script_name)
                 continue
@@ -453,7 +461,7 @@ data = {
     "address_field": "Cim2",
     "calc_net_price": lambda adatlap: adatlap.FelmeresiDij,
     "proform_number_field": "DijbekeroSzama2",
-    "type": "felmeres",
+    "type_name": "felmeres",
 }
 
 create_invoice_or_proform(
@@ -527,7 +535,7 @@ data = {
     "address_field": "Cim3",
     "calc_net_price": calc_net_price,
     "proform_number_field": "DijbekeroSzama3",
-    "type": "garancia",
+    "type_name": "garancia",
     "test": True,
 }
 create_invoice_or_proform(

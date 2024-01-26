@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+            <xmlszamla xmlns="http://www.szamlazz.hu/xmlszamla" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamla https://www.szamlazz.hu/szamla/docs/xsds/agent/xmlszamla.xsd">
+                <beallitasok>
+                    <szamlaagentkulcs>8czu6kzq8t529dxjxrtgkhs84ymt6aeerzztdxtnuq</szamlaagentkulcs>
+                    <eszamla>true</eszamla>
+                    <szamlaLetoltes>true</szamlaLetoltes>
+                </beallitasok>
+                <fejlec>
+                    <!-- header -->
+                    <keltDatum>2024-01-26</keltDatum>
+                    <teljesitesDatum>2024-01-26</teljesitesDatum>
+                    <!-- creating date, in this exact format -->
+                    <fizetesiHataridoDatum>2024-01-29</fizetesiHataridoDatum>
+                    <!-- due date -->
+                    <fizmod>Átutalás</fizmod>
+                    <!-- payment type: it can be seen in case you create the invoice
+                                                    from browser -->
+                    <penznem>HUF</penznem>
+                    <!-- currency: it can be seen in case you create the invoice
+                                                    from browser -->
+                    <szamlaNyelve>hu</szamlaNyelve>
+                    <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
+                                                    -->
+                    <megjegyzes><![CDATA[None]]></megjegyzes>
+                    <rendelesSzam>43181</rendelesSzam>
+                    <!-- order number -->
+                    <dijbekeroSzamlaszam>None</dijbekeroSzamlaszam>
+                    <!-- reference to pro forma invoice number -->
+                    <vegszamla>false</vegszamla>
+                    <!-- invoice (after a deposit invoice) -->
+                    <dijbekero>false</dijbekero>
+                    <!-- proform invoice -->
+                    <szamlaszamElotag>ERP</szamlaszamElotag>
+                    <!-- One of the prefixes from the invoice pad menu  -->
+                </fejlec>
+                <elado>
+                    <!-- Details of the merchant-->
+                    <bank>OTP</bank>
+                    <!-- bank name -->
+                    <bankszamlaszam>11741055-20013712</bankszamlaszam>
+                    <!-- bank account -->
+                    <emailReplyto>zsamboki.attila.jr@gmail.com</emailReplyto>
+                    <!-- reply e-mail address -->
+                    <emailTargy>Invoice notification</emailTargy>
+                    <!-- e-mail subject -->
+                    <emailSzoveg>mail text</emailSzoveg>
+                    <!-- text of e-mail -->
+                </elado>
+                <vevo>
+                    <!--Buyer details -->
+                    <nev><![CDATA[Tomics Hajnalka]]></nev>
+                    <!-- name -->
+                    <irsz><![CDATA[1221]]></irsz>
+                    <!-- ZIP code -->
+                    <telepules><![CDATA[Budapest]]></telepules>
+                    <!-- city -->
+                    <cim><![CDATA[Aranyfácán u. 13. A/1.]]></cim>
+                    <!-- address -->
+                    <email><![CDATA[tomicsh@hotmail.com]]></email>
+                    <!-- should we send the e-mail to the customer (by email) -->
+                    <adoszam></adoszam>
+                    <!-- fiscal number/tax number -->
+                    <postazasiNev><![CDATA[Tomics Hajnalka]]></postazasiNev>
+                    <!--delivery name/postal name -->
+                    <postazasiIrsz>1221</postazasiIrsz>
+                    <!--delivery ZIP code/postal ZIP code -->
+                    <postazasiTelepules><![CDATA[Budapest]]></postazasiTelepules>
+                    <!--delivery city/postal city -->
+                    <postazasiCim><![CDATA[Kocsola Utca 1.]]></postazasiCim>
+                    <!--delivery address/postal address -->
+                    <azonosito>43181</azonosito>
+                    <!-- identification -->
+                    <telefonszam>+36 30 331 6342</telefonszam>
+                    <!-- phone number -->
+                </vevo>
+                <tetelek>
+                    <!-- items on invoice -->
+                    <tetel>
+                        <!-- item 2, details are same as above -->
+                        <megnevezes>Felmérés</megnevezes>
+                        <mennyiseg>1.0</mennyiseg>
+                        <mennyisegiEgyseg>db</mennyisegiEgyseg>
+                        <nettoEgysegar>20000</nettoEgysegar>
+                        <afakulcs>27</afakulcs>
+                        <nettoErtek>20000</nettoErtek>
+                        <afaErtek>5400.0</afaErtek>
+                        <bruttoErtek>25400.0</bruttoErtek>
+                    </tetel>
+                </tetelek>
+            </xmlszamla>
+            

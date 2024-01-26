@@ -863,7 +863,7 @@ class MiniCRMConnector:
             if self.fixed_appointment_condition(i)
             and i[self.felmero_field]
             and i[self.date_field].date() >= datetime.now().date()
-        ][:5]
+        ]
 
     def main(self) -> List[Generation.Individual.Chromosome]:
         new_applicants = [
@@ -898,8 +898,8 @@ class MiniCRMConnector:
                 )
                 for i in self.appointments.distinct("external_id")
             ]
-            + self.fix_appointments()[:5]
-            + new_applicants[:5]
+            + self.fix_appointments()
+            + new_applicants
         ):
             if not i.zip:
                 continue
@@ -914,11 +914,11 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 1
-population_size = 15
-max_generations = 1
+initial_population_size = 7
+population_size = 100
+max_generations = 100
 tournament_size = 4
-elitism_size = 1000
+elitism_size = 10
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
