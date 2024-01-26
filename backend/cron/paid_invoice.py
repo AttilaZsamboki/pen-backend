@@ -10,15 +10,20 @@ import traceback
 
 load_dotenv()
 
-SZAMLA_AGENT_KULCS = os.environ.get("SZAMLA_AGENT_KULCS")
 
-
-def main(StatusId="", UpdateAdatlap=None):
+def main(StatusId="", UpdateAdatlap=None, test=False):
     log(
         "Kifizetettt számlák csekkolása megkezdődött",
         script_name="pen_paid_invoice",
         status="INFO",
     )
+
+    SZAMLA_AGENT_KULCS = (
+        os.environ.get("SZAMLA_AGENT_KULCS")
+        if not test
+        else os.environ.get("TESZT_SZAMLA_AGENT_KULCS")
+    )
+
     for adatlap in MiniCrmAdatlapok.objects.filter(StatusId=StatusId):
         query_xml = f"""
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -98,7 +103,7 @@ def update_garancia_adatlap(adatlap: MiniCrmAdatlapok):
 
 modules = [
     {"StatusId": 3083, "UpdateAdatlap": update_felmeres_adatlap},
-    {"StatusId": 3128, "UpdateAdatlap": update_garancia_adatlap},
+    {"StatusId": 3128, "UpdateAdatlap": update_garancia_adatlap, "test": True},
 ]
 
 try:
