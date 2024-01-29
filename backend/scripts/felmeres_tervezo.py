@@ -1,8 +1,10 @@
 import os
+import random
 import time
 from datetime import date as dt_date
 from datetime import datetime, timedelta
 from typing import List
+from multiprocessing import Pool, freeze_support, cpu_count
 
 import numpy as np
 from django.db.models import Q
@@ -23,7 +25,7 @@ from ..models import (
 from ..utils.google_routes import Client
 from ..utils.utils import round_to_30
 
-## Todo: NE FELEJTSD EL ODAíRNI A VÉGÉRE A T-t!!!!!!!
+## Todo: NE FELEJTSD EL ODAíRNI A VÉGÉRE A Y-t!!!!!!!
 gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KE"))
 
 
@@ -34,6 +36,28 @@ class Generation:
     class Individual:
         class Chromosome:
             def __init__(self, dates, external_id=0, zip=None, date=None, felmero=None):
+                # Validate external_id is an integer
+                if not isinstance(external_id, str) and not isinstance(
+                    external_id, int
+                ):
+                    raise ValueError("external_id must be an integer")
+
+                # Validate dates is a list of datetime objects
+                if not all(isinstance(d, datetime) or d == "*" for d in dates):
+                    raise ValueError("dates must be a list of datetime objects")
+
+                # Validate zip is a string and follows a specific format (e.g., 5 digits)
+                if zip is not None and type(zip) != str:
+                    print(zip)
+                    raise ValueError("zip must be a 5-digit string")
+
+                # Validate felmero is an instance of Salesmen
+                if felmero is not None and not isinstance(felmero, Salesmen):
+                    raise ValueError("felmero must be an instance of Salesmen")
+
+                if date is not None and not isinstance(date, datetime) and date != "*":
+                    raise ValueError("date must be a datetime object or None")
+
                 self.external_id = external_id
                 self.dates: List[datetime] = dates
                 self.date: datetime = date
@@ -41,14 +65,13 @@ class Generation:
                 self.felmero: Salesmen = felmero
 
             def random_date(self):
-                if self.dates:
-                    if len(self.dates) == 1:
-                        return self.dates[0]
-                    while True:
-                        i = self.dates[np.random.randint(low=0, high=len(self.dates))]
-                        if i != self.date:
-                            return i
-                return None
+                if not self.dates:
+                    return None
+                if len(self.dates) == 1:
+                    return self.dates[0]
+
+                available_dates = [d for d in self.dates if d != self.date]
+                return random.choice(available_dates) if available_dates else None
 
             def __str__(self):
                 return str(self.__dict__)
@@ -688,19 +711,49 @@ class Generation:
                     i.date = rand_date["date"]
                     i.felmero = rand_date["felmero"]
 
+    def generate_individual(self):
+        self.assign_new_applicants_dates()
+        return self.generate_route()
+
+    from multiprocessing import Pool
+
+    def generate_individuals_batch(self, batch_size):
+        """Generate a batch of individuals."""
+        return [self.generate_individual() for _ in range(batch_size)]
+
+    def generate_initial_population_batched(self, num_processes=None):
+        """Generate the initial population in batches using multiprocessing."""
+        # Determine the number of individuals per batch
+        batch_size = 10  # Example batch size, adjust as needed
+        num_full_batches = self.population_size // batch_size
+        remainder = self.population_size % batch_size
+
+        # Create a list of batch sizes to ensure the correct total population size
+        batch_sizes = [batch_size] * num_full_batches
+        if remainder > 0:
+            batch_sizes.append(
+                remainder
+            )  # Add the remainder as the size for the last batch
+
+        with Pool(processes=num_processes) as pool:
+            population_batches = pool.map(self.generate_individuals_batch, batch_sizes)
+
+        # Flatten the list of batches into a single population list
+        population = [
+            individual for batch in population_batches for individual in batch
+        ]
+        return population
+
     def main(self, test=False):
         start_time = time.time()
 
+        num_process = cpu_count()
         # if not test:
         self.create_distance_matrix(test)
 
-        self.population = []
-        for _ in range(self.initial_population_size):
-            self.assign_new_applicants_dates()  # Reassign dates to introduce variability
-            new_route = (
-                self.generate_route()
-            )  # Generate a new route with the updated data
-            self.population.append(new_route)
+        self.population = self.generate_initial_population_batched(
+            num_processes=num_process
+        )
         print(
             "Initial population length: " + str(len([i for i in self.population if i]))
         )
@@ -771,7 +824,7 @@ class Generation:
                                     level=level,
                                 ).save()
 
-    def run_one_generation(self):
+    def run_one_generation(self, population):
         fitnesses = np.array(
             [
                 route.calculate_fitness()
@@ -783,12 +836,13 @@ class Generation:
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
         population: List[Generation.Individual] = [
-            self.population[i] for i in sorted_fitnesses
+            population[i] for i in sorted_fitnesses
         ]
 
         elites = population[: self.elitism_size]
 
         new_population: List[Generation.Individual] = []
+
         for _ in range(population_size):
             parent1, parent2 = (
                 self.tournament_selection(),
@@ -863,7 +917,7 @@ class MiniCRMConnector:
             if self.fixed_appointment_condition(i)
             and i[self.felmero_field]
             and i[self.date_field].date() >= datetime.now().date()
-        ]
+        ][:5]
 
     def main(self) -> List[Generation.Individual.Chromosome]:
         new_applicants = [
@@ -898,8 +952,8 @@ class MiniCRMConnector:
                 )
                 for i in self.appointments.distinct("external_id")
             ]
-            + self.fix_appointments()
-            + new_applicants
+            + self.fix_appointments()[:5]
+            + new_applicants[:5]
         ):
             if not i.zip:
                 continue
@@ -914,9 +968,9 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 7
-population_size = 100
-max_generations = 100
+initial_population_size = 1
+population_size = 5
+max_generations = 5
 tournament_size = 4
 elitism_size = 10
 
@@ -960,4 +1014,8 @@ result = Generation(
     allow_weekends=allow_weekends,
     selection_within_time_period=selection_within_time_period,
     elitism_size=elitism_size,
-).main(test=True)
+)
+
+if __name__ == "__main__":
+    freeze_support()
+    result.main(test=True)

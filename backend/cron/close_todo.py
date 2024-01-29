@@ -13,7 +13,7 @@ def close_todo(adatlap_id, type):
     if todos:
         for todo in todos:
             resp = update_todo(todo["Id"], {"Status": "Closed"})
-            if resp.status_code == "200":
+            if resp.status_code == 200:
                 log(
                     "Státusz frissítve",
                     "INFO",

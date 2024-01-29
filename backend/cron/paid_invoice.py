@@ -29,7 +29,7 @@ def main(StatusId="", UpdateAdatlap=None, test=False):
                     <?xml version="1.0" encoding="UTF-8"?>
                     <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
                         <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
-                        <rendelesSzam>{adatlap.Id}</rendelesSzam>
+                        <szamlaszam>{adatlap.DijbekeroSzama2}</szamlaszam>
                     </xmlszamlaxml>
                 """.strip()
         query_response = requests.post(

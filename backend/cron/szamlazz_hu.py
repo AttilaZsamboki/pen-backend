@@ -12,6 +12,7 @@ import time
 from dotenv import load_dotenv
 from ..models import MiniCrmAdatlapok
 import traceback
+import xml.etree.ElementTree as ET
 
 load_dotenv()
 
@@ -34,7 +35,7 @@ def create_invoice_or_proform(
     calc_net_price=None,
     type_name="",
     test=False,
-    criteria=lambda adatlap: True,
+    criteria=lambda _: True,
     payment_deadline=lambda _: (
         datetime.datetime.now() + datetime.timedelta(days=3)
     ).strftime("%Y-%m-%d"),
@@ -123,11 +124,12 @@ def create_invoice_or_proform(
                     or query_response.headers["szlahu_szamlaszam"][0] == "E"
                     or cash
                 ):
+                    print(query_response.headers["szlahu_szamlaszam"])
                     log(
                         f"Már létezik {name}",
                         "INFO",
                         script_name,
-                        f"adatlap: {adatlap.Id}",
+                        f"adatlap: {adatlap.Id}, szamlaszam: {query_response.headers['szlahu_szamlaszam']}",
                     )
                     update_adatlap_fields(
                         adatlap.Id,
@@ -220,6 +222,11 @@ def create_invoice_or_proform(
                 )
                 continue
 
+            root = ET.fromstring(query_response.text)
+
+            ns = {"szamla": "http://www.szamlazz.hu/szamla"}
+
+            teljesites_datum = root.find(".//szamla:datum", ns)
             net_price = calc_net_price(adatlap)
             if not net_price:
                 log("Nincs nettó ár", "FAILED", script_name)
@@ -234,7 +241,7 @@ def create_invoice_or_proform(
                 <fejlec>
                     <!-- header -->
                     <keltDatum>{datetime.datetime.now().strftime("%Y-%m-%d")}</keltDatum>
-                    <teljesitesDatum>{datetime.datetime.now().strftime("%Y-%m-%d")}</teljesitesDatum>
+                    <teljesitesDatum>{teljesites_datum.text if not proform else datetime.datetime.now().strftime("%Y-%m-%d")}</teljesitesDatum>
                     <!-- creating date, in this exact format -->
                     <fizetesiHataridoDatum>{payment_deadline(adatlap)}</fizetesiHataridoDatum>
                     <!-- due date -->
@@ -370,7 +377,7 @@ def create_invoice_or_proform(
                     break
 
             if ENVIRONMENT == "production":
-                time.sleep(30)
+                time.sleep(60)
                 os.remove(pdf_path)
         except KeyError as e:
             log(
@@ -464,93 +471,94 @@ data = {
     "type_name": "felmeres",
 }
 
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3086,
+#     proform=False,
+#     cash=True,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
 create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3086,
+    criteria=lambda adatlap: adatlap.StatusId == 3023
+    and not (adatlap.SzamlaSorszama2 and adatlap.SzamlaSorszama2 != ""),
     proform=False,
-    cash=True,
+    cash=False,
     messages_field="SzamlaUzenetek",
     note_field="SzamlaMegjegyzes",
     **data,
 )
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3023,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
-create_invoice_or_proform(
-    proform=True,
-    cash=False,
-    criteria=proform_criteria,
-    messages_field="DijbekeroUzenetek",
-    note_field="DijbekeroMegjegyzes2",
-    payment_deadline=proform_deadline,
-    **data,
-)
+# create_invoice_or_proform(
+#     proform=True,
+#     cash=False,
+#     criteria=proform_criteria,
+#     messages_field="DijbekeroUzenetek",
+#     note_field="DijbekeroMegjegyzes2",
+#     payment_deadline=proform_deadline,
+#     **data,
+# )
 
 
-# Garancia
-def calc_net_price(adatlap: MiniCrmAdatlapok):
-    if adatlap.BejelentesTipusa == "Rendszergarancia":
-        return adatlap.NettoFelmeresiDij
-    elif adatlap.BejelentesTipusa == "Karbantartás":
-        return adatlap.NettoFelmeresiDij + (
-            adatlap.KarbantartasNettoDij if adatlap.KarbantartasNettoDij else 0
-        )
-    return None
+# # Garancia
+# def calc_net_price(adatlap: MiniCrmAdatlapok):
+#     if adatlap.BejelentesTipusa == "Rendszergarancia":
+#         return adatlap.NettoFelmeresiDij
+#     elif adatlap.BejelentesTipusa == "Karbantartás":
+#         return adatlap.NettoFelmeresiDij + (
+#             adatlap.KarbantartasNettoDij if adatlap.KarbantartasNettoDij else 0
+#         )
+#     return None
 
 
-def garancia_proform_criteria(adatlap: MiniCrmAdatlapok):
-    if adatlap.StatusId == 3126:
-        if (
-            adatlap.BejelentesTipusa == "Rendszerbővítés"
-            or adatlap.FizetesiMod4 == "Készpénz"
-        ):
-            resp = adatlap.change_status(3129)
-            if resp["code"] == 200:
-                log(
-                    "Sikeresen átállítottam a státuszt a(z) {} adatlapnál.".format(
-                        adatlap.Id
-                    ),
-                    "SUCCESS",
-                    adatlap.Id,
-                )
-            else:
-                log(
-                    "Hiba történt a(z) {} adatlapnál.".format(adatlap.Id),
-                    "ERROR",
-                    adatlap.Id,
-                )
-            return False
-        return True
-    return False
+# def garancia_proform_criteria(adatlap: MiniCrmAdatlapok):
+#     if adatlap.StatusId == 3126:
+#         if (
+#             adatlap.BejelentesTipusa == "Rendszerbővítés"
+#             or adatlap.FizetesiMod4 == "Készpénz"
+#         ):
+#             resp = adatlap.change_status(3129)
+#             if resp["code"] == 200:
+#                 log(
+#                     "Sikeresen átállítottam a státuszt a(z) {} adatlapnál.".format(
+#                         adatlap.Id
+#                     ),
+#                     "SUCCESS",
+#                     adatlap.Id,
+#                 )
+#             else:
+#                 log(
+#                     "Hiba történt a(z) {} adatlapnál.".format(adatlap.Id),
+#                     "ERROR",
+#                     adatlap.Id,
+#                 )
+#             return False
+#         return True
+#     return False
 
 
-data = {
-    "city_field": "Telepules2",
-    "update_data": update_data_garancia,
-    "zip_field": "Iranyitoszam2",
-    "address_field": "Cim3",
-    "calc_net_price": calc_net_price,
-    "proform_number_field": "DijbekeroSzama3",
-    "type_name": "garancia",
-    "test": True,
-}
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3129,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek2",
-    note_field="SzamlaMegjegyzes2",
-    **data,
-)
-create_invoice_or_proform(
-    criteria=garancia_proform_criteria,
-    proform=True,
-    cash=False,
-    messages_field="DijbekeroUzenetek2",
-    note_field="DijbekeroMegjegyzes3",
-    **data,
-)
+# data = {
+#     "city_field": "Telepules2",
+#     "update_data": update_data_garancia,
+#     "zip_field": "Iranyitoszam2",
+#     "address_field": "Cim3",
+#     "calc_net_price": calc_net_price,
+#     "proform_number_field": "DijbekeroSzama3",
+#     "type_name": "garancia",
+#     "test": True,
+# }
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3129,
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek2",
+#     note_field="SzamlaMegjegyzes2",
+#     **data,
+# )
+# create_invoice_or_proform(
+#     criteria=garancia_proform_criteria,
+#     proform=True,
+#     cash=False,
+#     messages_field="DijbekeroUzenetek2",
+#     note_field="DijbekeroMegjegyzes3",
+#     **data,
+# )
