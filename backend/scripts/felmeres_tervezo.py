@@ -824,19 +824,20 @@ class Generation:
                                     level=level,
                                 ).save()
 
-    def run_one_generation(self, population):
-        fitnesses = np.array(
-            [
-                route.calculate_fitness()
-                for route in self.population
-                if route is not None
-            ]
-        )
+    def evaluate_fitness_wrapper(self, individual: Individual):
+        # Wrapper function to evaluate fitness of an individual
+        return individual.calculate_fitness()
+
+    def run_one_generation(self):
+        num_processes = cpu_count()
+        pool = Pool(processes=num_processes)
+
+        fitnesses = pool.map(self.evaluate_fitness_wrapper, self.population)
         print(fitnesses)
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
         population: List[Generation.Individual] = [
-            population[i] for i in sorted_fitnesses
+            self.population[i] for i in sorted_fitnesses
         ]
 
         elites = population[: self.elitism_size]
