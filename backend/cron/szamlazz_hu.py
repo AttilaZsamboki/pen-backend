@@ -99,6 +99,7 @@ def create_invoice_or_proform(
     if adatlapok == []:
         log(f"Nincs új {name}", "INFO", script_name)
         return
+    print(adatlapok)
     for adatlap in adatlapok:
         log(
             "Új adatlap",
@@ -240,7 +241,7 @@ def create_invoice_or_proform(
                     <!-- creating date, in this exact format -->
                     <fizetesiHataridoDatum>{payment_deadline(adatlap)}</fizetesiHataridoDatum>
                     <!-- due date -->
-                    <fizmod>Átutalás</fizmod>
+                    <fizmod>{"Átutalás" if not cash else "Készpénz"}</fizmod>
                     <!-- payment type: it can be seen in case you create the invoice
                                                     from browser -->
                     <penznem>HUF</penznem>
@@ -467,7 +468,8 @@ data = {
 }
 
 create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3086,
+    criteria=lambda adatlap: adatlap.StatusId == 3086
+    and (adatlap.SzamlaSorszama2 == "" or adatlap.SzamlaSorszama2 is None),
     proform=False,
     cash=True,
     messages_field="SzamlaUzenetek",

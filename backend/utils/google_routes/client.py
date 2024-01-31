@@ -7,11 +7,11 @@ class Client:
     def __init__(self, key):
         self.api_key = key
         self.base_url = "https://routes.googleapis.com/directions/v2:"
+        self.country = "Hungary"
 
     def distance_matrix(
         self, origin_addresses, dest_addresses, travel_mode="DRIVE", fields=["*"]
     ):
-        print("You fucked up homie")
         url = f"{self.base_url}computeRouteMatrix"
 
         payload = json.dumps(
@@ -39,16 +39,15 @@ class Client:
         return DistanceMatrix(response.json())
 
     def routes(self, origin, destination):
-        print("You fucked up homie")
         url = f"{self.base_url}computeRoutes"
 
         payload = json.dumps(
             {
                 "origin": {
-                    "address": origin,
+                    "address": origin + ", " + self.country,
                 },
                 "destination": {
-                    "address": destination,
+                    "address": destination + ", " + self.country,
                 },
                 "travelMode": "DRIVE",
                 "routingPreference": "TRAFFIC_UNAWARE",

@@ -7,12 +7,12 @@
                 </beallitasok>
                 <fejlec>
                     <!-- header -->
-                    <keltDatum>2024-01-26</keltDatum>
-                    <teljesitesDatum>2024-01-26</teljesitesDatum>
+                    <keltDatum>2024-01-31</keltDatum>
+                    <teljesitesDatum>2024-01-31</teljesitesDatum>
                     <!-- creating date, in this exact format -->
-                    <fizetesiHataridoDatum>2024-01-29</fizetesiHataridoDatum>
+                    <fizetesiHataridoDatum>2024-02-03</fizetesiHataridoDatum>
                     <!-- due date -->
-                    <fizmod>Átutalás</fizmod>
+                    <fizmod>Készpénz</fizmod>
                     <!-- payment type: it can be seen in case you create the invoice
                                                     from browser -->
                     <penznem>HUF</penznem>
@@ -22,7 +22,7 @@
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                                     -->
                     <megjegyzes><![CDATA[None]]></megjegyzes>
-                    <rendelesSzam>43181</rendelesSzam>
+                    <rendelesSzam>43164</rendelesSzam>
                     <!-- order number -->
                     <dijbekeroSzamlaszam>None</dijbekeroSzamlaszam>
                     <!-- reference to pro forma invoice number -->
@@ -48,29 +48,29 @@
                 </elado>
                 <vevo>
                     <!--Buyer details -->
-                    <nev><![CDATA[Tomics Hajnalka]]></nev>
+                    <nev><![CDATA[Jáhner Attila]]></nev>
                     <!-- name -->
-                    <irsz><![CDATA[1221]]></irsz>
+                    <irsz><![CDATA[1119]]></irsz>
                     <!-- ZIP code -->
                     <telepules><![CDATA[Budapest]]></telepules>
                     <!-- city -->
-                    <cim><![CDATA[Aranyfácán u. 13. A/1.]]></cim>
+                    <cim><![CDATA[Bornemissza utca 10. 2em /7.]]></cim>
                     <!-- address -->
-                    <email><![CDATA[tomicsh@hotmail.com]]></email>
+                    <email><![CDATA[]]></email>
                     <!-- should we send the e-mail to the customer (by email) -->
                     <adoszam></adoszam>
                     <!-- fiscal number/tax number -->
-                    <postazasiNev><![CDATA[Tomics Hajnalka]]></postazasiNev>
+                    <postazasiNev><![CDATA[Jáhner Attila]]></postazasiNev>
                     <!--delivery name/postal name -->
-                    <postazasiIrsz>1221</postazasiIrsz>
+                    <postazasiIrsz>1119</postazasiIrsz>
                     <!--delivery ZIP code/postal ZIP code -->
                     <postazasiTelepules><![CDATA[Budapest]]></postazasiTelepules>
                     <!--delivery city/postal city -->
-                    <postazasiCim><![CDATA[Kocsola Utca 1.]]></postazasiCim>
+                    <postazasiCim><![CDATA[Bornemissza Utca 10. 2Em /7.]]></postazasiCim>
                     <!--delivery address/postal address -->
-                    <azonosito>43181</azonosito>
+                    <azonosito>43164</azonosito>
                     <!-- identification -->
-                    <telefonszam>+36 30 331 6342</telefonszam>
+                    <telefonszam>+36 20 998 3967</telefonszam>
                     <!-- phone number -->
                 </vevo>
                 <tetelek>

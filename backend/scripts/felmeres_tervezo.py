@@ -26,7 +26,7 @@ from ..utils.google_routes import Client
 from ..utils.utils import round_to_30
 
 ## Todo: NE FELEJTSD EL ODAíRNI A VÉGÉRE A Y-t!!!!!!!
-gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KE"))
+gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
 
 
 from datetime import timedelta
@@ -549,27 +549,25 @@ class Generation:
                                 )
                             ]
                         ):
-                            save = Routes(
-                                origin_zip=origin,
-                                dest_zip=destination,
-                                distance=np.random.randint(0, 10000),
-                                duration=np.random.randint(0, 10000),
-                            )
                             if test:
-                                pass
+                                save = Routes(
+                                    origin_zip=origin,
+                                    dest_zip=destination,
+                                    distance=np.random.randint(0, 10000),
+                                    duration=np.random.randint(0, 10000),
+                                )
                             else:
                                 num_requests += 1
                                 print(num_requests)
-                                # response = gmaps.routes(
-                                #     origin=origin, destination=destination
-                                # )
-                                # save = Routes(
-                                #     origin_zip=origin,
-                                #     dest_zip=destination,
-                                #     distance=response[0].distance_meters,
-                                #     duration=response[0].parse_duration(),
-                                # )
-                                pass
+                                response = gmaps.routes(
+                                    origin=origin, destination=destination
+                                )
+                                save = Routes(
+                                    origin_zip=origin,
+                                    dest_zip=destination,
+                                    distance=response.routes[0].distance_meters,
+                                    duration=response.routes[0].parse_duration(),
+                                )
                             self.all_routes.append(save)
                             save.save()
         print("Requestek száma: " + str(num_requests))
@@ -755,7 +753,6 @@ class Generation:
         num_process = cpu_count()
         if not test:
             self.create_distance_matrix(test)
-        return
 
         self.population = self.generate_initial_population_batched(
             num_processes=num_process
@@ -976,10 +973,10 @@ class MiniCRMConnector:
 
 
 initial_population_size = 15
-population_size = 15
-max_generations = 15
+population_size = 20
+max_generations = 20
 tournament_size = 4
-elitism_size = 50
+elitism_size = 20
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
