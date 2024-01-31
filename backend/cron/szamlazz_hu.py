@@ -222,11 +222,6 @@ def create_invoice_or_proform(
                 )
                 continue
 
-            root = ET.fromstring(query_response.text)
-
-            ns = {"szamla": "http://www.szamlazz.hu/szamla"}
-
-            teljesites_datum = root.find(".//szamla:datum", ns)
             net_price = calc_net_price(adatlap)
             if not net_price:
                 log("Nincs nettó ár", "FAILED", script_name)
@@ -241,7 +236,7 @@ def create_invoice_or_proform(
                 <fejlec>
                     <!-- header -->
                     <keltDatum>{datetime.datetime.now().strftime("%Y-%m-%d")}</keltDatum>
-                    <teljesitesDatum>{teljesites_datum.text if not proform else datetime.datetime.now().strftime("%Y-%m-%d")}</teljesitesDatum>
+                    <teljesitesDatum>{datetime.datetime.now().strftime("%Y-%m-%d")}</teljesitesDatum>
                     <!-- creating date, in this exact format -->
                     <fizetesiHataridoDatum>{payment_deadline(adatlap)}</fizetesiHataridoDatum>
                     <!-- due date -->
@@ -479,15 +474,15 @@ create_invoice_or_proform(
     note_field="SzamlaMegjegyzes",
     **data,
 )
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3023
-    and not (adatlap.SzamlaSorszama2 and adatlap.SzamlaSorszama2 != ""),
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek",
-    note_field="SzamlaMegjegyzes",
-    **data,
-)
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3023
+#     and not (adatlap.SzamlaSorszama2 and adatlap.SzamlaSorszama2 != ""),
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek",
+#     note_field="SzamlaMegjegyzes",
+#     **data,
+# )
 create_invoice_or_proform(
     proform=True,
     cash=False,
@@ -546,14 +541,14 @@ data = {
     "type_name": "garancia",
     "test": True,
 }
-create_invoice_or_proform(
-    criteria=lambda adatlap: adatlap.StatusId == 3129,
-    proform=False,
-    cash=False,
-    messages_field="SzamlaUzenetek2",
-    note_field="SzamlaMegjegyzes2",
-    **data,
-)
+# create_invoice_or_proform(
+#     criteria=lambda adatlap: adatlap.StatusId == 3129,
+#     proform=False,
+#     cash=False,
+#     messages_field="SzamlaUzenetek2",
+#     note_field="SzamlaMegjegyzes2",
+#     **data,
+# )
 create_invoice_or_proform(
     criteria=garancia_proform_criteria,
     proform=True,

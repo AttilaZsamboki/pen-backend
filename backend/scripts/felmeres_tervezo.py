@@ -493,6 +493,7 @@ class Generation:
 
     def create_distance_matrix(self, test=False):
         print("Creating distance matrix...")
+        num_requests = 0
         for day in self.dates:
             print("Dátumok: " + day.strftime("%Y-%m-%d %H:%M:%S"))
             adatlapok = [
@@ -548,14 +549,17 @@ class Generation:
                                 )
                             ]
                         ):
+                            save = Routes(
+                                origin_zip=origin,
+                                dest_zip=destination,
+                                distance=np.random.randint(0, 10000),
+                                duration=np.random.randint(0, 10000),
+                            )
                             if test:
-                                save = Routes(
-                                    origin_zip=origin,
-                                    dest_zip=destination,
-                                    distance=np.random.randint(0, 10000),
-                                    duration=np.random.randint(0, 10000),
-                                )
+                                pass
                             else:
+                                num_requests += 1
+                                print(num_requests)
                                 # response = gmaps.routes(
                                 #     origin=origin, destination=destination
                                 # )
@@ -568,6 +572,7 @@ class Generation:
                                 pass
                             self.all_routes.append(save)
                             save.save()
+        print("Requestek száma: " + str(num_requests))
 
     def generate_route(self):
         routes = self.Individual(self)
@@ -748,8 +753,9 @@ class Generation:
         start_time = time.time()
 
         num_process = cpu_count()
-        # if not test:
-        self.create_distance_matrix(test)
+        if not test:
+            self.create_distance_matrix(test)
+        return
 
         self.population = self.generate_initial_population_batched(
             num_processes=num_process
@@ -932,7 +938,7 @@ class MiniCRMConnector:
                 Deleted=0,
             ).values()
             if self.new_aplicant_condition(i) and i[self.zip_field]
-        ]
+        ][:5]
         data: List[Generation.Individual.Chromosome] = []
         for i in (
             [
@@ -953,8 +959,8 @@ class MiniCRMConnector:
                 )
                 for i in self.appointments.distinct("external_id")
             ]
-            + self.fix_appointments()[:5]
-            + new_applicants[:5]
+            + self.fix_appointments()
+            + new_applicants
         ):
             if not i.zip:
                 continue
@@ -969,11 +975,11 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 1
-population_size = 5
-max_generations = 5
+initial_population_size = 15
+population_size = 15
+max_generations = 15
 tournament_size = 4
-elitism_size = 10
+elitism_size = 50
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
@@ -1019,4 +1025,4 @@ result = Generation(
 
 if __name__ == "__main__":
     freeze_support()
-    result.main(test=True)
+    result.main(test=False)
