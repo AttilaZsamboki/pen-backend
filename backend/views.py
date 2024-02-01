@@ -1059,12 +1059,18 @@ class CancelOffer(APIView):
             request.body.decode("utf-8"),
         )
 
-        felmeres = models.Felmeresek.objects.filter(id=request.data["adatlap_id"])
-        if not felmeres.exists():
-            log("MiniCRM ajánlat sztornózása sikertelen", "ERROR", "pen_cancel_offer")
-            return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
+        adatlap = models.MiniCrmAdatlapok.objects.filter(
+            Felmeresid=request.data["adatlap_id"]
+        )
+        if not adatlap.exists():
+            log("Nem található adatlap", "ERROR", "pen_cancel_offer")
+            return Response("Nem található adatlap", HTTP_400_BAD_REQUEST)
+        offer = models.Offers.objects.filter(adatlap=adatlap.first().Id)
+        if not offer.exists():
+            log("Nem található ajánlat", "ERROR", "pen_cancel_offer")
+            return Response("Nem található ajánlat", HTTP_400_BAD_REQUEST)
         update_resp = update_offer_order(
-            offer_id=felmeres.first().adatlap_id.Id,
+            offer_id=offer.first().id,
             fields={"StatusId": "Sztornózva"},
             project=True,
         )
@@ -1077,48 +1083,10 @@ class CancelOffer(APIView):
                 {"adatlap_id": request.data["adatlap_id"]},
             )
             return Response(update_resp.text, HTTP_400_BAD_REQUEST)
-        felmeres.update(status="CANCELLED")
-        return Response("Sikeres sztornózás", HTTP_200_OK)
-
-    def get(self, request):
-        log(
-            "MiniCRM ajánlat sztornózása megkezdődött",
-            "INFO",
-            "pen_cancel_offer_dev",
-            request.body.decode("utf-8"),
+        models.Felmeresek.objects.filter(id=request.data["adatlap_id"]).update(
+            status="CANCELLED"
         )
-        if os.environ.get("ENVIRONMENT") == "development":
-            adatlap_id = "148"
-
-            def critera(adatlap):
-                return adatlap["Felmeresid"] == adatlap_id
-
-            offer_adatlap = get_all_adatlap_details(category_id=21, criteria=critera)
-            if len(offer_adatlap) == 0:
-                log(
-                    "MiniCRM ajánlat sztornózása sikertelen",
-                    "ERROR",
-                    "pen_cancel_offer_dev",
-                    "Nincs ilyen ajánlat",
-                )
-                return Response("Nincs ilyen ajánlat", HTTP_400_BAD_REQUEST)
-            offer_adatlap = offer_adatlap[0]
-
-            offer_id = models.Offers.objects.get(adatlap=offer_adatlap["Id"]).offer_id
-            update_resp = update_offer_order(
-                offer_id=offer_id, fields={"StatusId": "Sztornózva"}, project=True
-            )
-            if update_resp.status_code != 200:
-                log(
-                    "MiniCRM ajánlat sztornózása sikertelen",
-                    "ERROR",
-                    "pen_cancel_offer_dev",
-                    update_resp.text,
-                )
-                return Response(update_resp.text, HTTP_400_BAD_REQUEST)
-            return Response("Sikeres sztornózás", HTTP_200_OK)
-        else:
-            return Response("Nem development környezet", HTTP_400_BAD_REQUEST)
+        return Response("Sikeres sztornózás", HTTP_200_OK)
 
 
 @csrf_exempt
