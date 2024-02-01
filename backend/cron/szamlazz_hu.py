@@ -112,7 +112,7 @@ def create_invoice_or_proform(
                     <?xml version="1.0" encoding="UTF-8"?>
                     <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
                     <szamlaagentkulcs>{SZAMLA_AGENT_KULCS if not test else TESZT_SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
-                        <szamlaszam>{adatlap.DijbekeroSzama2}</szamlaszam>
+                        <rendelesSzam>{adatlap.Id}</rendelesSzam>
                     </xmlszamlaxml>
                 """.strip()
             query_response = requests.post(

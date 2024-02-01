@@ -718,30 +718,22 @@ class Generation:
         self.assign_new_applicants_dates()
         return self.generate_route()
 
-    from multiprocessing import Pool
-
     def generate_individuals_batch(self, batch_size):
         """Generate a batch of individuals."""
         return [self.generate_individual() for _ in range(batch_size)]
 
     def generate_initial_population_batched(self, num_processes=None):
-        """Generate the initial population in batches using multiprocessing."""
-        # Determine the number of individuals per batch
-        batch_size = 10  # Example batch size, adjust as needed
+        batch_size = 10
         num_full_batches = self.population_size // batch_size
         remainder = self.population_size % batch_size
 
-        # Create a list of batch sizes to ensure the correct total population size
         batch_sizes = [batch_size] * num_full_batches
         if remainder > 0:
-            batch_sizes.append(
-                remainder
-            )  # Add the remainder as the size for the last batch
+            batch_sizes.append(remainder)
 
         with Pool(processes=num_processes) as pool:
             population_batches = pool.map(self.generate_individuals_batch, batch_sizes)
 
-        # Flatten the list of batches into a single population list
         population = [
             individual for batch in population_batches for individual in batch
         ]
@@ -776,8 +768,8 @@ class Generation:
 
         ChromosomeModel.objects.all().delete()
         [
-            ChromosomeModel(**chromosome.__dict__).save()
-            for individual in self.population
+            ChromosomeModel(fitness=i + 1, **chromosome.__dict__).save()
+            for i, individual in enumerate(self.population)
             for chromosome in individual.data
         ]
         BestSlots.objects.all().delete()
@@ -973,10 +965,10 @@ class MiniCRMConnector:
 
 
 initial_population_size = 15
-population_size = 20
-max_generations = 20
+population_size = 10
+max_generations = 10
 tournament_size = 4
-elitism_size = 20
+elitism_size = 1000
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
