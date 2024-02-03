@@ -35,7 +35,14 @@ from datetime import timedelta
 class Generation:
     class Individual:
         class Chromosome:
-            def __init__(self, dates, external_id=0, zip=None, date=None, felmero=None):
+            def __init__(
+                self,
+                dates,
+                external_id=0,
+                zip=None,
+                date=None,
+                felmero: Salesmen | None = None,
+            ):
                 # Validate external_id is an integer
                 if not isinstance(external_id, str) and not isinstance(
                     external_id, int
@@ -99,18 +106,35 @@ class Generation:
 
         def calculate_distance(self):
             distances = []
-            for i in range(len(self.data)):
-                origin = 0 if i == 0 else self.data[i - 1].zip
-                dest = self.data[i].zip
-                if origin and dest:
-                    distance = [
-                        route
-                        for route in self.outer_instace.all_routes
-                        if (route.origin_zip == origin and route.dest_zip == dest)
-                        or (route.origin_zip == dest and route.dest_zip == origin)
-                    ]
-                    if distance:
-                        distances.append(distance[0].duration)
+            for i in self.outer_instace.qualified_salesmen:
+                data = [k for k in self.data if k.felmero == i]
+                for j in range(len(data)):
+                    origin = 0 if j == 0 else data[j - 1].zip
+                    dest = data[j].zip
+                    if origin and dest:
+                        distance = [
+                            route
+                            for route in self.outer_instace.all_routes
+                            if (route.origin_zip == origin and route.dest_zip == dest)
+                            or (route.origin_zip == dest and route.dest_zip == origin)
+                        ]
+                        if distance:
+                            print(
+                                "Distance calculated for "
+                                + str(origin)
+                                + " -> "
+                                + str(dest)
+                                + " : "
+                                + str(distance[0].duration)
+                            )
+                            distances.append(distance[0].duration)
+                        else:
+                            print(
+                                "No distance calculated for "
+                                + str(origin)
+                                + " -> "
+                                + str(dest)
+                            )
 
             return sum(distances)
 
@@ -124,12 +148,14 @@ class Generation:
         def print_route(self, print_starting_city=False):
             route = [
                 (
-                    i.date,
-                    i.external_id,
-                    i.zip,
+                    (
+                        i.date,
+                        i.external_id,
+                        i.zip,
+                    )
+                    if i.external_id != 0 or print_starting_city
+                    else " - "
                 )
-                if i.external_id != 0 or print_starting_city
-                else " - "
                 for i in self.data
             ]
 
@@ -575,20 +601,22 @@ class Generation:
     def generate_route(self):
         routes = self.Individual(self)
         for day in self.dates:
+            homes = [
+                self.Individual.Chromosome(
+                    date=datetime.combine(day, datetime.min.time()),
+                    dates=[],
+                    zip=i.zip,
+                    felmero=i,
+                )
+                for i in self.qualified_salesmen
+            ]
             day_cities = self.Individual(
                 outer_instance=self,
                 data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
-            if not day_cities.data:
-                print("No data for day: " + str(day))
-                continue
-            home = self.Individual.Chromosome(
-                date=datetime.combine(day, datetime.min.time()),
-                dates=[],
-            )
-
             day_cities = self.Individual(
-                data=([home] + day_cities.data + [home]), outer_instance=self
+                data=(homes + day_cities.data if day_cities.data else homes),
+                outer_instance=self,
             )
 
             self.Individual(data=day_cities.data, outer_instance=self).sort_route()
@@ -767,11 +795,13 @@ class Generation:
         print("Sorted population len:" + str(len(sorted_population)))
 
         ChromosomeModel.objects.all().delete()
-        [
-            ChromosomeModel(fitness=i + 1, **chromosome.__dict__).save()
-            for i, individual in enumerate(self.population)
-            for chromosome in individual.data
-        ]
+        ChromosomeModel.objects.bulk_create(
+            [
+                ChromosomeModel(fitness=i + 1, **chromosome.__dict__)
+                for i, individual in enumerate(self.population)
+                for chromosome in individual.data
+            ]
+        )
         BestSlots.objects.all().delete()
 
         self.process_individuals(sorted_population)
@@ -894,26 +924,32 @@ class MiniCRMConnector:
         self.appointments = Slots.objects.filter(booked=True)
 
     def fix_appointments(self) -> List[Generation.Individual.Chromosome]:
-        return [
-            Generation.Individual.Chromosome(
-                dates=[i[self.date_field]],
-                date=i[self.date_field],
-                external_id=i[self.id_field],
-                zip=i[self.zip_field],
-                felmero=Salesmen.objects.get(name=i[self.felmero_field]),
-            )
-            for i in MiniCrmAdatlapok.objects.filter(
-                ~Q(
-                    Id__in=[
-                        i.external_id for i in self.appointments.distinct("external_id")
-                    ]
-                ),
-                Deleted=0,
-            ).values()
-            if self.fixed_appointment_condition(i)
-            and i[self.felmero_field]
-            and i[self.date_field].date() >= datetime.now().date()
-        ][:5]
+        appointments: List[Generation.Individual.Chromosome] = []
+        for i in MiniCrmAdatlapok.objects.filter(
+            ~Q(
+                Id__in=[
+                    i.external_id for i in self.appointments.distinct("external_id")
+                ]
+            ),
+            Deleted=0,
+        ).values():
+            if len(appointments) > 5:
+                break
+            if (
+                self.fixed_appointment_condition(i)
+                and i[self.felmero_field]
+                and i[self.date_field].date() >= datetime.now().date()
+            ):
+                appointments.append(
+                    Generation.Individual.Chromosome(
+                        dates=[i[self.date_field]],
+                        date=i[self.date_field],
+                        external_id=i[self.id_field],
+                        zip=i[self.zip_field],
+                        felmero=Salesmen.objects.get(name=i[self.felmero_field]),
+                    )
+                )
+        return appointments
 
     def main(self) -> List[Generation.Individual.Chromosome]:
         new_applicants = [
@@ -965,10 +1001,10 @@ class MiniCRMConnector:
 
 
 initial_population_size = 15
-population_size = 10
-max_generations = 10
+population_size = 25
+max_generations = 25
 tournament_size = 4
-elitism_size = 1000
+elitism_size = 1000000
 
 number_of_work_hours = 8
 time_for_one_appointment = 90

@@ -12,7 +12,6 @@ import time
 from dotenv import load_dotenv
 from ..models import MiniCrmAdatlapok
 import traceback
-import xml.etree.ElementTree as ET
 
 load_dotenv()
 
