@@ -100,7 +100,7 @@ def update_data_felmeres(_: MiniCrmAdatlapok, szamlaszam):
 
 main(
     InvoiceCheck(
-        test=True,
+        test=False,
         def_criteria=lambda adatlap: adatlap.StatusId == 3023
         and not (adatlap.SzamlaSorszama2 and adatlap.SzamlaSorszama2 != ""),
         update_adatlap=update_data_felmeres,

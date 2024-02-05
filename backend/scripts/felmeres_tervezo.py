@@ -797,8 +797,8 @@ class Generation:
         ChromosomeModel.objects.all().delete()
         ChromosomeModel.objects.bulk_create(
             [
-                ChromosomeModel(fitness=i + 1, **chromosome.__dict__)
-                for i, individual in enumerate(self.population)
+                ChromosomeModel(level=i + 1,duration=sorted_fitnesses[i], **chromosome.__dict__)
+                for i, individual in enumerate(sorted_population)
                 for chromosome in individual.data
             ]
         )
@@ -933,7 +933,7 @@ class MiniCRMConnector:
             ),
             Deleted=0,
         ).values():
-            if len(appointments) > 5:
+            if len(appointments) > 10:
                 break
             if (
                 self.fixed_appointment_condition(i)
@@ -1000,9 +1000,9 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 15
-population_size = 25
-max_generations = 25
+initial_population_size = 5
+population_size = 5
+max_generations = 5
 tournament_size = 4
 elitism_size = 1000000
 

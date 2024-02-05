@@ -1888,7 +1888,8 @@ class Chromosomes(models.Model):
     date = models.TextField(blank=True, null=True)
     zip = models.TextField(blank=True, null=True)
     felmero = models.ForeignKey("Salesmen", models.DO_NOTHING, blank=True, null=True)
-    fitness = models.FloatField(blank=True, null=True)
+    level = models.IntegerField(blank=True, null=True)
+    duration = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
