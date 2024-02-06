@@ -11,7 +11,12 @@ import traceback
 load_dotenv()
 
 
-def main(StatusId="", UpdateAdatlap=None, test=False):
+def main(
+    StatusId="",
+    UpdateAdatlap=None,
+    test=False,
+    get_szamlaszam=lambda x: x.DijbekeroSzama2,
+):
     log(
         "Kifizetettt számlák csekkolása megkezdődött",
         script_name="pen_paid_invoice",
@@ -29,13 +34,14 @@ def main(StatusId="", UpdateAdatlap=None, test=False):
                     <?xml version="1.0" encoding="UTF-8"?>
                     <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
                         <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
-                        <szamlaszam>{adatlap.DijbekeroSzama2}</szamlaszam>
+                        <rendelesSzam>{adatlap.Id}</rendelesSzam>
                     </xmlszamlaxml>
                 """.strip()
         query_response = requests.post(
             "https://www.szamlazz.hu/szamla/",
             files={"action-szamla_agent_xml": ("invoice.xml", query_xml)},
         )
+        print(adatlap.Id, query_response.text)
         if query_response.status_code != 200:
             log(
                 "Számla lekérdezése sikertelen",
@@ -83,10 +89,12 @@ def update_felmeres_adatlap(adatlap: MiniCrmAdatlapok):
     return {
         "StatusId": "3023",
         "BefizetesMegerkezett": "Igen",
-        "DijbekeroUzenetek": adatlap.DijbekeroUzenetek
-        if adatlap.DijbekeroUzenetek
-        else ""
-        + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}",
+        "DijbekeroUzenetek": (
+            adatlap.DijbekeroUzenetek
+            if adatlap.DijbekeroUzenetek
+            else ""
+            + f"\nBefizetés megérkezett Számlázz.hu-n keresztül: {datetime.datetime.now()}"
+        ),
     }
 
 
@@ -103,7 +111,12 @@ def update_garancia_adatlap(adatlap: MiniCrmAdatlapok):
 
 modules = [
     {"StatusId": 3083, "UpdateAdatlap": update_felmeres_adatlap},
-    {"StatusId": 3128, "UpdateAdatlap": update_garancia_adatlap, "test": True},
+    {
+        "StatusId": 3128,
+        "UpdateAdatlap": update_garancia_adatlap,
+        "test": True,
+        "get_szamlaszam": lambda x: x.DijbekeroSzama3,
+    },
 ]
 
 try:

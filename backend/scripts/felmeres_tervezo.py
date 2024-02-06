@@ -164,26 +164,30 @@ class Generation:
         def mutate(self):
             size = len(self.data)
             while True:
-                i = np.random.randint(0, size)
-                dates = self.data[i].dates
-                if len(dates):
-                    print("Dátumok mutáció: " + str(len(dates)))
-                    if len(dates) == 1:
-                        if dates[0] == "*":
-                            possible_dates = self.outer_instace.get_possible_dates(
-                                self.data[i]
-                            )
-                            if possible_dates:
-                                new_date = possible_dates[
-                                    np.random.randint(low=0, high=len(possible_dates))
-                                ]
-                                self.data[i].date = new_date["date"]
-                                self.data[i].felmero = new_date["felmero"]
-                    else:
-                        new_date = self.data[i].random_date()
-                        self.data[i].date = new_date
-                    self.sort_route()
-                    return self
+                start = np.random.randint(0, size)
+                end = np.random.randint(start, size)
+                for i in range(start, end):
+                    dates = self.data[i].dates
+                    if len(dates):
+                        print("Dátumok mutáció: " + str(len(dates)))
+                        if len(dates) == 1:
+                            if dates[0] == "*":
+                                possible_dates = self.outer_instace.get_possible_dates(
+                                    self.data[i]
+                                )
+                                if possible_dates:
+                                    new_date = possible_dates[
+                                        np.random.randint(
+                                            low=0, high=len(possible_dates)
+                                        )
+                                    ]
+                                    self.data[i].date = new_date["date"]
+                                    self.data[i].felmero = new_date["felmero"]
+                        else:
+                            new_date = self.data[i].random_date()
+                            self.data[i].date = new_date
+                        self.sort_route()
+                        return self
 
     def count_appointments_on_date(self, date, salesman: Salesmen):
         return len(
@@ -797,7 +801,9 @@ class Generation:
         ChromosomeModel.objects.all().delete()
         ChromosomeModel.objects.bulk_create(
             [
-                ChromosomeModel(level=i + 1,duration=sorted_fitnesses[i], **chromosome.__dict__)
+                ChromosomeModel(
+                    level=i + 1, duration=sorted_fitnesses[i], **chromosome.__dict__
+                )
                 for i, individual in enumerate(sorted_population)
                 for chromosome in individual.data
             ]
@@ -938,7 +944,7 @@ class MiniCRMConnector:
             if (
                 self.fixed_appointment_condition(i)
                 and i[self.felmero_field]
-                and i[self.date_field].date() >= datetime.now().date()
+                and i[self.date_field].date() > datetime.now().date()
             ):
                 appointments.append(
                     Generation.Individual.Chromosome(
@@ -1000,9 +1006,9 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 5
-population_size = 5
-max_generations = 5
+initial_population_size = 8
+population_size = 15
+max_generations = 15
 tournament_size = 4
 elitism_size = 1000000
 

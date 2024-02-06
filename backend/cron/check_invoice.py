@@ -43,16 +43,17 @@ def main(invoice_check: InvoiceCheck):
             details=f"adatlap: {adatlap.Id}",
         )
         query_xml = f"""
-            <?xml version="1.0" encoding="UTF-8"?>
-            <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
-            <szamlaagentkulcs>{SZAMLA_AGENT_KULCS if not invoice_check.test else TESZT_SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
-                <rendelesSzam>{adatlap.Id}</rendelesSzam>
-            </xmlszamlaxml>
-        """.strip()
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
+                    <szamlaagentkulcs>{SZAMLA_AGENT_KULCS if not invoice_check.test else TESZT_SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
+                        <rendelesSzam>{adatlap.Id}</rendelesSzam>
+                    </xmlszamlaxml>
+                """.strip()
         query_response = requests.post(
             "https://www.szamlazz.hu/szamla/",
             files={"action-szamla_agent_xml": ("invoice.xml", query_xml)},
         )
+        print(query_response.headers.keys())
         if "szlahu_szamlaszam" in query_response.headers.keys():
             szamlaszam = query_response.headers["szlahu_szamlaszam"]
             if szamlaszam[0] == "E":
@@ -84,12 +85,13 @@ def main(invoice_check: InvoiceCheck):
                 details=f"adatlap: {adatlap.Id}",
             )
             continue
-        log(
-            "Nincs díjbekérő",
-            "INFO",
-            script_name=script_name,
-            details=f"adatlap: {adatlap.Id}",
-        )
+        else:
+            log(
+                "Nincs díjbekérő",
+                "INFO",
+                script_name=script_name,
+                details=f"adatlap: {adatlap.Id}",
+            )
 
 
 def update_data_felmeres(_: MiniCrmAdatlapok, szamlaszam):
