@@ -119,6 +119,10 @@ class RolesSerializer(serializers.ModelSerializer):
 
 
 class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
+    FelmeresCim = serializers.CharField(
+        required=False, allow_null=True, write_only=True
+    )
+
     class Meta:
         model = models.MiniCrmAdatlapok
         fields = [
@@ -135,6 +139,12 @@ class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
             "Felmero2",
             "IngatlanKepe",
             "CreatedAt",
+            "Beepitok",
+            "DateTime1953",
+            "KiMerteFel2",
+            "FelmeresDatuma2",
+            "RendelesSzama",
+            "FelmeresCim",
         ]
 
 

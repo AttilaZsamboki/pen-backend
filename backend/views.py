@@ -675,9 +675,11 @@ def get_unas_order_data(type):
             business_kapcsolat = business_kapcsolat["response"]
         else:
             business_kapcsolat = {
-                "Name": kapcsolat["LastName"] + " " + kapcsolat["FirstName"]
-                if not kapcsolat.get("Name")
-                else kapcsolat.get("Name"),
+                "Name": (
+                    kapcsolat["LastName"] + " " + kapcsolat["FirstName"]
+                    if not kapcsolat.get("Name")
+                    else kapcsolat.get("Name")
+                ),
                 "EUVatNumber": "",
                 **kapcsolat,
             }
@@ -974,9 +976,9 @@ class UnasSetProduct(APIView):
                     products = [
                         {
                             "id": element.find("local_id").text,
-                            "sku": element.find("Sku").text
-                            if element.find("Sku")
-                            else "",
+                            "sku": (
+                                element.find("Sku").text if element.find("Sku") else ""
+                            ),
                         }
                         for element in root.iter("Product")
                         if element
@@ -1200,18 +1202,8 @@ class MiniCrmAdatlapok(generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
     permission_classes = [AllowAny]
     queryset = models.MiniCrmAdatlapok.objects.all()
-    filterset_fields = ["CategoryId"]
-
-    def get_queryset(self):
-        id = self.request.query_params.get("Id")
-        if id:
-            id = id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
-        status_id = self.request.query_params.get("StatusId")
-        if status_id:
-            status_id = status_id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
-        return super().get_queryset()
+    pagination_class = PageNumberPagination
+    filterset_fields = "__all__"
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):

@@ -120,21 +120,13 @@ class Generation:
                         ]
                         if distance:
                             print(
-                                "Distance calculated for "
-                                + str(origin)
+                                str(origin)
                                 + " -> "
                                 + str(dest)
                                 + " : "
                                 + str(distance[0].duration)
                             )
                             distances.append(distance[0].duration)
-                        else:
-                            print(
-                                "No distance calculated for "
-                                + str(origin)
-                                + " -> "
-                                + str(dest)
-                            )
 
             return sum(distances)
 
@@ -605,21 +597,30 @@ class Generation:
     def generate_route(self):
         routes = self.Individual(self)
         for day in self.dates:
-            homes = [
-                self.Individual.Chromosome(
-                    date=datetime.combine(day, datetime.min.time()),
-                    dates=[],
-                    zip=i.zip,
-                    felmero=i,
-                )
-                for i in self.qualified_salesmen
-            ]
+
+            def get_homes(start=True):
+                return [
+                    self.Individual.Chromosome(
+                        date=datetime.combine(
+                            day, datetime.min.time() if start else datetime.max.time()
+                        ),
+                        dates=[],
+                        zip=i.zip,
+                        felmero=i,
+                    )
+                    for i in self.qualified_salesmen
+                ]
+
             day_cities = self.Individual(
                 outer_instance=self,
                 data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
             day_cities = self.Individual(
-                data=(homes + day_cities.data if day_cities.data else homes),
+                data=(
+                    get_homes()
+                    + (day_cities.data if day_cities.data else [])
+                    + get_homes(start=False)
+                ),
                 outer_instance=self,
             )
 
@@ -802,7 +803,9 @@ class Generation:
         ChromosomeModel.objects.bulk_create(
             [
                 ChromosomeModel(
-                    level=i + 1, duration=sorted_fitnesses[i], **chromosome.__dict__
+                    level=i + 1,
+                    duration=individual.calculate_distance(),
+                    **chromosome.__dict__,
                 )
                 for i, individual in enumerate(sorted_population)
                 for chromosome in individual.data
@@ -1007,8 +1010,8 @@ class MiniCRMConnector:
 
 
 initial_population_size = 8
-population_size = 15
-max_generations = 15
+population_size = 20
+max_generations = 20
 tournament_size = 4
 elitism_size = 1000000
 
