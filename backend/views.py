@@ -1202,7 +1202,6 @@ class MiniCrmAdatlapok(generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
     permission_classes = [AllowAny]
     queryset = models.MiniCrmAdatlapok.objects.all()
-    filterset_fields = "__all__"
 
     def get_queryset(self):
         id = self.request.query_params.get("Id")
