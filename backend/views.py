@@ -1202,7 +1202,6 @@ class MiniCrmAdatlapok(generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
     permission_classes = [AllowAny]
     queryset = models.MiniCrmAdatlapok.objects.all()
-    pagination_class = PageNumberPagination
     filterset_fields = "__all__"
 
 
