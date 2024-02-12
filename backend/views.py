@@ -1106,7 +1106,7 @@ def upload_file(request):
         )
 
         try:
-            felmeres_id = request.query_params.get("felmeres_id")
+            felmeres_id = request.GET.get("felmeres_id")
             for file in files:
                 new_file_name = f"{felmeres_id}{file.name}"
                 s3_client.upload_fileobj(
