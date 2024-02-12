@@ -1106,7 +1106,7 @@ def upload_file(request):
         )
 
         try:
-            adatlap_id = request.META.get("HTTP_X_ADATLAP_ID")
+            adatlap_id = request.headers.get("X-Adatlap-Id")
             for file in files:
                 new_file_name = f"{adatlap_id}{file.name}"
                 s3_client.upload_fileobj(
