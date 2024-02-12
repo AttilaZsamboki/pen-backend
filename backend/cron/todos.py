@@ -111,14 +111,6 @@ def main(
                     + ", Error: "
                     + str(todo.text),
                 )
-        else:
-            log(
-                "Az adatlaphoz már létezik feladat",
-                "INFO",
-                script_name=script_name,
-                details=adatlap.Id,
-            )
-            continue
 
 
 def filter_adatlapok(adatlap: MiniCrmAdatlapok):
@@ -267,7 +259,7 @@ models = [
         "todo_comment": garancia_comment,
         "deadline_field": "FelmeresDatuma3",
         "type": lambda adatlap: [
-            j for j, k in todo_map.items() if k == adatlap.BejelentesTipusa
+            j for j, k in todo_map["33"].items() if k == adatlap.BejelentesTipusa
         ],
     },
     {

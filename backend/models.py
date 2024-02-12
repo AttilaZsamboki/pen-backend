@@ -1674,6 +1674,8 @@ class MiniCrmAdatlapok(models.Model):
     SzamlazasIngatlanCimre2 = models.CharField(max_length=100, blank=True, null=True)
     FizetesiMod4 = models.CharField(max_length=50, blank=True, null=True)
     FizetesiHatarido2 = models.DateTimeField(blank=True, null=True)
+    SzamlaSorszama = models.TextField(blank=True, null=True)
+    VisszafizetesDatuma2 = models.DateTimeField(blank=True, null=True)
 
     @property
     def StatusIdStr(self):

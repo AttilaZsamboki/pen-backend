@@ -67,7 +67,7 @@ def update_adatlap_fields(id, fields, script_name=None):
     if adatlap.status_code == 200:
         return {"code": 200, "data": adatlap.json()}
     else:
-        return {"code": adatlap.status_code, "reason": adatlap.reason}
+        return {"code": adatlap.status_code, "reason": adatlap.text}
 
 
 def get_all_adatlap(
@@ -280,7 +280,9 @@ statuses = {
 
 
 def update_todo(id, fields, script_name=None):
-    return update_request(id=id, fields=fields, endpoint="ToDo", script_name=script_name)
+    return update_request(
+        id=id, fields=fields, endpoint="ToDo", script_name=script_name
+    )
 
 
 def create_order(adatlap, offer_id, adatlap_status=None, project_data=None):
@@ -407,9 +409,11 @@ def get_order_address(order_id=None, order=None, script_name=None):
         order = get_order(order_id=order_id, script_name=script_name)
     return {
         "status": order["status"],
-        "response": order["response"]["Customer"]
-        if order["status"] == "Success"
-        else order["response"],
+        "response": (
+            order["response"]["Customer"]
+            if order["status"] == "Success"
+            else order["response"]
+        ),
     }
 
 

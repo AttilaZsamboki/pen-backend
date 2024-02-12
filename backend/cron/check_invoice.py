@@ -53,6 +53,7 @@ def main(invoice_check: InvoiceCheck):
             "https://www.szamlazz.hu/szamla/",
             files={"action-szamla_agent_xml": ("invoice.xml", query_xml)},
         )
+        print(adatlap.Id)
         print(query_response.headers.keys())
         if "szlahu_szamlaszam" in query_response.headers.keys():
             szamlaszam = query_response.headers["szlahu_szamlaszam"]

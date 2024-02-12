@@ -98,7 +98,6 @@ def create_invoice_or_proform(
     if adatlapok == []:
         log(f"Nincs új {name}", "INFO", script_name)
         return
-    print(adatlapok)
     for adatlap in adatlapok:
         log(
             "Új adatlap",
@@ -124,7 +123,6 @@ def create_invoice_or_proform(
                     or query_response.headers["szlahu_szamlaszam"][0] == "E"
                     or cash
                 ):
-                    print(query_response.headers["szlahu_szamlaszam"])
                     log(
                         f"Már létezik {name}",
                         "INFO",
@@ -288,15 +286,7 @@ def create_invoice_or_proform(
                     <!-- should we send the e-mail to the customer (by email) -->
                     <adoszam>{business_contact["VatNumber"]}</adoszam>
                     <!-- fiscal number/tax number -->
-                    <postazasiNev><![CDATA[{adatlap.Name}]]></postazasiNev>
-                    <!--delivery name/postal name -->
-                    <postazasiIrsz>{adatlap.__dict__[zip_field]}</postazasiIrsz>
-                    <!--delivery ZIP code/postal ZIP code -->
-                    <postazasiTelepules><![CDATA[{adatlap.__dict__[city_field]}]]></postazasiTelepules>
-                    <!--delivery city/postal city -->
-                    <postazasiCim><![CDATA[{adatlap.__dict__[address_field]}]]></postazasiCim>
-                    <!--delivery address/postal address -->
-                    <azonosito>{adatlap.Id}</azonosito>
+                    <azonosito>{adatlap.MainContactId}</azonosito>
                     <!-- identification -->
                     <telefonszam>{contact["Phone"]}</telefonszam>
                     <!-- phone number -->
@@ -396,19 +386,19 @@ def create_invoice_or_proform(
 
 def update_data_garancia(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam):
     return {
-        "DijbekeroPdf3"
-        if proform
-        else "SzamlaPdf2": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+        (
+            "DijbekeroPdf3" if proform else "SzamlaPdf2"
+        ): f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
         "StatusId": "Utalásra vár" if proform else adatlap.StatusId,
         "DijbekeroSzama3" if proform else "SzamlaSorszama": szamlaszam,
         f"KiallitasDatuma{'3' if proform else '4'}": datetime.datetime.now().strftime(
             "%Y-%m-%d"
         ),
         "FizetesiHatarido2": (
-            datetime.datetime.now() + datetime.timedelta(days=3)
-        ).strftime("%Y-%m-%d")
-        if proform
-        else adatlap.FizetesiHatarido2.strftime("%Y-%m-%d"),
+            (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
+            if proform
+            else adatlap.FizetesiHatarido2.strftime("%Y-%m-%d")
+        ),
         (
             "DijbekeroUzenetek2" if proform else "SzamlaUzenetek2"
         ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
@@ -438,17 +428,17 @@ def proform_deadline(adatlap: MiniCrmAdatlapok):
 
 def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam):
     return {
-        "DijbekeroPdf2"
-        if proform
-        else "SzamlaPdf": f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
+        (
+            "DijbekeroPdf2" if proform else "SzamlaPdf"
+        ): f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
         "StatusId": "Utalásra vár" if proform else adatlap.StatusId,
         "DijbekeroSzama2" if proform else "SzamlaSorszama2": szamlaszam,
         f"KiallitasDatuma{'' if proform else '2'}": datetime.datetime.now().strftime(
             "%Y-%m-%d"
         ),
-        "FizetesiHatarido": proform_deadline(adatlap)
-        if proform
-        else adatlap.FizetesiHatarido,
+        "FizetesiHatarido": (
+            proform_deadline(adatlap) if proform else adatlap.FizetesiHatarido
+        ),
         (
             "DijbekeroUzenetek" if proform else "SzamlaUzenetek"
         ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",

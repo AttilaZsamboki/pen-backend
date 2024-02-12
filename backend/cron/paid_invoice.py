@@ -15,7 +15,6 @@ def main(
     StatusId="",
     UpdateAdatlap=None,
     test=False,
-    get_szamlaszam=lambda x: x.DijbekeroSzama2,
 ):
     log(
         "Kifizetettt számlák csekkolása megkezdődött",
@@ -31,12 +30,12 @@ def main(
 
     for adatlap in MiniCrmAdatlapok.objects.filter(StatusId=StatusId):
         query_xml = f"""
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
-                        <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
-                        <rendelesSzam>{adatlap.Id}</rendelesSzam>
-                    </xmlszamlaxml>
-                """.strip()
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
+                <szamlaagentkulcs>{SZAMLA_AGENT_KULCS}</szamlaagentkulcs>
+                    <rendelesSzam>{adatlap.Id}</rendelesSzam>
+                </xmlszamlaxml>
+            """.strip()
         query_response = requests.post(
             "https://www.szamlazz.hu/szamla/",
             files={"action-szamla_agent_xml": ("invoice.xml", query_xml)},
@@ -115,7 +114,6 @@ modules = [
         "StatusId": 3128,
         "UpdateAdatlap": update_garancia_adatlap,
         "test": True,
-        "get_szamlaszam": lambda x: x.DijbekeroSzama3,
     },
 ]
 
