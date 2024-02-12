@@ -1106,11 +1106,13 @@ def upload_file(request):
         )
 
         try:
+            adatlap_id = request.META.get("HTTP_X_ADATLAP_ID")
             for file in files:
+                new_file_name = f"{adatlap_id}{file.name}"
                 s3_client.upload_fileobj(
                     file,
                     os.getenv("AWS_BUCKET_NAME"),
-                    file.name,
+                    new_file_name,
                     ExtraArgs={"ACL": "public-read", "ContentType": file.content_type},
                 )
             return JsonResponse(
