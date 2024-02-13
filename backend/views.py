@@ -40,10 +40,9 @@ from .utils.minicrm import (
     address_details,
     address_ids,
     contact_details,
-    get_all_adatlap_details,
     update_offer_order,
 )
-from .utils.utils import replace_self_closing_tags
+from .utils.utils import replace_self_closing_tags, get_address
 
 # Create your views here.
 from typing import List, Dict
@@ -1200,21 +1199,69 @@ class UserRole(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MiniCrmAdatlapok(generics.ListAPIView):
-    serializer_class = serializers.MiniCrmAdatlapokSerializer
-    permission_classes = [AllowAny]
-    queryset = models.MiniCrmAdatlapok.objects.all()
+class MiniCrmAdatlapok(APIView):
+    def get(self, request):
+        queryset = models.MiniCrmAdatlapok.objects.all()
 
-    def get_queryset(self):
-        id = self.request.query_params.get("Id")
+        # Filtering
+        id = request.query_params.get("Id")
         if id:
             id = id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
-        status_id = self.request.query_params.get("StatusId")
+            queryset = queryset.filter(Id__in=id)
+        status_id = request.query_params.get("StatusId")
         if status_id:
             status_id = status_id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
-        return super().get_queryset()
+            queryset = queryset.filter(StatusId__in=status_id)
+        if request.query_params.get("CategoryId"):
+            queryset = queryset.filter(
+                CategoryId=request.query_params.get("CategoryId")
+            )
+
+        adatlapok = []
+        for i in queryset.values(
+            "Id",
+            "Name",
+            "CategoryId",
+            "StatusId",
+            "ContactId",
+            "FelmeresiDij",
+            "Telepules",
+            "Iranyitoszam",
+            "Orszag",
+            "Felmero2",
+            "IngatlanKepe",
+            "CreatedAt",
+            "Beepitok",
+            "DateTime1953",
+            "KiMerteFel2",
+            "FelmeresDatuma2",
+            "RendelesSzama",
+            "FelmeresLink",
+            "MainContactId",
+        ):
+            try:
+                felmeres_id = int(i["FelmeresLink"].split("/")[-1])
+                felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
+                if felmeres.exists():
+                    felmeres = felmeres.first()
+                    i["NetTotal"] = felmeres.netOrderTotal
+                    i["Tavolsag"] = felmeres.adatlap_id.Tavolsag
+                    i["FelmeresCim"] = get_address(felmeres.adatlap_id)
+                    contact = contact_details(i["ContactId"])
+                    if contact != "Error":
+                        contact = contact["response"]
+                        i["Phone"] = contact["Phone"]
+                        i["Email"] = contact["Email"]
+                else:
+                    print(traceback.format_exc())
+                    i["NetTotal"] = 0
+                    i["FelmeresCim"] = ""
+            except:
+                i["NetTotal"] = 0
+                i["FelmeresCim"] = ""
+
+            adatlapok.append(i)
+        return Response(adatlapok)
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
