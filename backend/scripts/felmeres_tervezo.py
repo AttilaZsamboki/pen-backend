@@ -949,13 +949,17 @@ class MiniCRMConnector:
                 and i[self.felmero_field]
                 and i[self.date_field].date() > datetime.now().date()
             ):
+                salesman = Salesmen.objects.filter(name=i[self.felmero_field])
+                if not salesman.exists():
+                    continue
+
                 appointments.append(
                     Generation.Individual.Chromosome(
                         dates=[i[self.date_field]],
                         date=i[self.date_field],
                         external_id=i[self.id_field],
                         zip=i[self.zip_field],
-                        felmero=Salesmen.objects.get(name=i[self.felmero_field]),
+                        felmero=salesman,
                     )
                 )
         return appointments
@@ -1057,23 +1061,26 @@ result = Generation(
     elitism_size=elitism_size,
 )
 
+
 def calculate_simpson_index(population):
     n = len(population)
     n_i = [0] * n
     for i in range(n):
-        for j in range(i +  1, n):
+        for j in range(i + 1, n):
             if population[i] == population[j]:
-                n_i[i] +=  1
-                n_i[j] +=  1
-    simpson_index = sum(n_i[i]**2 for i in range(n)) / (n * (n -  1))
+                n_i[i] += 1
+                n_i[j] += 1
+    simpson_index = sum(n_i[i] ** 2 for i in range(n)) / (n * (n - 1))
     return simpson_index
+
 
 def calculate_inverse_simpson_index(population):
     simpson_index = calculate_simpson_index(population)
-    if simpson_index ==  0:
+    if simpson_index == 0:
         print("Nem jól működik a generálás 100%-ig")
-        return float('inf')
-    return  1 / simpson_index
+        return float("inf")
+    return 1 / simpson_index
+
 
 # Example usage:
 
@@ -1082,8 +1089,6 @@ if __name__ == "__main__":
     result.create_distance_matrix()
 
     num_process = cpu_count()
-    population = result.generate_initial_population_batched(
-        num_processes=num_process
-    )
+    population = result.generate_initial_population_batched(num_processes=num_process)
     inverse_simpson_index = calculate_inverse_simpson_index(population)
     print(inverse_simpson_index)

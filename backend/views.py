@@ -1251,14 +1251,9 @@ class MiniCrmAdatlapok(APIView):
             "IngatlanKepe",
             "CreatedAt",
             "Cim2",
-            "Beepitok",
-            "DateTime1953",
-            "KiMerteFel2",
-            "FelmeresDatuma2",
-            "RendelesSzama",
-            "FelmeresLink",
-            "MainContactId",
-            "FizetesiMod3",
+            "FelmeresAdatok",
+            "FizetesiMod2",
+            "Tavolsag",
         ):
             try:
                 felmeres_id = int(i["FelmeresLink"].split("/")[-1])
@@ -1266,19 +1261,27 @@ class MiniCrmAdatlapok(APIView):
                 if felmeres.exists():
                     felmeres = felmeres.first()
                     i["Total"] = felmeres.grossOrderTotal
-                    i["Tavolsag"] = felmeres.adatlap_id.Tavolsag
-                    i["FelmeresCim"] = get_address(felmeres.adatlap_id)
                     contact = contact_details(i["ContactId"])
                     if contact != "Error":
                         contact = contact["response"]
                         i["Phone"] = contact["Phone"]
                         i["Email"] = contact["Email"]
-                else:
-                    i["Total"] = 0
-                    i["FelmeresCim"] = ""
+
+                order_adatlap = models.MiniCrmAdatlapok.objects.filter(
+                    FelmeresLink=i["FelmeresAdatok"]
+                )
+                if order_adatlap.exists():
+                    order = order_adatlap.first()
+                    i["Beepitok"] = order.Beepitok
+                    i["DateTime1953"] = order.DateTime1953
+                    i["FizetesiMod2"] = order.FizetesiMod3
             except:
-                i["Total"] = 0
-                i["FelmeresCim"] = ""
+                log(
+                    "Hiba akadt az adatlapok lekérdezése közben",
+                    "ERROR",
+                    "pen_get_adatlapok",
+                    details=traceback.format_exc(),
+                )
 
             adatlapok.append(i)
 
