@@ -371,6 +371,8 @@ class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
     permission_classes = [AllowAny]
+    pagination_class = PageNumberPagination
+    filterset_fields = "__all__"
 
 
 def felmeresek_detail(pk):
@@ -1218,34 +1220,28 @@ class MiniCrmAdatlapok(APIView):
                 CategoryId=request.query_params.get("CategoryId")
             )
 
-        paginator = PageNumberPagination()
-        paginated_queryset: List[models.MiniCrmAdatlapok] = paginator.paginate_queryset(
-            queryset.values(
-                "Id",
-                "Name",
-                "CategoryId",
-                "StatusId",
-                "ContactId",
-                "FelmeresiDij",
-                "Telepules",
-                "Iranyitoszam",
-                "Orszag",
-                "Felmero2",
-                "IngatlanKepe",
-                "CreatedAt",
-                "Beepitok",
-                "DateTime1953",
-                "KiMerteFel2",
-                "FelmeresDatuma2",
-                "RendelesSzama",
-                "FelmeresLink",
-                "MainContactId",
-            ),
-            request,
-        )
-
         adatlapok = []
-        for i in paginated_queryset:
+        for i in queryset.values(
+            "Id",
+            "Name",
+            "CategoryId",
+            "StatusId",
+            "ContactId",
+            "FelmeresiDij",
+            "Telepules",
+            "Iranyitoszam",
+            "Orszag",
+            "Felmero2",
+            "IngatlanKepe",
+            "CreatedAt",
+            "Beepitok",
+            "DateTime1953",
+            "KiMerteFel2",
+            "FelmeresDatuma2",
+            "RendelesSzama",
+            "FelmeresLink",
+            "MainContactId",
+        ):
             try:
                 felmeres_id = int(i["FelmeresLink"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
@@ -1268,8 +1264,7 @@ class MiniCrmAdatlapok(APIView):
 
             adatlapok.append(i)
 
-        paginated_response = paginator.get_paginated_response(adatlapok)
-        return paginated_response
+        return Response(adatlapok)
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
@@ -1413,7 +1408,7 @@ class SchedulerSettings(generics.ListAPIView):
     serializer_class = serializers.SchedulerSettingsSerializer
     queryset = models.SchedulerSettings.objects.all()
     permission_classes = [AllowAny]
-    filter_fields = "__all__"
+    filterset_fields = "__all__"
 
 
 import requests
