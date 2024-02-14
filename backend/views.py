@@ -1248,15 +1248,15 @@ class MiniCrmAdatlapok(APIView):
             "Iranyitoszam",
             "Orszag",
             "Felmero2",
-            "IngatlanKepe",
             "CreatedAt",
             "Cim2",
             "FelmeresAdatok",
             "FizetesiMod2",
             "Tavolsag",
+            "FelmeresIdopontja2",
         ):
             try:
-                felmeres_id = int(i["FelmeresLink"].split("/")[-1])
+                felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
                 if felmeres.exists():
                     felmeres = felmeres.first()
@@ -1275,7 +1275,9 @@ class MiniCrmAdatlapok(APIView):
                     i["Beepitok"] = order.Beepitok
                     i["DateTime1953"] = order.DateTime1953
                     i["FizetesiMod2"] = order.FizetesiMod3
+                    i["RendelesSzama"] = order.RendelesSzama
             except:
+                print(traceback.format_exc())
                 log(
                     "Hiba akadt az adatlapok lekérdezése közben",
                     "ERROR",
