@@ -1200,6 +1200,7 @@ class UserRole(APIView):
 
 
 class MiniCrmAdatlapok(APIView):
+
     def get(self, request):
         queryset = models.MiniCrmAdatlapok.objects.all()
 
@@ -1217,28 +1218,34 @@ class MiniCrmAdatlapok(APIView):
                 CategoryId=request.query_params.get("CategoryId")
             )
 
+        paginator = PageNumberPagination()
+        paginated_queryset: List[models.MiniCrmAdatlapok] = paginator.paginate_queryset(
+            queryset.values(
+                "Id",
+                "Name",
+                "CategoryId",
+                "StatusId",
+                "ContactId",
+                "FelmeresiDij",
+                "Telepules",
+                "Iranyitoszam",
+                "Orszag",
+                "Felmero2",
+                "IngatlanKepe",
+                "CreatedAt",
+                "Beepitok",
+                "DateTime1953",
+                "KiMerteFel2",
+                "FelmeresDatuma2",
+                "RendelesSzama",
+                "FelmeresLink",
+                "MainContactId",
+            ),
+            request,
+        )
+
         adatlapok = []
-        for i in queryset.values(
-            "Id",
-            "Name",
-            "CategoryId",
-            "StatusId",
-            "ContactId",
-            "FelmeresiDij",
-            "Telepules",
-            "Iranyitoszam",
-            "Orszag",
-            "Felmero2",
-            "IngatlanKepe",
-            "CreatedAt",
-            "Beepitok",
-            "DateTime1953",
-            "KiMerteFel2",
-            "FelmeresDatuma2",
-            "RendelesSzama",
-            "FelmeresLink",
-            "MainContactId",
-        ):
+        for i in paginated_queryset:
             try:
                 felmeres_id = int(i["FelmeresLink"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
@@ -1253,7 +1260,6 @@ class MiniCrmAdatlapok(APIView):
                         i["Phone"] = contact["Phone"]
                         i["Email"] = contact["Email"]
                 else:
-                    print(traceback.format_exc())
                     i["NetTotal"] = 0
                     i["FelmeresCim"] = ""
             except:
@@ -1261,7 +1267,9 @@ class MiniCrmAdatlapok(APIView):
                 i["FelmeresCim"] = ""
 
             adatlapok.append(i)
-        return Response(adatlapok)
+
+        paginated_response = paginator.get_paginated_response(adatlapok)
+        return paginated_response
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
