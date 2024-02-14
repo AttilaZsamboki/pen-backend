@@ -1258,13 +1258,14 @@ class MiniCrmAdatlapok(APIView):
             "RendelesSzama",
             "FelmeresLink",
             "MainContactId",
+            "FizetesiMod3",
         ):
             try:
                 felmeres_id = int(i["FelmeresLink"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
                 if felmeres.exists():
                     felmeres = felmeres.first()
-                    i["NetTotal"] = felmeres.netOrderTotal
+                    i["Total"] = felmeres.grossOrderTotal
                     i["Tavolsag"] = felmeres.adatlap_id.Tavolsag
                     i["FelmeresCim"] = get_address(felmeres.adatlap_id)
                     contact = contact_details(i["ContactId"])
@@ -1273,10 +1274,10 @@ class MiniCrmAdatlapok(APIView):
                         i["Phone"] = contact["Phone"]
                         i["Email"] = contact["Email"]
                 else:
-                    i["NetTotal"] = 0
+                    i["Total"] = 0
                     i["FelmeresCim"] = ""
             except:
-                i["NetTotal"] = 0
+                i["Total"] = 0
                 i["FelmeresCim"] = ""
 
             adatlapok.append(i)
