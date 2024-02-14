@@ -8,6 +8,9 @@ import traceback
 import uuid
 import xml.etree.ElementTree as ET
 
+# Create your views here.
+from typing import Dict, List
+
 import boto3
 from django.db import connection
 from django.db.models import CharField, F, Q, Value
@@ -42,10 +45,7 @@ from .utils.minicrm import (
     contact_details,
     update_offer_order,
 )
-from .utils.utils import replace_self_closing_tags, get_address
-
-# Create your views here.
-from typing import List, Dict
+from .utils.utils import get_address, replace_self_closing_tags
 
 
 def map_wh_fields(data: Dict, field_names: List[str]):
@@ -367,12 +367,28 @@ class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 
+from rest_framework.filters import SearchFilter
+
+
 class FelmeresekList(generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
     permission_classes = [AllowAny]
     pagination_class = PageNumberPagination
-    filterset_fields = "__all__"
+    filter_backends = [SearchFilter]
+    search_fields = [
+        "adatlap_id__Name",
+        "adatlap_id__Id",
+        "adatlap_id__Felmero2",
+        "adatlap_id__FizetesiMod2",
+        "adatlap_id__Cim2",
+        "adatlap_id__Telepules",
+        "adatlap_id__Iranyitoszam",
+        "status",
+        "type",
+        "subject",
+        "garancia",
+    ]
 
 
 def felmeresek_detail(pk):
@@ -1234,6 +1250,7 @@ class MiniCrmAdatlapok(APIView):
             "Felmero2",
             "IngatlanKepe",
             "CreatedAt",
+            "Cim2",
             "Beepitok",
             "DateTime1953",
             "KiMerteFel2",
