@@ -1278,12 +1278,6 @@ class MiniCrmAdatlapok(APIView):
                     i["RendelesSzama"] = order.RendelesSzama
             except:
                 print(traceback.format_exc())
-                log(
-                    "Hiba akadt az adatlapok lekérdezése közben",
-                    "ERROR",
-                    "pen_get_adatlapok",
-                    details=traceback.format_exc(),
-                )
 
             adatlapok.append(i)
 
