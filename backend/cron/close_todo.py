@@ -14,12 +14,6 @@ class Project:
         return str(self.category_id)
 
     def close_todo(self, adatlap_id, type):
-        log(
-            "Teendő lezárása",
-            "INFO",
-            script_name="pen_close_todo",
-            details=adatlap_id,
-        )
         todos = list_to_dos(
             adatlap_id,
             criteria=lambda x: x["Status"] == "Open"
@@ -27,29 +21,7 @@ class Project:
         )
         if todos:
             for todo in todos:
-                resp = update_todo(todo["Id"], {"Status": "Closed"})
-                if resp.status_code == 200:
-                    log(
-                        "Státusz frissítve",
-                        "INFO",
-                        script_name="pen_close_todo",
-                        details=adatlap_id,
-                    )
-                else:
-                    log(
-                        "Státusz frissítése sikertelen",
-                        "ERROR",
-                        script_name="pen_close_todo",
-                        details=resp.text,
-                        data={"Id": adatlap_id},
-                    )
-        else:
-            log(
-                "Nincs ilyen teendő",
-                "ERROR",
-                script_name="pen_close_todo",
-                details=type,
-            )
+                update_todo(todo["Id"], {"Status": "Closed"})
 
 
 felmeres_action_map = {
@@ -159,19 +131,12 @@ modules = [
 
 
 def main(module: Project):
-    log("Összes teendő lekérdezése elindult", "INFO", script_name="pen_close_todo")
     sheet = get_spreadsheet("[SYS] ÖSSZES TEENDŐ", module.get_category_id_str())
     for row in sheet.get("B2:C"):
         if len(row) == 2:
             data = {"Id": row[0].split("/")[-1], "Type": row[1]}
             adatlap = MiniCrmAdatlapok.objects.filter(Id=data["Id"]).first()
             if adatlap is None:
-                log(
-                    "Nincs ilyen adatlap",
-                    "ERROR",
-                    script_name="close_todo",
-                    details=data["Id"],
-                )
                 continue
 
             for condition in module.action_map:

@@ -1217,21 +1217,78 @@ class UserRole(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MiniCrmAdatlapok(generics.ListAPIView):
-    serializer_class = serializers.MiniCrmAdatlapokSerializer
-    permission_classes = [AllowAny]
-    queryset = models.MiniCrmAdatlapok.objects.all()
+class MiniCrmAdatlapokV2(APIView):
+    pagination_class = PageNumberPagination
 
-    def get_queryset(self):
-        id = self.request.query_params.get("Id")
+    def get(self, request):
+        queryset = models.MiniCrmAdatlapok.objects.all()
+
+        # Filtering
+        id = request.query_params.get("Id")
         if id:
             id = id.split(",")
             return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
         status_id = self.request.query_params.get("StatusId")
         if status_id:
             status_id = status_id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
-        return super().get_queryset()
+            queryset = queryset.filter(StatusId__in=status_id)
+        if request.query_params.get("CategoryId"):
+            queryset = queryset.filter(
+                CategoryId=request.query_params.get("CategoryId")
+            )
+
+        adatlapok = []
+        for i in queryset.values(
+            "Id",
+            "Name",
+            "CategoryId",
+            "StatusId",
+            "ContactId",
+            "FelmeresiDij",
+            "Telepules",
+            "Iranyitoszam",
+            "Orszag",
+            "Felmero2",
+            "CreatedAt",
+            "Cim2",
+            "FelmeresAdatok",
+            "FizetesiMod2",
+            "Tavolsag",
+            "FelmeresIdopontja2",
+        ):
+            try:
+                felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
+                felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
+                if felmeres.exists():
+                    felmeres = felmeres.first()
+                    i["Total"] = felmeres.grossOrderTotal
+                    contact = contact_details(i["ContactId"])
+                    if contact != "Error":
+                        contact = contact["response"]
+                        i["Phone"] = contact["Phone"]
+                        i["Email"] = contact["Email"]
+
+                order_adatlap = models.MiniCrmAdatlapok.objects.filter(
+                    FelmeresLink=i["FelmeresAdatok"]
+                )
+                if order_adatlap.exists():
+                    order = order_adatlap.first()
+                    i["Beepitok"] = order.Beepitok
+                    i["DateTime1953"] = order.DateTime1953
+                    i["FizetesiMod2"] = order.FizetesiMod3
+                    i["RendelesSzama"] = order.RendelesSzama
+            except:
+                print(traceback.format_exc())
+                log(
+                    "Hiba akadt az adatlapok lekérdezése közben",
+                    "ERROR",
+                    "pen_get_adatlapok",
+                    details=traceback.format_exc(),
+                )
+
+            adatlapok.append(i)
+
+        return Response(adatlapok)
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
