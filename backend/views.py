@@ -1217,7 +1217,7 @@ class UserRole(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MiniCrmAdatlapok(APIView):
+class MiniCrmAdatlapokV2(APIView):
     pagination_class = PageNumberPagination
 
     def get(self, request):
@@ -1317,6 +1317,23 @@ class MiniCrmAdatlapok(APIView):
             adatlapok.append(i)
 
         return paginator.get_paginated_response(adatlapok)
+
+
+class MiniCrmAdatlapok(generics.ListAPIView):
+    serializer_class = serializers.MiniCrmAdatlapokSerializer
+    permission_classes = [AllowAny]
+    queryset = models.MiniCrmAdatlapok.objects.all()
+
+    def get_queryset(self):
+        id = self.request.query_params.get("Id")
+        if id:
+            id = id.split(",")
+            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
+        status_id = self.request.query_params.get("StatusId")
+        if status_id:
+            status_id = status_id.split(",")
+            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
+        return super().get_queryset()
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
