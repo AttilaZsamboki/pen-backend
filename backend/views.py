@@ -1290,6 +1290,23 @@ class MiniCrmAdatlapokV2(APIView):
 
         return Response(adatlapok)
 
+class MiniCrmAdatlapok(generics.ListAPIView):
+    serializer_class = serializers.MiniCrmAdatlapokSerializer
+    permission_classes = [AllowAny]
+    queryset = models.MiniCrmAdatlapok.objects.all()
+
+    def get_queryset(self):
+        id = self.request.query_params.get("Id")
+        if id:
+            id = id.split(",")
+            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
+        status_id = self.request.query_params.get("StatusId")
+        if status_id:
+            status_id = status_id.split(",")
+            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
+        return super().get_queryset()
+
+
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
