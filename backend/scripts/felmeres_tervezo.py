@@ -959,7 +959,7 @@ class MiniCRMConnector:
                         date=i[self.date_field],
                         external_id=i[self.id_field],
                         zip=i[self.zip_field],
-                        felmero=salesman,
+                        felmero=salesman.first(),
                     )
                 )
         return appointments
