@@ -1223,12 +1223,36 @@ class MiniCrmAdatlapokV2(APIView):
     def get(self, request):
         queryset = models.MiniCrmAdatlapok.objects.all()
 
+        search_query = request.query_params.get("search", None)
+        if search_query:
+            search_terms = search_query.split()
+            search_conditions = Q()
+            for term in search_terms:
+                search_conditions &= (
+                    Q(Name__icontains=term)
+                    | Q(CategoryId__icontains=term)
+                    | Q(StatusId__icontains=term)
+                    | Q(ContactId__icontains=term)
+                    | Q(FelmeresiDij__icontains=term)
+                    | Q(Telepules__icontains=term)
+                    | Q(Iranyitoszam__icontains=term)
+                    | Q(Orszag__icontains=term)
+                    | Q(Felmero2__icontains=term)
+                    | Q(CreatedAt__icontains=term)
+                    | Q(Cim2__icontains=term)
+                    | Q(FelmeresAdatok__icontains=term)
+                    | Q(FizetesiMod2__icontains=term)
+                    | Q(Tavolsag__icontains=term)
+                    | Q(FelmeresIdopontja2__icontains=term)
+                )
+            queryset = queryset.filter(search_conditions)
+
         # Filtering
         id = request.query_params.get("Id")
         if id:
             id = id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
-        status_id = self.request.query_params.get("StatusId")
+            queryset = queryset.filter(Id__in=id)
+        status_id = request.query_params.get("StatusId")
         if status_id:
             status_id = status_id.split(",")
             queryset = queryset.filter(StatusId__in=status_id)
@@ -1237,26 +1261,35 @@ class MiniCrmAdatlapokV2(APIView):
                 CategoryId=request.query_params.get("CategoryId")
             )
 
+        paginator = self.pagination_class()
+        paginated_queryset = paginator.paginate_queryset(
+            queryset.values(
+                "Id",
+                "Name",
+                "CategoryId",
+                "StatusId",
+                "ContactId",
+                "FelmeresiDij",
+                "Telepules",
+                "Iranyitoszam",
+                "Orszag",
+                "Felmero2",
+                "CreatedAt",
+                "Cim2",
+                "FelmeresAdatok",
+                "FizetesiMod2",
+                "Tavolsag",
+                "FelmeresIdopontja2",
+            ),
+            request,
+        )
+
         adatlapok = []
-        for i in queryset.values(
-            "Id",
-            "Name",
-            "CategoryId",
-            "StatusId",
-            "ContactId",
-            "FelmeresiDij",
-            "Telepules",
-            "Iranyitoszam",
-            "Orszag",
-            "Felmero2",
-            "CreatedAt",
-            "Cim2",
-            "FelmeresAdatok",
-            "FizetesiMod2",
-            "Tavolsag",
-            "FelmeresIdopontja2",
-        ):
+        for i in paginated_queryset:
             try:
+                if not i["FelmeresAdatok"]:
+                    adatlapok.append(i)
+                    continue
                 felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
                 if felmeres.exists():
@@ -1265,8 +1298,9 @@ class MiniCrmAdatlapokV2(APIView):
                     contact = contact_details(i["ContactId"])
                     if contact != "Error":
                         contact = contact["response"]
-                        i["Phone"] = contact["Phone"]
-                        i["Email"] = contact["Email"]
+                        if type(contact) != str:
+                            i["Phone"] = contact["Phone"]
+                            i["Email"] = contact["Email"]
 
                 order_adatlap = models.MiniCrmAdatlapok.objects.filter(
                     FelmeresLink=i["FelmeresAdatok"]
@@ -1279,16 +1313,11 @@ class MiniCrmAdatlapokV2(APIView):
                     i["RendelesSzama"] = order.RendelesSzama
             except:
                 print(traceback.format_exc())
-                log(
-                    "Hiba akadt az adatlapok lekérdezése közben",
-                    "ERROR",
-                    "pen_get_adatlapok",
-                    details=traceback.format_exc(),
-                )
 
             adatlapok.append(i)
 
-        return Response(adatlapok)
+        return paginator.get_paginated_response(adatlapok)
+
 
 class MiniCrmAdatlapok(generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
@@ -1305,7 +1334,6 @@ class MiniCrmAdatlapok(generics.ListAPIView):
             status_id = status_id.split(",")
             return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
         return super().get_queryset()
-
 
 
 class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
