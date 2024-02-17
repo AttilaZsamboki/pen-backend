@@ -186,7 +186,7 @@ Tel: {contact["Phone"]} 
 Email: {contact["Email"]} 
 
 Beépítők: {adatlap.Beepitok} 
-Beépítés ideje: {adatlap.DateTime1953} 
+Beépítés ideje: {adatlap.DateTime1953.strftime("%Y-%m-%d %H:%M:%S")} 
 Fizetési mód: {adatlap.FizetesiMod3}
 
 Teljes bruttó összeg: {str(round_to_five(order.grossOrderTotal))}Ft{f'''

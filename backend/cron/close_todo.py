@@ -125,7 +125,7 @@ garancia_action_map = {
 
 
 modules = [
-    # Project(23, felmeres_action_map),
+    Project(23, felmeres_action_map),
     Project(33, garancia_action_map),
 ]
 
@@ -141,7 +141,6 @@ def main(module: Project):
 
             for condition in module.action_map:
                 if isinstance(condition[0], tuple):
-                    print(data["Type"])
                     if data["Type"] in condition[0] and condition[1](adatlap):
                         module.close_todo(adatlap.Id, data["Type"])
                         break

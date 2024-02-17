@@ -92,6 +92,17 @@ class Generation:
                 self.data = None
             self.outer_instace: Generation = outer_instance
 
+        def __eq__(self, other):
+            self.sort_route()
+            other.sort_route()
+            for i in range(len(self.data)):
+                if (
+                    self.data[i].date != other.data[i].date
+                    or self.data[i].felmero != other.data[i].felmero
+                ):
+                    return False
+            return True
+
         def sort_route(self):
             def sort_key(x: Generation.Individual.Chromosome):
                 if isinstance(x.date, dt_date):
@@ -1070,7 +1081,7 @@ def calculate_simpson_index(population):
             if population[i] == population[j]:
                 n_i[i] += 1
                 n_i[j] += 1
-    simpson_index = sum(n_i[i] ** 2 for i in range(n)) / (n * (n - 1))
+    simpson_index = sum(n_i[i] ** 2 for i in range(n)) / (sum(n_i) ** 2)
     return simpson_index
 
 
@@ -1089,6 +1100,8 @@ if __name__ == "__main__":
     result.create_distance_matrix()
 
     num_process = cpu_count()
-    population = result.generate_initial_population_batched(num_processes=num_process)
+    population = [
+        result.generate_individual() for _ in range(result.initial_population_size)
+    ]
     inverse_simpson_index = calculate_inverse_simpson_index(population)
     print(inverse_simpson_index)

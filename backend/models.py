@@ -1453,7 +1453,7 @@ class MiniCrmAdatlapok(models.Model):
     Float1944 = models.TextField(blank=True, null=True)
     DateTime1945 = models.TextField(blank=True, null=True)
     Enum1951 = models.TextField(blank=True, null=True)
-    DateTime1953 = models.TextField(blank=True, null=True)
+    DateTime1953 = models.DateTimeField(blank=True, null=True)
     ElutasitasOka = models.BigIntegerField(blank=True, null=True)
     MegjegyzesLeiras = models.TextField(blank=True, null=True)
     FelmeresiKepek = models.TextField(blank=True, null=True)

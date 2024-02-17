@@ -45,7 +45,7 @@ from .utils.minicrm import (
     contact_details,
     update_offer_order,
 )
-from .utils.utils import get_address, replace_self_closing_tags
+from .utils.utils import replace_self_closing_tags
 
 
 def map_wh_fields(data: Dict, field_names: List[str]):
@@ -1252,13 +1252,26 @@ class MiniCrmAdatlapokV2(APIView):
         if id:
             id = id.split(",")
             queryset = queryset.filter(Id__in=id)
+
         status_id = request.query_params.get("StatusId")
         if status_id:
             status_id = status_id.split(",")
             queryset = queryset.filter(StatusId__in=status_id)
+
         if request.query_params.get("CategoryId"):
             queryset = queryset.filter(
                 CategoryId=request.query_params.get("CategoryId")
+            )
+
+        beepites_datuma = json.loads(request.query_params.get("BeepitesDatuma"))
+        if beepites_datuma:
+            queryset = queryset.filter(
+                DateTime1953V2__gte=datetime.datetime.strptime(
+                    beepites_datuma["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
+                DateTime1953V2__lte=datetime.datetime.strptime(
+                    beepites_datuma["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
             )
 
         paginator = self.pagination_class()
@@ -1302,15 +1315,6 @@ class MiniCrmAdatlapokV2(APIView):
                             i["Phone"] = contact["Phone"]
                             i["Email"] = contact["Email"]
 
-                order_adatlap = models.MiniCrmAdatlapok.objects.filter(
-                    FelmeresLink=i["FelmeresAdatok"]
-                )
-                if order_adatlap.exists():
-                    order = order_adatlap.first()
-                    i["Beepitok"] = order.Beepitok
-                    i["DateTime1953"] = order.DateTime1953
-                    i["FizetesiMod2"] = order.FizetesiMod3
-                    i["RendelesSzama"] = order.RendelesSzama
             except:
                 print(traceback.format_exc())
 
