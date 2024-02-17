@@ -1286,7 +1286,7 @@ class MiniCrmAdatlapokV2(APIView):
             request,
         )
 
-        beepites_datuma = json.loads(request.query_params.get("BeepitesDatuma"))
+        beepites_datuma = request.query_params.get("BeepitesDatuma")
         adatlapok = []
         for i in paginated_queryset:
             try:
@@ -1325,11 +1325,11 @@ class MiniCrmAdatlapokV2(APIView):
                 not i.get("DateTime1953")
                 or i.get("DateTime1953")
                 < datetime.datetime.strptime(
-                    beepites_datuma["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    json.loads(beepites_datuma)["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
                 )
                 or i.get("DateTime1953")
                 > datetime.datetime.strptime(
-                    beepites_datuma["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    json.loads(beepites_datuma)["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
                 )
             ):
                 continue

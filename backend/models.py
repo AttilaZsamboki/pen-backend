@@ -1677,6 +1677,12 @@ class MiniCrmAdatlapok(models.Model):
     SzamlaSorszama = models.TextField(blank=True, null=True)
     VisszafizetesDatuma2 = models.DateTimeField(blank=True, null=True)
 
+    @property
+    def StatusIdStr(self):
+        if self.StatusId and self.StatusId in status_map.keys():
+            return status_map[self.StatusId]
+        return ""
+
     def change_status(self, status_id):
         resp = update_adatlap_fields(
             self.Id, {"StatusId": status_id}, script_name="pen_change_status"
