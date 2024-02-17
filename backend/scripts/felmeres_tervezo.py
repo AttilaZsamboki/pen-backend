@@ -1028,7 +1028,7 @@ initial_population_size = 5
 population_size = 20
 max_generations = 20
 tournament_size = 4
-elitism_size = 10
+elitism_size = 100
 
 number_of_work_hours = 8
 time_for_one_appointment = 90
@@ -1073,35 +1073,7 @@ result = Generation(
 )
 
 
-def calculate_simpson_index(population):
-    n = len(population)
-    n_i = [0] * n
-    for i in range(n):
-        for j in range(i + 1, n):
-            if population[i] == population[j]:
-                n_i[i] += 1
-                n_i[j] += 1
-    simpson_index = sum(n_i[i] ** 2 for i in range(n)) / (sum(n_i) ** 2)
-    return simpson_index
-
-
-def calculate_inverse_simpson_index(population):
-    simpson_index = calculate_simpson_index(population)
-    if simpson_index == 0:
-        print("Nem jól működik a generálás 100%-ig")
-        return float("inf")
-    return 1 / simpson_index
-
-
 # Example usage:
-
 if __name__ == "__main__":
     freeze_support()
-    result.create_distance_matrix()
-
-    num_process = cpu_count()
-    population = [
-        result.generate_individual() for _ in range(result.initial_population_size)
-    ]
-    inverse_simpson_index = calculate_inverse_simpson_index(population)
-    print(inverse_simpson_index)
+    result.main(False)

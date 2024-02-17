@@ -1263,17 +1263,6 @@ class MiniCrmAdatlapokV2(APIView):
                 CategoryId=request.query_params.get("CategoryId")
             )
 
-        beepites_datuma = json.loads(request.query_params.get("BeepitesDatuma"))
-        if beepites_datuma:
-            queryset = queryset.filter(
-                DateTime1953V2__gte=datetime.datetime.strptime(
-                    beepites_datuma["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                ),
-                DateTime1953V2__lte=datetime.datetime.strptime(
-                    beepites_datuma["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                ),
-            )
-
         paginator = self.pagination_class()
         paginated_queryset = paginator.paginate_queryset(
             queryset.values(
@@ -1297,11 +1286,13 @@ class MiniCrmAdatlapokV2(APIView):
             request,
         )
 
+        beepites_datuma = json.loads(request.query_params.get("BeepitesDatuma"))
         adatlapok = []
         for i in paginated_queryset:
             try:
                 if not i["FelmeresAdatok"]:
-                    adatlapok.append(i)
+                    if not beepites_datuma:
+                        adatlapok.append(i)
                     continue
                 felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
@@ -1315,9 +1306,33 @@ class MiniCrmAdatlapokV2(APIView):
                             i["Phone"] = contact["Phone"]
                             i["Email"] = contact["Email"]
 
+                order_adatlap = models.MiniCrmAdatlapok.objects.filter(
+                    FelmeresLink=i["FelmeresAdatok"]
+                )
+                if order_adatlap.exists():
+                    order = order_adatlap.first()
+                    i["Beepitok"] = order.Beepitok
+                    i["DateTime1953"] = order.DateTime1953
+                    i["FizetesiMod2"] = order.FizetesiMod3
+                    i["RendelesSzama"] = order.RendelesSzama
+                elif beepites_datuma:
+                    continue
+
             except:
                 print(traceback.format_exc())
 
+            if beepites_datuma and (
+                not i.get("DateTime1953")
+                or i.get("DateTime1953")
+                < datetime.datetime.strptime(
+                    beepites_datuma["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                )
+                or i.get("DateTime1953")
+                > datetime.datetime.strptime(
+                    beepites_datuma["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                )
+            ):
+                continue
             adatlapok.append(i)
 
         return paginator.get_paginated_response(adatlapok)
