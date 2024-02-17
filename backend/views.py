@@ -1263,6 +1263,19 @@ class MiniCrmAdatlapokV2(APIView):
                 CategoryId=request.query_params.get("CategoryId")
             )
 
+        if request.query_params.get("FelmeresIdopontja2"):
+            queryset = queryset.filter(
+                FelmeresIdopontja2=request.query_params.get("FelmeresIdopontja2")
+            )
+
+        if request.query_params.get("FizetesiMod2"):
+            queryset = queryset.filter(
+                FizetesiMod2=request.query_params.get("FizetesiMod2")
+            )
+
+        if request.query_params.get("Telepuless"):
+            queryset = queryset.filter(Telepules=request.query_params.get("Telepules"))
+
         paginator = self.pagination_class()
         paginated_queryset = paginator.paginate_queryset(
             queryset.values(
@@ -1294,18 +1307,6 @@ class MiniCrmAdatlapokV2(APIView):
                     if not beepites_datuma:
                         adatlapok.append(i)
                     continue
-                felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
-                felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
-                if felmeres.exists():
-                    felmeres = felmeres.first()
-                    i["Total"] = felmeres.grossOrderTotal
-                    contact = contact_details(i["ContactId"])
-                    if contact != "Error":
-                        contact = contact["response"]
-                        if type(contact) != str:
-                            i["Phone"] = contact["Phone"]
-                            i["Email"] = contact["Email"]
-
                 order_adatlap = models.MiniCrmAdatlapok.objects.filter(
                     FelmeresLink=i["FelmeresAdatok"]
                 )
@@ -1318,21 +1319,34 @@ class MiniCrmAdatlapokV2(APIView):
                 elif beepites_datuma:
                     continue
 
+                if beepites_datuma and (
+                    not i.get("DateTime1953")
+                    or i.get("DateTime1953")
+                    < datetime.datetime.strptime(
+                        json.loads(beepites_datuma)["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    )
+                    or i.get("DateTime1953")
+                    > datetime.datetime.strptime(
+                        json.loads(beepites_datuma)["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    )
+                ):
+                    continue
+
+                felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
+                felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
+                if felmeres.exists():
+                    felmeres = felmeres.first()
+                    i["Total"] = felmeres.grossOrderTotal
+                    contact = contact_details(i["ContactId"])
+                    if contact != "Error":
+                        contact = contact["response"]
+                        if type(contact) != str:
+                            i["Phone"] = contact["Phone"]
+                            i["Email"] = contact["Email"]
+
             except:
                 print(traceback.format_exc())
 
-            if beepites_datuma and (
-                not i.get("DateTime1953")
-                or i.get("DateTime1953")
-                < datetime.datetime.strptime(
-                    json.loads(beepites_datuma)["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                )
-                or i.get("DateTime1953")
-                > datetime.datetime.strptime(
-                    json.loads(beepites_datuma)["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                )
-            ):
-                continue
             adatlapok.append(i)
 
         return paginator.get_paginated_response(adatlapok)
