@@ -33,7 +33,17 @@ def main(adatlap: MiniCrmAdatlapok):
             details=f"Adatlap: {adatlap}",
         )
     id = adatlap.Felmeresid
-    felmeres = Felmeresek.objects.get(id=id)
+    felmeres = Felmeresek.objects.filter(id=id)
+    if felmeres.exists():
+        felmeres = felmeres.first()
+    else:
+        log(
+            f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
+            script_name="pen_create_order",
+            status="ERROR",
+            details=f"Felmérés: {felmeres}",
+        )
+        return
     offer = Offers.objects.filter(adatlap=adatlap.Id).first()
     if offer:
         order = create_order(
@@ -47,9 +57,9 @@ def main(adatlap: MiniCrmAdatlapok):
                 "FelmeresLink": "https://app.peneszmentesites.hu/" + str(id),
                 "KiMerteFel2": felmeres.adatlap_id.Felmero2,
                 "FelmeresDatuma2": felmeres.adatlap_id.FelmeresIdopontja2,
-                "GaranciaTipusa": garancia_type_map[felmeres.garancia]
-                if felmeres.garancia
-                else None,
+                "GaranciaTipusa": (
+                    garancia_type_map[felmeres.garancia] if felmeres.garancia else None
+                ),
                 "Indoklas": felmeres.garancia_reason,
                 "KiepitesFeltetele": "Van" if felmeres.is_conditional else "Nincs",
                 "KiepitesFeltetelLeirasa": felmeres.condition,
@@ -114,7 +124,7 @@ def main(adatlap: MiniCrmAdatlapok):
 
 
 try:
-    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=21, StatusId=2896)
+    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=21, StatusId=2896, Deleted=0)
     for adatlap in adatlapok:
         main(adatlap)
 except Exception as e:

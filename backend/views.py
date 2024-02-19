@@ -1316,11 +1316,13 @@ class MiniCrmAdatlapokV2(APIView):
                     i["RendelesSzama"] = order.RendelesSzama
                     i["RendelesStatusz"] = order.StatusId
 
-                felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
-                felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
-                if felmeres.exists():
-                    felmeres = felmeres.first()
-                    i["Total"] = felmeres.grossOrderTotal
+                    felmeres_id = int(order.FelmeresLink.split("/")[-1])
+                    felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
+                    if felmeres.exists():
+                        felmeres = felmeres.first()
+                        i["Total"] = felmeres.grossOrderTotal
+
+                i["FelmeresekSzama"] = len(models.Felmeresek.objects.filter(adatlap_id=i["Id"]))
 
             except:
                 print(traceback.format_exc())

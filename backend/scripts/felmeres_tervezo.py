@@ -134,7 +134,6 @@ class Generation:
             return sum(distances)
 
         def calculate_fitness(self):
-            print("Calculating fitness...")
             distance = self.calculate_distance()
             if distance == 0:
                 return 0
