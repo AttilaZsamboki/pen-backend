@@ -55,7 +55,6 @@ class Generation:
 
                 # Validate zip is a string and follows a specific format (e.g., 5 digits)
                 if zip is not None and type(zip) != str:
-                    print(zip)
                     raise ValueError("zip must be a 5-digit string")
 
                 # Validate felmero is an instance of Salesmen
@@ -130,13 +129,6 @@ class Generation:
                             or (route.origin_zip == dest and route.dest_zip == origin)
                         ]
                         if distance:
-                            print(
-                                str(origin)
-                                + " -> "
-                                + str(dest)
-                                + " : "
-                                + str(distance[0].duration)
-                            )
                             distances.append(distance[0].duration)
 
             return sum(distances)
@@ -166,31 +158,30 @@ class Generation:
 
         def mutate(self):
             size = len(self.data)
-            while True:
+            num_actual_mutations = 0
+            while num_actual_mutations <= self.outer_instace.mutation_range:
                 start = np.random.randint(0, size)
-                end = np.random.randint(start, size)
-                for i in range(start, end):
-                    dates = self.data[i].dates
-                    if len(dates):
-                        print("Dátumok mutáció: " + str(len(dates)))
-                        if len(dates) == 1:
-                            if dates[0] == "*":
-                                possible_dates = self.outer_instace.get_possible_dates(
-                                    self.data[i]
-                                )
-                                if possible_dates:
-                                    new_date = possible_dates[
-                                        np.random.randint(
-                                            low=0, high=len(possible_dates)
-                                        )
-                                    ]
-                                    self.data[i].date = new_date["date"]
-                                    self.data[i].felmero = new_date["felmero"]
-                        else:
-                            new_date = self.data[i].random_date()
-                            self.data[i].date = new_date
-                        self.sort_route()
-                        return self
+                dates = self.data[start].dates
+                if len(dates):
+                    print("Dátumok mutáció: " + str(len(dates)))
+                    if len(dates) == 1:
+                        if dates[0] == "*":
+                            possible_dates = self.outer_instace.get_possible_dates(
+                                self.data[start]
+                            )
+                            if possible_dates:
+                                new_date = possible_dates[
+                                    np.random.randint(low=0, high=len(possible_dates))
+                                ]
+                                self.data[start].date = new_date["date"]
+                                self.data[start].felmero = new_date["felmero"]
+                                num_actual_mutations += 1
+                    else:
+                        new_date = self.data[start].random_date()
+                        self.data[start].date = new_date
+                    self.sort_route()
+            print("Mutációk száma: " + str(num_actual_mutations) + "/10")
+            return self
 
     def count_appointments_on_date(self, date, salesman: Salesmen):
         return len(
@@ -479,10 +470,7 @@ class Generation:
             return possible_hours
 
     def get_possible_dates(self, chromosome: Individual.Chromosome):
-        start_time = time.time()
-        print("Deleting old slots...")
         Slots.objects.filter(external_id=chromosome.external_id).delete()
-        print("Getting possible dates...", time.time() - start_time)
         possible_dates = []
         slots_to_save = []
         for date in self.dates:
@@ -528,7 +516,6 @@ class Generation:
         print("Creating distance matrix...")
         num_requests = 0
         for day in self.dates:
-            print("Dátumok: " + day.strftime("%Y-%m-%d %H:%M:%S"))
             adatlapok = [
                 i
                 for i in self.data
@@ -663,6 +650,7 @@ class Generation:
         allow_weekends=False,
         selection_within_time_period=3,
         elitism_size=10,
+        mutation_range=5,
     ):
         # Parameters
         self.population_size = population_size
@@ -681,6 +669,7 @@ class Generation:
         self.allow_weekends = allow_weekends
         self.selection_within_time_period = selection_within_time_period
         self.elitism_size = elitism_size
+        self.mutation_range = mutation_range
 
         self.qualified_salesmen = [
             i
@@ -878,7 +867,6 @@ class Generation:
         pool = Pool(processes=num_processes)
 
         fitnesses = pool.map(self.evaluate_fitness_wrapper, self.population)
-        print(fitnesses)
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
         population: List[Generation.Individual] = [
@@ -912,7 +900,6 @@ class Generation:
         tournament_individuals: List[Generation.Individual] = [
             self.population[i] for i in indices
         ]
-        # print(tournament_individuals)
         tournament_fitnesses = [
             self.population[i].calculate_fitness()
             for i in indices
@@ -1024,7 +1011,7 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 5
+initial_population_size = 4
 population_size = 20
 max_generations = 20
 tournament_size = 4
@@ -1051,6 +1038,7 @@ num_best_slots = 5
 plan_timespan = 90
 allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
 selection_within_time_period = 3
+mutation_range = 10
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(
@@ -1070,6 +1058,7 @@ result = Generation(
     allow_weekends=allow_weekends,
     selection_within_time_period=selection_within_time_period,
     elitism_size=elitism_size,
+    mutation_range=mutation_range,
 )
 
 

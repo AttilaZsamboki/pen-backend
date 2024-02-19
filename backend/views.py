@@ -1273,7 +1273,7 @@ class MiniCrmAdatlapokV2(APIView):
                 FizetesiMod2=request.query_params.get("FizetesiMod2")
             )
 
-        if request.query_params.get("Telepuless"):
+        if request.query_params.get("Telepules"):
             queryset = queryset.filter(Telepules=request.query_params.get("Telepules"))
 
         paginator = self.pagination_class()
@@ -1299,13 +1299,11 @@ class MiniCrmAdatlapokV2(APIView):
             request,
         )
 
-        beepites_datuma = request.query_params.get("BeepitesDatuma")
         adatlapok = []
         for i in paginated_queryset:
             try:
                 if not i["FelmeresAdatok"]:
-                    if not beepites_datuma:
-                        adatlapok.append(i)
+                    adatlapok.append(i)
                     continue
                 order_adatlap = models.MiniCrmAdatlapok.objects.filter(
                     FelmeresLink=i["FelmeresAdatok"]
@@ -1316,33 +1314,13 @@ class MiniCrmAdatlapokV2(APIView):
                     i["DateTime1953"] = order.DateTime1953
                     i["FizetesiMod2"] = order.FizetesiMod3
                     i["RendelesSzama"] = order.RendelesSzama
-                elif beepites_datuma:
-                    continue
-
-                if beepites_datuma and (
-                    not i.get("DateTime1953")
-                    or i.get("DateTime1953")
-                    < datetime.datetime.strptime(
-                        json.loads(beepites_datuma)["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                    )
-                    or i.get("DateTime1953")
-                    > datetime.datetime.strptime(
-                        json.loads(beepites_datuma)["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                    )
-                ):
-                    continue
+                    i["RendelesStatusz"] = order.StatusId
 
                 felmeres_id = int(i["FelmeresAdatok"].split("/")[-1])
                 felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
                 if felmeres.exists():
                     felmeres = felmeres.first()
                     i["Total"] = felmeres.grossOrderTotal
-                    contact = contact_details(i["ContactId"])
-                    if contact != "Error":
-                        contact = contact["response"]
-                        if type(contact) != str:
-                            i["Phone"] = contact["Phone"]
-                            i["Email"] = contact["Email"]
 
             except:
                 print(traceback.format_exc())

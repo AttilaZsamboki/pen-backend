@@ -168,30 +168,18 @@ def create_invoice_or_proform(
                     if not contact.get("Name")
                     else contact["Name"]
                 )
-                address = address_list(business_contact_id)
-                if address is None or address == []:
-                    log(
-                        "Nincsen cím",
-                        "FAILED",
-                        script_name,
-                    )
-                    continue
-                address = address[0]
-                if address == "Error":
-                    log(
-                        "Nem sikerült lekérdezni a címeket",
-                        "FAILED",
-                        script_name,
-                        adatlap.Id,
-                    )
-                    continue
+                address = {
+                    "PostalCode": adatlap.__dict__.get(zip_field),
+                    "City": adatlap.__dict__.get(city_field),
+                    "Address": adatlap.__dict__.get(address_field),
+                }
             if address is None or type(address) == str:
                 log("Nincsen cím", "FAILED", script_name)
                 continue
 
             if business_contact is None:
                 log(
-                    "Nincsenek számlázási adatok",
+                    "Nincsenek adatok",
                     "FAILED",
                     script_name,
                     f"adatlap: {adatlap.Id}",
@@ -205,10 +193,6 @@ def create_invoice_or_proform(
                 address.get("City"),
                 address.get("Address"),
                 contact.get("Email"),
-                adatlap.Name,
-                adatlap.__dict__.get(zip_field),
-                adatlap.__dict__.get(city_field),
-                adatlap.__dict__.get(address_field),
                 adatlap.__dict__.get("Id"),
                 contact.get("Phone"),
             ]:
@@ -357,7 +341,8 @@ def create_invoice_or_proform(
                         details=f"adatlap: {adatlap.Id}, error: {update_resp['reason']}",
                         data=update_request_payload,
                     )
-                    time.sleep(180)
+                    if not test:
+                        time.sleep(180)
                 else:
                     break
 
@@ -530,7 +515,7 @@ data = {
     "calc_net_price": calc_net_price,
     "proform_number_field": "DijbekeroSzama3",
     "type_name": "garancia",
-    "test": True,
+    "test": False,
 }
 # create_invoice_or_proform(
 #     criteria=lambda adatlap: adatlap.StatusId == 3129,
