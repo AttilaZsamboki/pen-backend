@@ -159,11 +159,10 @@ class Generation:
         def mutate(self):
             size = len(self.data)
             num_actual_mutations = 0
-            while num_actual_mutations <= self.outer_instace.mutation_range:
+            while num_actual_mutations < self.outer_instace.mutation_range:
                 start = np.random.randint(0, size)
                 dates = self.data[start].dates
                 if len(dates):
-                    print("Dátumok mutáció: " + str(len(dates)))
                     if len(dates) == 1:
                         if dates[0] == "*":
                             possible_dates = self.outer_instace.get_possible_dates(
@@ -195,9 +194,9 @@ class Generation:
         )
 
     def is_appointment_schedulable(self, appointment_time: dt_date, user: Salesmen):
-        unschedulable_times = UnschedulableTimes.objects.filter(
-            Q(user=user) | Q(user__isnull=True)
-        )
+        unschedulable_times = [
+            i for i in self.all_unschedulable_times if i.user == user or i.user is None
+        ]
         for unschedulable_time in unschedulable_times:
             repeat_time = unschedulable_time.repeat_time
             from_field = unschedulable_time.from_field
@@ -708,6 +707,7 @@ class Generation:
         )
 
         self.all_routes = list(Routes.objects.all())
+        self.all_unschedulable_times = list(UnschedulableTimes.objects.all())
 
     def crossover(self, parent1: Individual, parent2: Individual):
         size = len(parent1.data)
@@ -1015,7 +1015,7 @@ initial_population_size = 4
 population_size = 20
 max_generations = 20
 tournament_size = 4
-elitism_size = 100
+elitism_size = 10
 
 number_of_work_hours = 8
 time_for_one_appointment = 90

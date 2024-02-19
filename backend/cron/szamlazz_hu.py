@@ -2,7 +2,6 @@ from ..utils.minicrm import (
     contact_details,
     get_address,
     update_adatlap_fields,
-    address_list,
 )
 from ..utils.logs import log
 import requests
