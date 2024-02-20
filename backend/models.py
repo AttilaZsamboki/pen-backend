@@ -1921,7 +1921,8 @@ class MiniCrmAdatlapokV2(models.Model):
     RendelesStatusz = models.IntegerField(blank=True, null=True)
     FelmeresLink = models.TextField(blank=True, null=True)
     Total = models.FloatField(blank=True, null=True)
-    AjanlatStatusz = models.IntegerField(blank=True, null=True)
+    AjanlatKikuldve = models.BooleanField(blank=True, null=True)
+    FelmeresekSzama = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
