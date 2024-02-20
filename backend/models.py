@@ -1896,3 +1896,32 @@ class Chromosomes(models.Model):
     class Meta:
         managed = False
         db_table = "pen_chromosomes"
+
+
+class MiniCrmAdatlapokV2(models.Model):
+    Id = models.IntegerField(primary_key=True)
+    Name = models.TextField(blank=True, null=True)
+    CategoryId = models.IntegerField(blank=True, null=True)
+    StatusId = models.IntegerField(blank=True, null=True)
+    ContactId = models.IntegerField(blank=True, null=True)
+    FelmeresiDij = models.IntegerField(blank=True, null=True)
+    Telepules = models.TextField(blank=True, null=True)
+    Iranyitoszam = models.TextField(blank=True, null=True)
+    Orszag = models.TextField(blank=True, null=True)
+    Felmero2 = models.TextField(blank=True, null=True)
+    CreatedAt = models.DateTimeField(blank=True, null=True)
+    Cim2 = models.TextField(blank=True, null=True)
+    FelmeresAdatok = models.TextField(blank=True, null=True)
+    FizetesiMod2 = models.TextField(blank=True, null=True)
+    Tavolsag = models.TextField(blank=True, null=True)
+    FelmeresIdopontja2 = models.DateTimeField(blank=True, null=True)
+    DateTime1953 = models.DateTimeField(blank=True, null=True)
+    FizetesiMod3 = models.TextField(blank=True, null=True)
+    RendelesSzama = models.TextField(blank=True, null=True)
+    RendelesStatusz = models.IntegerField(blank=True, null=True)
+    FelmeresLink = models.TextField(blank=True, null=True)
+    Total = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "pen_minicrm_adatlapok_v2"

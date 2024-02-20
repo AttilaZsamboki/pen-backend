@@ -18,7 +18,9 @@ from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -365,9 +367,6 @@ class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
         product_templates = models.ProductTemplate.objects.filter(template=pk)
         serializer = serializers.ProductTemplateSerializer(product_templates, many=True)
         return Response(serializer.data)
-
-
-from rest_framework.filters import SearchFilter
 
 
 class FelmeresekList(generics.ListCreateAPIView):
@@ -1217,121 +1216,71 @@ class UserRole(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MiniCrmAdatlapokV2(APIView):
+class MiniCrmAdatlapokV2(generics.ListAPIView):
     pagination_class = PageNumberPagination
+    serializer_class = serializers.MiniCrmAdatlapokV2Serializer
+    queryset = models.MiniCrmAdatlapokV2.objects.all()
+    permission_classes = [AllowAny]
+    filter_backends = [OrderingFilter, SearchFilter, DjangoFilterBackend]
+    filterset_fields = ["Felmero2", "FizetesiMod3", "Telepules", "CategoryId"]
+    search_fields = [
+        "Id",
+        "Name",
+        "CategoryId",
+        "StatusId",
+        "ContactId",
+        "FelmeresiDij",
+        "Telepules",
+        "Iranyitoszam",
+        "Orszag",
+        "Felmero2",
+        "CreatedAt",
+        "Cim2",
+        "FelmeresAdatok",
+        "FizetesiMod2",
+        "Tavolsag",
+        "DateTime1953",
+        "FizetesiMod3",
+        "RendelesSzama",
+        "RendelesStatusz",
+        "FelmeresLink",
+        "Total",
+    ]
+    ordering_fields = "__all__"
 
-    def get(self, request):
-        queryset = models.MiniCrmAdatlapok.objects.all().order_by("FelmeresIdopontja2")
-
-        search_query = request.query_params.get("search", None)
-        if search_query:
-            search_terms = search_query.split()
-            search_conditions = Q()
-            for term in search_terms:
-                search_conditions &= (
-                    Q(Name__icontains=term)
-                    | Q(CategoryId__icontains=term)
-                    | Q(StatusId__icontains=term)
-                    | Q(ContactId__icontains=term)
-                    | Q(FelmeresiDij__icontains=term)
-                    | Q(Telepules__icontains=term)
-                    | Q(Iranyitoszam__icontains=term)
-                    | Q(Orszag__icontains=term)
-                    | Q(Felmero2__icontains=term)
-                    | Q(CreatedAt__icontains=term)
-                    | Q(Cim2__icontains=term)
-                    | Q(FelmeresAdatok__icontains=term)
-                    | Q(FizetesiMod2__icontains=term)
-                    | Q(Tavolsag__icontains=term)
-                    | Q(FelmeresIdopontja2__icontains=term)
-                )
-            queryset = queryset.filter(search_conditions)
-
-        # Filtering
-        id = request.query_params.get("Id")
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        id = self.request.query_params.get("Id")
         if id:
             id = id.split(",")
             queryset = queryset.filter(Id__in=id)
-
-        status_id = request.query_params.get("StatusId")
+        status_id = self.request.query_params.get("StatusId")
         if status_id:
             status_id = status_id.split(",")
             queryset = queryset.filter(StatusId__in=status_id)
-
-        if request.query_params.get("CategoryId"):
+        felmeres_idopontja = self.request.query_params.get("FelmeresIdopontja2")
+        if felmeres_idopontja:
+            felmeres_idopontja = json.loads(felmeres_idopontja)
             queryset = queryset.filter(
-                CategoryId=request.query_params.get("CategoryId")
+                FelmeresIdopontja2__gte=datetime.datetime.strptime(
+                    felmeres_idopontja["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
+                FelmeresIdopontja2__lte=datetime.datetime.strptime(
+                    felmeres_idopontja["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
             )
-
-        if request.query_params.get("FelmeresIdopontja2"):
+        beepites_idopontja = self.request.query_params.get("BeepitesDatuma")
+        if beepites_idopontja:
+            beepites_idopontja = json.loads(beepites_idopontja)
             queryset = queryset.filter(
-                FelmeresIdopontja2=request.query_params.get("FelmeresIdopontja2")
+                DateTime1953__gte=datetime.datetime.strptime(
+                    beepites_idopontja["from"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
+                DateTime1953__lte=datetime.datetime.strptime(
+                    beepites_idopontja["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
             )
-
-        if request.query_params.get("FizetesiMod2"):
-            queryset = queryset.filter(
-                FizetesiMod2=request.query_params.get("FizetesiMod2")
-            )
-
-        if request.query_params.get("Telepules"):
-            queryset = queryset.filter(Telepules=request.query_params.get("Telepules"))
-
-        paginator = self.pagination_class()
-        paginated_queryset = paginator.paginate_queryset(
-            queryset.values(
-                "Id",
-                "Name",
-                "CategoryId",
-                "StatusId",
-                "ContactId",
-                "FelmeresiDij",
-                "Telepules",
-                "Iranyitoszam",
-                "Orszag",
-                "Felmero2",
-                "CreatedAt",
-                "Cim2",
-                "FelmeresAdatok",
-                "FizetesiMod2",
-                "Tavolsag",
-                "FelmeresIdopontja2",
-            ),
-            request,
-        )
-
-        adatlapok = []
-        for i in paginated_queryset:
-            try:
-                if not i["FelmeresAdatok"]:
-                    adatlapok.append(i)
-                    continue
-                order_adatlap = models.MiniCrmAdatlapok.objects.filter(
-                    FelmeresLink=i["FelmeresAdatok"]
-                )
-                if order_adatlap.exists():
-                    order = order_adatlap.first()
-                    i["Beepitok"] = order.Beepitok
-                    i["DateTime1953"] = order.DateTime1953 = order.DateTime1953
-                    i["FizetesiMod2"] = order.FizetesiMod3
-                    i["RendelesSzama"] = order.RendelesSzama
-                    i["RendelesStatusz"] = order.StatusId
-
-                    felmeres_id = int(order.FelmeresLink.split("/")[-1])
-                    felmeres = models.Felmeresek.objects.filter(id=felmeres_id)
-                    if felmeres.exists():
-                        felmeres = felmeres.first()
-                        i["Total"] = felmeres.grossOrderTotal
-
-                i["FelmeresekSzama"] = len(
-                    models.Felmeresek.objects.filter(adatlap_id=i["Id"])
-                )
-
-            except:
-                print(traceback.format_exc())
-
-            adatlapok.append(i)
-
-        return paginator.get_paginated_response(adatlapok)
+        return queryset
 
 
 class MiniCrmAdatlapok(generics.ListAPIView):

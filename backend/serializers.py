@@ -192,3 +192,9 @@ class SchedulerSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SchedulerSettings
         fields = "__all__"
+
+
+class MiniCrmAdatlapokV2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.MiniCrmAdatlapokV2
+        fields = "__all__"
