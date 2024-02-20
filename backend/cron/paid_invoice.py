@@ -113,7 +113,6 @@ modules = [
     {
         "StatusId": 3128,
         "UpdateAdatlap": update_garancia_adatlap,
-        "test": True,
     },
 ]
 

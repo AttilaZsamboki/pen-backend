@@ -1221,7 +1221,7 @@ class MiniCrmAdatlapokV2(APIView):
     pagination_class = PageNumberPagination
 
     def get(self, request):
-        queryset = models.MiniCrmAdatlapok.objects.all()
+        queryset = models.MiniCrmAdatlapok.objects.all().order_by("FelmeresIdopontja2")
 
         search_query = request.query_params.get("search", None)
         if search_query:
@@ -1311,7 +1311,7 @@ class MiniCrmAdatlapokV2(APIView):
                 if order_adatlap.exists():
                     order = order_adatlap.first()
                     i["Beepitok"] = order.Beepitok
-                    i["DateTime1953"] = order.DateTime1953
+                    i["DateTime1953"] = order.DateTime1953 = order.DateTime1953
                     i["FizetesiMod2"] = order.FizetesiMod3
                     i["RendelesSzama"] = order.RendelesSzama
                     i["RendelesStatusz"] = order.StatusId
@@ -1322,7 +1322,9 @@ class MiniCrmAdatlapokV2(APIView):
                         felmeres = felmeres.first()
                         i["Total"] = felmeres.grossOrderTotal
 
-                i["FelmeresekSzama"] = len(models.Felmeresek.objects.filter(adatlap_id=i["Id"]))
+                i["FelmeresekSzama"] = len(
+                    models.Felmeresek.objects.filter(adatlap_id=i["Id"])
+                )
 
             except:
                 print(traceback.format_exc())

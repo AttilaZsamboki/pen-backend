@@ -37,6 +37,7 @@ def create_invoice_or_proform(
     payment_deadline=lambda _: (
         datetime.datetime.now() + datetime.timedelta(days=3)
     ).strftime("%Y-%m-%d"),
+    prefix="TMTSZ",
 ):
     if proform:
         name = "díjbekérő"
@@ -239,7 +240,7 @@ def create_invoice_or_proform(
                     <!-- invoice (after a deposit invoice) -->
                     <dijbekero>{'true' if proform else 'false'}</dijbekero>
                     <!-- proform invoice -->
-                    <szamlaszamElotag>{"TMTSZ" if ENVIRONMENT == "production" and not test else "ERP"}</szamlaszamElotag>
+                    <szamlaszamElotag>{prefix if ENVIRONMENT == "production" and not test else "ERP"}</szamlaszamElotag>
                     <!-- One of the prefixes from the invoice pad menu  -->
                 </fejlec>
                 <elado>
@@ -332,7 +333,9 @@ def create_invoice_or_proform(
                     adatlap.Id,
                     update_request_payload,
                 )
-                if update_resp["code"] == 400:
+                if update_resp["code"] == 200:
+                    break
+                else:
                     log(
                         f"Hiba akadt a {name} feltöltésében",
                         "ERROR",
@@ -340,10 +343,8 @@ def create_invoice_or_proform(
                         details=f"adatlap: {adatlap.Id}, error: {update_resp['reason']}",
                         data=update_request_payload,
                     )
-                    if not test:
+                    if ENVIRONMENT == "production":
                         time.sleep(180)
-                else:
-                    break
 
             if ENVIRONMENT == "production":
                 time.sleep(60)
@@ -515,6 +516,7 @@ data = {
     "proform_number_field": "DijbekeroSzama3",
     "type_name": "garancia",
     "test": False,
+    "prefix": "ASZ",
 }
 # create_invoice_or_proform(
 #     criteria=lambda adatlap: adatlap.StatusId == 3129,

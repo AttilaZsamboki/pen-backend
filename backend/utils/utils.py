@@ -91,7 +91,7 @@ def round_to_30(dt: datetime) -> datetime:
         return (
             dt.replace(minute=30, second=0)
             if dt.minute < 45
-            else dt.replace(hour=dt.hour + 1, minute=0, second=0)
+            else dt.replace(hour=(dt.hour + 1) % 24, minute=0, second=0)
         )
     else:
         return (

@@ -164,9 +164,7 @@ class Generation:
                 if len(dates):
                     if len(dates) == 1:
                         if dates[0] == "*":
-                            possible_dates = self.outer_instace.get_possible_dates(
-                                self.data[start]
-                            )
+                            possible_dates = self.get_possible_dates(self.data[start])
                             if possible_dates:
                                 new_date = possible_dates[
                                     np.random.randint(low=0, high=len(possible_dates))
@@ -181,334 +179,355 @@ class Generation:
             print("Mutációk száma: " + str(num_actual_mutations) + "/10")
             return self
 
-    def count_appointments_on_date(self, date, salesman: Salesmen):
-        return len(
-            [
+        def get_gap_appointment(
+            self, chromosome: Chromosome, date: dt_date, felmero: Salesmen
+        ):
+            all_routes = self.outer_instace.all_routes
+            jobs_on_day = [
+                self.Chromosome(
+                    felmero=felmero,
+                    zip=felmero.zip,
+                    external_id="XXX",
+                    date=datetime.combine(date, datetime.min.time()),
+                    dates=[],
+                )
+            ] + [
                 i
                 for i in self.data
-                if i.date != "*"
-                and i.date.date() == date
-                and i.felmero == salesman.name
+                if i.date != "*" and i.date.date() == date and i.felmero == felmero
             ]
-        )
-
-    def is_appointment_schedulable(self, appointment_time: dt_date, user: Salesmen):
-        unschedulable_times = [
-            i for i in self.all_unschedulable_times if i.user == user or i.user is None
-        ]
-        for unschedulable_time in unschedulable_times:
-            repeat_time = unschedulable_time.repeat_time
-            from_field = unschedulable_time.from_field
-            to = unschedulable_time.to
-
-            # Check if the unschedulable time repeats
-            if repeat_time:
-                # Calculate the duration of the unschedulable time
-                duration = to - from_field
-
-                for i in range(len(self.dates)):
-                    date: datetime = from_field + timedelta(days=repeat_time * i)
-                    if date.date() not in self.dates:
-                        if date.date() > max(self.dates):
-                            break
+            possible_hours = []
+            if jobs_on_day:
+                jobs_on_day.sort(key=lambda x: x.date)
+                len_jobs_on_day = len(jobs_on_day)
+                for i in range(len_jobs_on_day):
+                    if i + 1 == len_jobs_on_day:
                         continue
-                    if date <= appointment_time < date + duration:
+                    job = jobs_on_day[i]
+                    next_job = jobs_on_day[i + 1]
+                    if job.zip and next_job.zip:
+                        x = [
+                            route
+                            for route in all_routes
+                            if (
+                                (
+                                    route.origin_zip == job.zip
+                                    and route.dest_zip == chromosome.zip
+                                )
+                                or (
+                                    route.origin_zip == chromosome.zip
+                                    and route.dest_zip == job.zip
+                                )
+                            )
+                        ]
+
+                        y = [
+                            route
+                            for route in all_routes
+                            if (
+                                (
+                                    route.origin_zip == chromosome.zip
+                                    and route.dest_zip == next_job.zip
+                                )
+                                or (
+                                    route.origin_zip == next_job.zip
+                                    and route.dest_zip == chromosome.zip
+                                )
+                            )
+                        ]
+
+                        if not x or not y:
+                            continue
+                        x = x[0].duration
+                        y = y[0].duration
+
+                        time_between_jobs = (
+                            (next_job.date - job.date)
+                            if next_job.date > job.date
+                            else timedelta(seconds=0)
+                        )
+
+                        plus_time = 0
+                        while True:
+                            time_of_appointment = round_to_30(
+                                job.date
+                                + timedelta(
+                                    minutes=(
+                                        self.outer_instace.time_for_one_appointment
+                                        if job.external_id != "XXX"
+                                        else 0
+                                    )
+                                    + plus_time
+                                )
+                                + timedelta(
+                                    seconds=x if job.external_id != "XXX" else 0
+                                )
+                            )
+
+                            if time_between_jobs >= timedelta(
+                                minutes=self.outer_instace.time_for_one_appointment
+                                * (2 if job.external_id != "XXX" else 1)
+                                + plus_time
+                            ) + timedelta(
+                                seconds=(x if job.external_id != "XXX" else 0) + y
+                            ):
+                                if time_of_appointment >= datetime.combine(
+                                    date,
+                                    datetime.strptime(
+                                        self.outer_instace.first_appointment, "%H:%M"
+                                    ).time(),
+                                ) and self.is_appointment_schedulable(
+                                    time_of_appointment, felmero
+                                ):
+                                    possible_hours.append(time_of_appointment)
+                                plus_time += 30
+                            else:
+                                break
+                return possible_hours
+
+        def is_appointment_schedulable(self, appointment_time: dt_date, user: Salesmen):
+            unschedulable_times = [
+                i
+                for i in self.outer_instace.all_unschedulable_times
+                if i.user == user or i.user is None
+            ]
+            for unschedulable_time in unschedulable_times:
+                repeat_time = unschedulable_time.repeat_time
+                from_field = unschedulable_time.from_field
+                to = unschedulable_time.to
+
+                # Check if the unschedulable time repeats
+                if repeat_time:
+                    # Calculate the duration of the unschedulable time
+                    duration = to - from_field
+
+                    for i in range(len(self.outer_instace.dates)):
+                        date: datetime = from_field + timedelta(days=repeat_time * i)
+                        if date.date() not in self.outer_instace.dates:
+                            if date.date() > max(self.outer_instace.dates):
+                                break
+                            continue
+                        if date <= appointment_time < date + duration:
+                            return False
+                else:
+                    # Check if the appointment time falls within the unschedulable time
+                    if from_field <= appointment_time <= to:
                         return False
+            return True
+
+        def get_possible_dates(self, chromosome: Chromosome):
+            Slots.objects.filter(external_id=chromosome.external_id).delete()
+            possible_dates = []
+            slots_to_save = []
+            for date in self.outer_instace.dates:
+                if date < datetime.date(
+                    datetime.now()
+                    + timedelta(days=self.outer_instace.selection_within_time_period)
+                ):
+                    continue
+                for felmero in self.outer_instace.qualified_salesmen:
+                    if (
+                        self.count_appointments_on_date(date, felmero)
+                        < self.outer_instace.max_appointment_per_day
+                    ):
+                        gap_appointments = self.get_gap_appointment(
+                            chromosome, date, felmero=felmero
+                        )
+                        if gap_appointments:
+                            for i in gap_appointments:
+                                possible_dates.append({"felmero": felmero, "date": i})
+                                slots_to_save.append(
+                                    Slots(
+                                        external_id=chromosome.external_id,
+                                        at=i,
+                                        user=felmero,
+                                    )
+                                )
+                        a = self.check_working_hours(
+                            date, felmero=felmero, chromosome=chromosome
+                        )
+                        if a:
+                            for i in a:
+                                possible_dates.append({"felmero": felmero, "date": i})
+                                slots_to_save.append(
+                                    Slots(
+                                        external_id=chromosome.external_id,
+                                        at=i,
+                                        user=felmero,
+                                    )
+                                )
+            Slots.objects.bulk_create(slots_to_save)
+            return possible_dates
+
+        def count_appointments_on_date(self, date, salesman: Salesmen):
+            return len(
+                [
+                    i
+                    for i in self.data
+                    if i.date != "*"
+                    and i.date.date() == date
+                    and i.felmero == salesman.name
+                ]
+            )
+
+        def check_working_hours(
+            self,
+            date,
+            felmero: Salesmen,
+            plus_time=0,
+            chromosome: Chromosome = None,
+        ) -> List[datetime]:
+            jobs_on_day = [
+                i
+                for i in self.data
+                if i.date != "*" and i.date.date() == date and felmero == i.felmero
+            ]
+            possible_hours = []
+            if jobs_on_day:
+                jobs_on_day.sort(key=lambda x: x.date)
+
+                first_appointment = jobs_on_day[0]
+                if not first_appointment.zip:
+                    return
+                z = [
+                    route
+                    for route in self.outer_instace.all_routes
+                    if (
+                        (
+                            route.origin_zip == felmero.zip
+                            and route.dest_zip == first_appointment.zip
+                        )
+                        or (
+                            route.origin_zip == first_appointment.zip
+                            and route.dest_zip == felmero.zip
+                        )
+                    )
+                ]
+                if not z:
+                    return
+
+                z = z[0].duration
+                a = min(
+                    datetime.combine(
+                        date,
+                        datetime.strptime(
+                            self.outer_instace.first_appointment, "%H:%M"
+                        ).time(),
+                    ),
+                    first_appointment.date - timedelta(seconds=z),
+                )
+
+                last_appointment = jobs_on_day[-1]
+                x = [
+                    route
+                    for route in self.outer_instace.all_routes
+                    if (
+                        (
+                            route.origin_zip == chromosome.zip
+                            and route.dest_zip == last_appointment.zip
+                        )
+                        or (
+                            route.origin_zip == last_appointment.zip
+                            and route.dest_zip == chromosome.zip
+                        )
+                    )
+                ]
+
+                if not x:
+                    return
+
+                x = x[0].duration
+                y = self.get_time_home(chromosome, felmero=felmero)
+                if not y:
+                    return
+                b = (
+                    last_appointment.date.replace(minute=0, second=0)
+                    + max(timedelta(minutes=plus_time), timedelta(seconds=x))
+                    + timedelta(minutes=2 * self.outer_instace.time_for_one_appointment)
+                    + timedelta(seconds=y)
+                )
+
+                if (
+                    b - a < timedelta(hours=self.outer_instace.number_of_work_hours)
+                    and b > a
+                ):
+                    if self.is_appointment_schedulable(
+                        last_appointment.date
+                        + timedelta(minutes=self.outer_instace.time_for_one_appointment)
+                        + max(timedelta(seconds=x), timedelta(minutes=plus_time)),
+                        felmero,
+                    ):
+                        possible_hours += [
+                            round_to_30(
+                                last_appointment.date
+                                + timedelta(
+                                    minutes=self.outer_instace.time_for_one_appointment
+                                )
+                                + max(
+                                    timedelta(seconds=x), timedelta(minutes=plus_time)
+                                )
+                            )
+                        ] + self.check_working_hours(
+                            date,
+                            plus_time=plus_time + 30,
+                            felmero=felmero,
+                            chromosome=chromosome,
+                        )
+                return list(set(possible_hours))
             else:
-                # Check if the appointment time falls within the unschedulable time
-                if from_field <= appointment_time <= to:
-                    return False
-        return True
+                plus_time = 0
+                time_home = self.get_time_home(chromosome, felmero=felmero)
+                if not time_home:
+                    return possible_hours
+                while True:
+                    if timedelta(minutes=plus_time) + timedelta(
+                        seconds=time_home
+                    ) * 2 < timedelta(
+                        hours=self.outer_instace.number_of_work_hours
+                    ) and self.is_appointment_schedulable(
+                        datetime.combine(
+                            date,
+                            datetime.strptime(
+                                self.outer_instace.first_appointment, "%H:%M"
+                            ).time(),
+                        )
+                        + timedelta(minutes=plus_time),
+                        felmero,
+                    ):
+                        possible_hours.append(
+                            datetime.combine(
+                                date,
+                                datetime.strptime(
+                                    self.outer_instace.first_appointment, "%H:%M"
+                                ).time(),
+                            )
+                            + timedelta(minutes=plus_time)
+                        )
+                        plus_time += 30
+                    else:
+                        break
+                return possible_hours
 
-    def check_working_hours(
-        self,
-        date,
-        felmero: Salesmen,
-        plus_time=0,
-        chromosome: Individual.Chromosome = None,
-    ) -> List[datetime]:
-        jobs_on_day = [
-            i
-            for i in self.data
-            if i.date != "*" and i.date.date() == date and felmero == i.felmero
-        ]
-        possible_hours = []
-        if jobs_on_day:
-            jobs_on_day.sort(key=lambda x: x.date)
-
-            first_appointment = jobs_on_day[0]
-            if not first_appointment.zip:
-                return
-            z = [
+        def get_time_home(self, chromosome: Chromosome, felmero: Salesmen = None):
+            time_home = [
                 route
-                for route in self.all_routes
+                for route in self.outer_instace.all_routes
                 if (
                     (
                         route.origin_zip == felmero.zip
-                        and route.dest_zip == first_appointment.zip
+                        and route.dest_zip == chromosome.zip
                     )
                     or (
-                        route.origin_zip == first_appointment.zip
+                        route.origin_zip == chromosome.zip
                         and route.dest_zip == felmero.zip
                     )
                 )
             ]
-            if not z:
-                return
 
-            z = z[0].duration
-            a = min(
-                datetime.combine(
-                    date, datetime.strptime(self.first_appointment, "%H:%M").time()
-                ),
-                first_appointment.date - timedelta(seconds=z),
-            )
-
-            last_appointment = jobs_on_day[-1]
-            x = [
-                route
-                for route in self.all_routes
-                if (
-                    (
-                        route.origin_zip == chromosome.zip
-                        and route.dest_zip == last_appointment.zip
-                    )
-                    or (
-                        route.origin_zip == last_appointment.zip
-                        and route.dest_zip == chromosome.zip
-                    )
-                )
-            ]
-
-            if not x:
-                return
-
-            x = x[0].duration
-            y = self.get_time_home(chromosome, felmero=felmero)
-            if not y:
-                return
-            b = (
-                last_appointment.date.replace(minute=0, second=0)
-                + max(timedelta(minutes=plus_time), timedelta(seconds=x))
-                + timedelta(minutes=2 * self.time_for_one_appointment)
-                + timedelta(seconds=y)
-            )
-
-            if b - a < timedelta(hours=self.number_of_work_hours) and b > a:
-                if self.is_appointment_schedulable(
-                    last_appointment.date
-                    + timedelta(minutes=self.time_for_one_appointment)
-                    + max(timedelta(seconds=x), timedelta(minutes=plus_time)),
-                    felmero,
-                ):
-                    possible_hours += [
-                        round_to_30(
-                            last_appointment.date
-                            + timedelta(minutes=self.time_for_one_appointment)
-                            + max(timedelta(seconds=x), timedelta(minutes=plus_time))
-                        )
-                    ] + self.check_working_hours(
-                        date,
-                        plus_time=plus_time + 30,
-                        felmero=felmero,
-                        chromosome=chromosome,
-                    )
-            return list(set(possible_hours))
-        else:
-            plus_time = 0
-            time_home = self.get_time_home(chromosome, felmero=felmero)
             if not time_home:
-                return possible_hours
-            while True:
-                if timedelta(minutes=plus_time) + timedelta(
-                    seconds=time_home
-                ) * 2 < timedelta(
-                    hours=self.number_of_work_hours
-                ) and self.is_appointment_schedulable(
-                    datetime.combine(
-                        date,
-                        datetime.strptime(self.first_appointment, "%H:%M").time(),
-                    )
-                    + timedelta(minutes=plus_time),
-                    felmero,
-                ):
-                    possible_hours.append(
-                        datetime.combine(
-                            date,
-                            datetime.strptime(self.first_appointment, "%H:%M").time(),
-                        )
-                        + timedelta(minutes=plus_time)
-                    )
-                    plus_time += 30
-                else:
-                    break
-            return possible_hours
+                return
 
-    def get_time_home(
-        self, chromosome: Individual.Chromosome, felmero: Salesmen = None
-    ):
-        time_home = [
-            route
-            for route in self.all_routes
-            if (
-                (route.origin_zip == felmero.zip and route.dest_zip == chromosome.zip)
-                or (
-                    route.origin_zip == chromosome.zip and route.dest_zip == felmero.zip
-                )
-            )
-        ]
-
-        if not time_home:
-            return
-
-        return time_home[0].duration
-
-    def get_gap_appointment(
-        self, chromosome: Individual.Chromosome, date: dt_date, felmero: Salesmen
-    ):
-        all_routes = self.all_routes
-        jobs_on_day = [
-            self.Individual.Chromosome(
-                felmero=felmero,
-                zip=felmero.zip,
-                external_id="XXX",
-                date=datetime.combine(date, datetime.min.time()),
-                dates=[],
-            )
-        ] + [
-            i
-            for i in self.data
-            if i.date != "*" and i.date.date() == date and i.felmero == felmero
-        ]
-        possible_hours = []
-        if jobs_on_day:
-            jobs_on_day.sort(key=lambda x: x.date)
-            len_jobs_on_day = len(jobs_on_day)
-            for i in range(len_jobs_on_day):
-                if i + 1 == len_jobs_on_day:
-                    continue
-                job = jobs_on_day[i]
-                next_job = jobs_on_day[i + 1]
-                if job.zip and next_job.zip:
-                    x = [
-                        route
-                        for route in all_routes
-                        if (
-                            (
-                                route.origin_zip == job.zip
-                                and route.dest_zip == chromosome.zip
-                            )
-                            or (
-                                route.origin_zip == chromosome.zip
-                                and route.dest_zip == job.zip
-                            )
-                        )
-                    ]
-
-                    y = [
-                        route
-                        for route in all_routes
-                        if (
-                            (
-                                route.origin_zip == chromosome.zip
-                                and route.dest_zip == next_job.zip
-                            )
-                            or (
-                                route.origin_zip == next_job.zip
-                                and route.dest_zip == chromosome.zip
-                            )
-                        )
-                    ]
-
-                    if not x or not y:
-                        continue
-                    x = x[0].duration
-                    y = y[0].duration
-
-                    time_between_jobs = (
-                        (next_job.date - job.date)
-                        if next_job.date > job.date
-                        else timedelta(seconds=0)
-                    )
-
-                    plus_time = 0
-                    while True:
-                        time_of_appointment = round_to_30(
-                            job.date
-                            + timedelta(
-                                minutes=(
-                                    self.time_for_one_appointment
-                                    if job.external_id != "XXX"
-                                    else 0
-                                )
-                                + plus_time
-                            )
-                            + timedelta(seconds=x if job.external_id != "XXX" else 0)
-                        )
-
-                        if time_between_jobs >= timedelta(
-                            minutes=self.time_for_one_appointment
-                            * (2 if job.external_id != "XXX" else 1)
-                            + plus_time
-                        ) + timedelta(
-                            seconds=(x if job.external_id != "XXX" else 0) + y
-                        ):
-                            if time_of_appointment >= datetime.combine(
-                                date,
-                                datetime.strptime(
-                                    self.first_appointment, "%H:%M"
-                                ).time(),
-                            ) and self.is_appointment_schedulable(
-                                time_of_appointment, felmero
-                            ):
-                                possible_hours.append(time_of_appointment)
-                            plus_time += 30
-                        else:
-                            break
-            return possible_hours
-
-    def get_possible_dates(self, chromosome: Individual.Chromosome):
-        Slots.objects.filter(external_id=chromosome.external_id).delete()
-        possible_dates = []
-        slots_to_save = []
-        for date in self.dates:
-            if date < datetime.date(
-                datetime.now() + timedelta(days=self.selection_within_time_period)
-            ):
-                continue
-            for felmero in self.qualified_salesmen:
-                if (
-                    self.count_appointments_on_date(date, felmero)
-                    < self.max_appointment_per_day
-                ):
-                    gap_appointments = self.get_gap_appointment(
-                        chromosome, date, felmero=felmero
-                    )
-                    if gap_appointments:
-                        for i in gap_appointments:
-                            possible_dates.append({"felmero": felmero, "date": i})
-                            slots_to_save.append(
-                                Slots(
-                                    external_id=chromosome.external_id,
-                                    at=i,
-                                    user=felmero,
-                                )
-                            )
-                    a = self.check_working_hours(
-                        date, felmero=felmero, chromosome=chromosome
-                    )
-                    if a:
-                        for i in a:
-                            possible_dates.append({"felmero": felmero, "date": i})
-                            slots_to_save.append(
-                                Slots(
-                                    external_id=chromosome.external_id,
-                                    at=i,
-                                    user=felmero,
-                                )
-                            )
-        Slots.objects.bulk_create(slots_to_save)
-        return possible_dates
+            return time_home[0].duration
 
     def create_distance_matrix(self, test=False):
         print("Creating distance matrix...")
@@ -737,7 +756,9 @@ class Generation:
     def assign_new_applicants_dates(self):
         for i in self.data:
             if i.dates == ["*"]:
-                possible_dates = self.get_possible_dates(i)
+                possible_dates = self.Individual(
+                    data=self.data, outer_instance=self
+                ).get_possible_dates(i)
                 if possible_dates:
                     num_possible_dates = len(possible_dates)
                     rand_date = possible_dates[
