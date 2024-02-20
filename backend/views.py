@@ -1245,6 +1245,7 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
         "RendelesStatusz",
         "FelmeresLink",
         "Total",
+        "AjanlatStatusz"
     ]
     ordering_fields = "__all__"
 
