@@ -174,6 +174,7 @@ class OrderWebhook(APIView):
                     "GaranciaTipusa",
                     "KiepitesFeltetele",
                     "KiepitesFelteteleIgazolva",
+                    "Enum1951",
                 ],
             )
 

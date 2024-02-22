@@ -1918,7 +1918,7 @@ class MiniCrmAdatlapokV2(models.Model):
     DateTime1953 = models.DateTimeField(blank=True, null=True)
     FizetesiMod3 = models.TextField(blank=True, null=True)
     RendelesSzama = models.TextField(blank=True, null=True)
-    RendelesStatusz = models.IntegerField(blank=True, null=True)
+    RendelesStatusz = models.TextField(blank=True, null=True)
     FelmeresLink = models.TextField(blank=True, null=True)
     Total = models.FloatField(blank=True, null=True)
     AjanlatKikuldve = models.BooleanField(blank=True, null=True)
