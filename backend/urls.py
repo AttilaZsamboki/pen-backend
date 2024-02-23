@@ -50,4 +50,5 @@ urlpatterns = [
     path("garancia-webhook/", views.GaranciaWebhook.as_view()),
     path("slots/<external_id>/", views.Slots.as_view()),
     path("scheduler-settings/", views.SchedulerSettings.as_view()),
+    path("copy-felmeres/", views.CopyFelmeres.as_view()),
 ]

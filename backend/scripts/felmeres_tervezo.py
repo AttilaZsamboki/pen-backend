@@ -164,7 +164,10 @@ class Generation:
                 if len(dates):
                     if len(dates) == 1:
                         if dates[0] == "*":
-                            possible_dates = self.get_possible_dates(self.data[start])
+                            possible_dates = Generation.Individual(
+                                data=self.outer_instace.data,
+                                outer_instance=self.outer_instace,
+                            ).get_possible_dates(self.data[start])
                             if possible_dates:
                                 new_date = possible_dates[
                                     np.random.randint(low=0, high=len(possible_dates))
@@ -296,9 +299,7 @@ class Generation:
                 from_field = unschedulable_time.from_field
                 to = unschedulable_time.to
 
-                # Check if the unschedulable time repeats
                 if repeat_time:
-                    # Calculate the duration of the unschedulable time
                     duration = to - from_field
 
                     for i in range(len(self.outer_instace.dates)):
@@ -310,7 +311,6 @@ class Generation:
                         if date <= appointment_time < date + duration:
                             return False
                 else:
-                    # Check if the appointment time falls within the unschedulable time
                     if from_field <= appointment_time <= to:
                         return False
             return True
@@ -1031,9 +1031,9 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 4
-population_size = 20
-max_generations = 20
+initial_population_size = 10
+population_size = 200
+max_generations = 200
 tournament_size = 4
 elitism_size = 10
 

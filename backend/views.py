@@ -1485,3 +1485,81 @@ def minicrm_proxy(request):
             return Response({"error": "Error " + response.text}, status=400)
     log("Minicrm proxy sikertelen", "ERROR", "pen_minicrm_proxy", "Missing endpoint")
     return Response({"error": "Missing endpoint"}, status=400)
+
+
+class CopyFelmeres(APIView):
+    def post(self, request):
+        data = json.loads(request.body)
+        log("Másolás API meghívva", "INFO", "pen_felmeres_webhook", data=data)
+        id = data.get("id")
+        if not id:
+            log(
+                "Felmérés azonosító nem volt megadva",
+                "ERROR",
+                "pen_felmeres_webhook",
+                data=data,
+            )
+            return Response("Adatlap id is required", status=HTTP_400_BAD_REQUEST)
+
+        felmeres = models.Felmeresek.objects.filter(id=id)
+        if not felmeres.exists():
+            log(
+                "Nem található felmérés evvel az azonosítóval",
+                "ERROR",
+                "pen_felmeres_webhook",
+                data=data,
+            )
+            return Response("Nem található felmérés", status=HTTP_400_BAD_REQUEST)
+
+        felmeres = felmeres.first()
+        felmeres.id = None
+        felmeres.save()
+
+        felmeres_items = models.FelmeresItems.objects.filter(adatlap__id=id)
+        if felmeres_items.exists():
+            items = []
+            for item in felmeres_items:
+                item.id = None
+                item.adatlap = felmeres
+                items.append(item)
+            models.FelmeresItems.objects.bulk_create(items)
+
+        felmeres_munkadijak = models.FelmeresMunkadijak.objects.filter(felmeres__id=id)
+        if felmeres_munkadijak.exists():
+            munkadijak = []
+            for munkadij in felmeres_munkadijak:
+                munkadij.id = None
+                munkadij.felmeres = felmeres
+                munkadijak.append(munkadij)
+            models.FelmeresMunkadijak.objects.bulk_create(munkadijak)
+
+        felmeres_pictures = models.FelmeresPictures.objects.filter(felmeres__id=id)
+        if felmeres_pictures.exists():
+            pictures = []
+            for picture in felmeres_pictures:
+                picture.id = None
+                picture.felmeres = felmeres
+                pictures.append(picture)
+            models.FelmeresPictures.objects.bulk_create(pictures)
+
+        felmeres_notes = models.FelmeresekNotes.objects.filter(felmeres_id=id)
+        if felmeres_notes.exists():
+            notes = []
+            for note in felmeres_notes:
+                note.id = None
+                note.felmeres_id = felmeres.id
+                notes.append(note)
+            models.FelmeresekNotes.objects.bulk_create(notes)
+
+        felmeres_questions = models.FelmeresQuestions.objects.filter(adatlap__id=id)
+        if felmeres_questions.exists():
+            questions = []
+            for question in felmeres_questions:
+                question.id = None
+                question.felmeres = felmeres
+                questions.append(question)
+            models.FelmeresQuestions.objects.bulk_create(questions)
+
+        return Response(
+            serializers.FelmeresekSerializer(felmeres).data, status=HTTP_200_OK
+        )
