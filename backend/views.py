@@ -1484,26 +1484,14 @@ def minicrm_proxy(request):
 
 
 class CopyFelmeres(APIView):
-    def post(self, request):
-        data = json.loads(request.body)
-        log("Másolás API meghívva", "INFO", "pen_felmeres_webhook", data=data)
-        id = data.get("id")
-        if not id:
-            log(
-                "Felmérés azonosító nem volt megadva",
-                "ERROR",
-                "pen_felmeres_webhook",
-                data=data,
-            )
-            return Response("Adatlap id is required", status=HTTP_400_BAD_REQUEST)
-
+    def post(self, request, id):
+        log("Másolás API meghívva", "INFO", "pen_felmeres_webhook", details=id)
         felmeres = models.Felmeresek.objects.filter(id=id)
         if not felmeres.exists():
             log(
                 "Nem található felmérés evvel az azonosítóval",
                 "ERROR",
                 "pen_felmeres_webhook",
-                data=data,
             )
             return Response("Nem található felmérés", status=HTTP_400_BAD_REQUEST)
 
