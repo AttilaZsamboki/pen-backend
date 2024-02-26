@@ -9,7 +9,7 @@ def main():
     adatlapok = MiniCrmAdatlapok.objects.filter(
         ~Q(StatusId=3009),
         CategoryId=29,
-        Enum1951=4374,
+        Enum1951="Beépítésre vár",
         Deleted=0,
     ).values()
     if not adatlapok:

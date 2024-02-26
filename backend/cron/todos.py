@@ -232,7 +232,7 @@ def create_beepites_todo(
 
 def filter_beepites_adatlapok(adatlap: MiniCrmAdatlapok):
     return (
-        adatlap.Enum1951 == "4374"
+        adatlap.Enum1951 == "Beépítésre vár"
         and adatlap.Beepitok is not None
         and adatlap.DateTime1953 is not None
         and adatlap.StatusId != "3009"

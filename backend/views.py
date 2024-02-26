@@ -647,7 +647,7 @@ class UnasLogin(APIView):
 
 def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
-        Q(Enum1951=4374) | Q(StatusId=3008), CategoryId=29, Deleted="0"
+        Q(Enum1951="Beépítésre vár") | Q(StatusId=3008), CategoryId=29, Deleted="0"
     ).values()
     if not adatlapok:
         return """<?xml version="1.0" encoding="UTF-8" ?>
@@ -658,7 +658,6 @@ def get_unas_order_data(type):
     for adatlap in adatlapok:
         if adatlap["RendelesSzama"] != "" and adatlap["RendelesSzama"] is not None:
             continue
-        # Get the order data, adatlap details, business contact details, address, and contact details for each adatlap
         order_data = models.Orders.objects.get(adatlap_id=adatlap["Id"]).__dict__
         script_name = "pen_unas_get_order"
         kapcsolat = contact_details(
@@ -925,7 +924,6 @@ class UnasGetOrder(APIView):
             "Unas rendelések lekérdezése meghívva",
             "INFO",
             "pen_unas_get_order",
-            request.body.decode("utf-8"),
         )
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
@@ -955,7 +953,6 @@ class UnasGetOrder(APIView):
                 "Unas rendelések lekérdezése meghívva",
                 "INFO",
                 "pen_unas_get_order_dev",
-                request.body.decode("utf-8"),
             )
             response = get_unas_order_data(type)
             return HttpResponse(response, HTTP_200_OK)
@@ -1218,7 +1215,6 @@ class UserRole(APIView):
 
 
 class MiniCrmAdatlapokV2(generics.ListAPIView):
-    pagination_class = PageNumberPagination
     serializer_class = serializers.MiniCrmAdatlapokV2Serializer
     queryset = models.MiniCrmAdatlapokV2.objects.all()
     permission_classes = [AllowAny]
@@ -1270,7 +1266,7 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
                     felmeres_idopontja["to"], "%Y-%m-%dT%H:%M:%S.%fZ"
                 ),
             )
-        beepites_idopontja = self.request.query_params.get("BeepitesDatuma")
+        beepites_idopontja = self.request.query_params.get("DateTime1953")
         if beepites_idopontja:
             beepites_idopontja = json.loads(beepites_idopontja)
             queryset = queryset.filter(

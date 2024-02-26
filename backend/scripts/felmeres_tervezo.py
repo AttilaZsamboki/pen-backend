@@ -30,6 +30,8 @@ gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
 
 
 from datetime import timedelta
+import time
+from django.db import OperationalError
 
 
 class Generation:
@@ -316,7 +318,17 @@ class Generation:
             return True
 
         def get_possible_dates(self, chromosome: Chromosome):
-            Slots.objects.filter(external_id=chromosome.external_id).delete()
+            MAX_RETRIES = 5
+
+            for attempt in range(MAX_RETRIES):
+                try:
+                    Slots.objects.filter(external_id=chromosome.external_id).delete()
+                    break
+                except OperationalError:
+                    if attempt < MAX_RETRIES - 1:
+                        continue
+                    else:
+                        raise
             possible_dates = []
             slots_to_save = []
             for date in self.outer_instace.dates:
@@ -356,7 +368,25 @@ class Generation:
                                         user=felmero,
                                     )
                                 )
-            Slots.objects.bulk_create(slots_to_save)
+
+            def create_slots_with_retry(slots_to_save):
+                max_retries = 3
+                retry_delay = 1
+
+                for retry in range(max_retries):
+                    try:
+                        Slots.objects.bulk_create(slots_to_save)
+                        break
+                    except OperationalError as e:
+                        if retry < max_retries - 1:
+                            print(
+                                f"Encountered OperationalError: {e}. Retrying in {retry_delay} seconds..."
+                            )
+                            time.sleep(retry_delay)
+                        else:
+                            raise
+
+            create_slots_with_retry(slots_to_save)
             return possible_dates
 
         def count_appointments_on_date(self, date, salesman: Salesmen):
@@ -1032,8 +1062,8 @@ class MiniCRMConnector:
 
 
 initial_population_size = 10
-population_size = 200
-max_generations = 200
+population_size = 100
+max_generations = 100
 tournament_size = 4
 elitism_size = 10
 

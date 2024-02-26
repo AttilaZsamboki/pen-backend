@@ -1923,6 +1923,8 @@ class MiniCrmAdatlapokV2(models.Model):
     Total = models.FloatField(blank=True, null=True)
     AjanlatKikuldve = models.BooleanField(blank=True, null=True)
     FelmeresekSzama = models.IntegerField(blank=True, null=True)
+    Beepitok = models.TextField(blank=True, null=True)
+    AjanlatElutasitva = models.BooleanField(blank=True, null=True)
 
     class Meta:
         managed = False
