@@ -12,8 +12,9 @@ import xml.etree.ElementTree as ET
 from typing import Dict, List
 
 import boto3
+from collections import defaultdict
 from django.db import connection
-from django.db.models import CharField, F, Q, Value
+from django.db.models import CharField, F, Q, Value, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -1215,6 +1216,7 @@ class UserRole(APIView):
 
 
 class MiniCrmAdatlapokV2(generics.ListAPIView):
+    pagination_class = PageNumberPagination
     serializer_class = serializers.MiniCrmAdatlapokV2Serializer
     queryset = models.MiniCrmAdatlapokV2.objects.all()
     permission_classes = [AllowAny]

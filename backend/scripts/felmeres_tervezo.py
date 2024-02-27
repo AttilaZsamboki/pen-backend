@@ -1062,8 +1062,8 @@ class MiniCRMConnector:
 
 
 initial_population_size = 10
-population_size = 100
-max_generations = 100
+population_size = 50
+max_generations = 50
 tournament_size = 4
 elitism_size = 10
 
