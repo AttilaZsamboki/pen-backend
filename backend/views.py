@@ -1223,40 +1223,30 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
     filter_backends = [OrderingFilter, SearchFilter, DjangoFilterBackend]
     filterset_fields = ["Felmero2", "FizetesiMod3", "Telepules", "CategoryId"]
     search_fields = [
-        "Id",
         "Name",
         "CategoryId",
-        "StatusId",
         "ContactId",
-        "FelmeresiDij",
         "Telepules",
         "Iranyitoszam",
         "Orszag",
         "Felmero2",
         "CreatedAt",
         "Cim2",
-        "FelmeresAdatok",
         "FizetesiMod2",
         "Tavolsag",
+        "FelmeresIdopontja2",
         "DateTime1953",
         "FizetesiMod3",
         "RendelesSzama",
-        "RendelesStatusz",
-        "FelmeresLink",
         "Total",
+        "FelmeresekSzama",
+        "Beepitok",
+        "Statusz",
     ]
     ordering_fields = "__all__"
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        id = self.request.query_params.get("Id")
-        if id:
-            id = id.split(",")
-            queryset = queryset.filter(Id__in=id)
-        status_id = self.request.query_params.get("StatusId")
-        if status_id:
-            status_id = status_id.split(",")
-            queryset = queryset.filter(StatusId__in=status_id)
         felmeres_idopontja = self.request.query_params.get("FelmeresIdopontja2")
         if felmeres_idopontja:
             felmeres_idopontja = json.loads(felmeres_idopontja)
