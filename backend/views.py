@@ -1236,7 +1236,6 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
         "Iranyitoszam",
         "Orszag",
         "Felmero2",
-        "CreatedAt",
         "Cim2",
         "FizetesiMod2",
         "Tavolsag",
@@ -1482,7 +1481,7 @@ def minicrm_proxy(request):
 
 
 class CopyFelmeres(APIView):
-    def get(self, request, id):
+    def post(self, request, id):
         log("Másolás API meghívva", "INFO", "pen_felmeres_webhook", details=id)
         felmeres = models.Felmeresek.objects.filter(id=id)
         if not felmeres.exists():
