@@ -1061,9 +1061,9 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 10
-population_size = 50
-max_generations = 50
+initial_population_size = 5
+population_size = 10
+max_generations = 10
 tournament_size = 4
 elitism_size = 10
 
@@ -1088,7 +1088,7 @@ num_best_slots = 5
 plan_timespan = 90
 allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
 selection_within_time_period = 3
-mutation_range = 10
+mutation_range = 5
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(

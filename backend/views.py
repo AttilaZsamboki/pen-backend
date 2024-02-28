@@ -1486,7 +1486,7 @@ def minicrm_proxy(request):
 
 
 class CopyFelmeres(APIView):
-    def post(self, request, id):
+    def get(self, request, id):
         log("Másolás API meghívva", "INFO", "pen_felmeres_webhook", details=id)
         felmeres = models.Felmeresek.objects.filter(id=id)
         if not felmeres.exists():
@@ -1499,6 +1499,9 @@ class CopyFelmeres(APIView):
 
         felmeres = felmeres.first()
         felmeres.id = None
+        felmeres.created_at = datetime.datetime.now()
+        felmeres.status = "DRAFT"
+
         felmeres.save()
 
         felmeres_items = models.FelmeresItems.objects.filter(adatlap__id=id)
