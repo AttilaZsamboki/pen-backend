@@ -51,4 +51,5 @@ urlpatterns = [
     path("slots/<external_id>/", views.Slots.as_view()),
     path("scheduler-settings/", views.SchedulerSettings.as_view()),
     path("<id>/copy-felmeres/", views.CopyFelmeres.as_view()),
+    path("salesmen/", views.SalesmenList.as_view()),
 ]

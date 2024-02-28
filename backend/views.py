@@ -1547,3 +1547,9 @@ class CopyFelmeres(APIView):
         return Response(
             serializers.FelmeresekSerializer(felmeres).data, status=HTTP_200_OK
         )
+
+
+class SalesmenList(generics.ListCreateAPIView):
+    serializer_class = serializers.SalesmenSerializer
+    queryset = models.Salesmen.objects.all()
+    permission_classes = [AllowAny]

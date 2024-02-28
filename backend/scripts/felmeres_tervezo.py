@@ -1088,7 +1088,7 @@ num_best_slots = 5
 plan_timespan = 90
 allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
 selection_within_time_period = 3
-mutation_range = 5
+mutation_range = 20
 
 fixed_appointments = minicrm_conn.fix_appointments()
 result = Generation(

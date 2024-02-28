@@ -198,3 +198,9 @@ class MiniCrmAdatlapokV2Serializer(serializers.ModelSerializer):
     class Meta:
         model = models.MiniCrmAdatlapokV2
         fields = "__all__"
+
+
+class SalesmenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Salesmen
+        fields = "__all__"
