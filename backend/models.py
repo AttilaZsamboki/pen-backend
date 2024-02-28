@@ -1918,6 +1918,8 @@ class MiniCrmAdatlapokV2(models.Model):
     FelmeresekSzama = models.IntegerField(blank=True, null=True)
     Beepitok = models.TextField(blank=True, null=True)
     Statusz = models.TextField(blank=True, null=True)
+    FelmeresiDij = models.IntegerField(blank=True, null=True)
+    FelmeresLink = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
