@@ -1221,7 +1221,13 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
     queryset = models.MiniCrmAdatlapokV2.objects.all()
     permission_classes = [AllowAny]
     filter_backends = [OrderingFilter, SearchFilter, DjangoFilterBackend]
-    filterset_fields = ["Felmero2", "FizetesiMod3", "Telepules", "CategoryId"]
+    filterset_fields = [
+        "Felmero2",
+        "FizetesiMod3",
+        "Telepules",
+        "CategoryId",
+        "Statusz",
+    ]
     search_fields = [
         "Name",
         "CategoryId",
