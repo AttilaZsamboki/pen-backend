@@ -47,6 +47,7 @@ from .utils.minicrm import (
     address_ids,
     contact_details,
     update_offer_order,
+    get_request,
 )
 from .utils.utils import replace_self_closing_tags
 
@@ -1369,7 +1370,7 @@ class SettingsList(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
-class MiniCrmProxy(APIView):
+class MiniCrmProxyId(APIView):
     def put(self, request, adatlap_id):
         data = mini_crm_proxy(request.data, adatlap_id, True)
         if data["code"] == 200:
@@ -1442,42 +1443,60 @@ import requests
 from rest_framework.decorators import api_view
 
 
-@csrf_exempt
-@api_view(["POST"])
-def minicrm_proxy(request):
-    data = request.body.decode("utf-8")
-    log(
-        "Minicrm proxy meghívva",
-        "INFO",
-        "pen_minicrm_proxy",
-        data,
-    )
-    endpoint = request.GET.get("endpoint")
-
-    if endpoint == "XML":
-        system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
-        api_key = os.environ.get("PEN_MINICRM_API_KEY")
-
-        response = requests.post(
-            f"https://r3.minicrm.hu/Api/SyncFeed/119/Upload",
-            auth=(system_id, api_key),
-            data=data.encode("utf-8"),
-            headers={"Content-Type": "application/xml"},
+class MiniCrmProxy(APIView):
+    def post(self, request):
+        data = request.body.decode("utf-8")
+        log(
+            "Minicrm proxy meghívva",
+            "INFO",
+            "pen_minicrm_proxy",
+            data,
         )
+        endpoint = request.GET.get("endpoint")
 
-        if response.ok:
-            log("Minicrm proxy sikeres", "INFO", "pen_minicrm_proxy", response.text)
-            return Response(response.json())
-        else:
+        if endpoint == "XML":
+            system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
+            api_key = os.environ.get("PEN_MINICRM_API_KEY")
+
+            response = requests.post(
+                f"https://r3.minicrm.hu/Api/SyncFeed/119/Upload",
+                auth=(system_id, api_key),
+                data=data.encode("utf-8"),
+                headers={"Content-Type": "application/xml"},
+            )
+
+            if response.ok:
+                log("Minicrm proxy sikeres", "INFO", "pen_minicrm_proxy", response.text)
+                return Response(response.json())
+            else:
+                log(
+                    "Minicrm proxy sikertelen",
+                    "ERROR",
+                    "pen_minicrm_proxy",
+                    response.text,
+                )
+                return Response({"error": "Error " + response.text}, status=400)
+        log(
+            "Minicrm proxy sikertelen", "ERROR", "pen_minicrm_proxy", "Missing endpoint"
+        )
+        return Response({"error": "Missing endpoint"}, status=400)
+
+    def get(self, request):
+        endpoint = request.GET.get("endpoint")
+        id = request.GET.get("id")
+
+        resp = get_request(endpoint=endpoint, id=id)
+        if resp["status"] == "Error":
             log(
                 "Minicrm proxy sikertelen",
                 "ERROR",
                 "pen_minicrm_proxy",
-                response.text,
+                resp["response"],
             )
-            return Response({"error": "Error " + response.text}, status=400)
-    log("Minicrm proxy sikertelen", "ERROR", "pen_minicrm_proxy", "Missing endpoint")
-    return Response({"error": "Missing endpoint"}, status=400)
+            return Response(resp["response"], status=400)
+
+        log("Minicrm proxy sikeres", "INFO", "pen_minicrm_proxy", resp["response"])
+        return Response(resp["response"])
 
 
 class CopyFelmeres(APIView):
