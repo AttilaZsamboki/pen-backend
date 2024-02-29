@@ -7,8 +7,9 @@ from ..utils.minicrm import (
 from ..utils.minicrm_str_to_text import todo_map
 from ..utils.utils import round_to_five
 from ..utils.logs import log
-from ..models import MiniCrmAdatlapok, MiniCrmTodos, Orders, Felmeresek
+from ..models import MiniCrmAdatlapok, MiniCrmTodos, Orders, Felmeresek, Logs
 import traceback
+from datetime import datetime, timedelta
 
 
 def main(
@@ -44,9 +45,16 @@ def main(
             if does_todo_exist
             else MiniCrmTodos.objects.filter(todo_id=adatlap.Id).exists() is False
         ):
+            if Logs.objects.filter(
+                script_name=script_name,
+                details=adatlap.Id,
+                status="START",
+                time__gte=datetime.now() - timedelta(minutes=5),
+            ).exists():
+                continue
             log(
                 "Új feladat létrehozása",
-                "INFO",
+                "START",
                 script_name=script_name,
                 details=adatlap.Id,
             )

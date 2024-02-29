@@ -1559,7 +1559,7 @@ class CopyFelmeres(APIView):
             questions = []
             for question in felmeres_questions:
                 question.id = None
-                question.felmeres = felmeres
+                question.adatlap = felmeres
                 questions.append(question)
             models.FelmeresQuestions.objects.bulk_create(questions)
 

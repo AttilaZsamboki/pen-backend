@@ -1,4 +1,4 @@
-from .create_order import main
+from .create_order import create_order
 from ..utils.logs import log
 from ..utils.minicrm import get_all_adatlap
 from ..models import MiniCrmAdatlapok
@@ -13,4 +13,4 @@ for adatlap in adatlapok:
         str(adatlap["Id"]),
     )
     adatlap = MiniCrmAdatlapok.objects.get(id=adatlap["Id"])
-    main(adatlap)
+    create_order(adatlap)

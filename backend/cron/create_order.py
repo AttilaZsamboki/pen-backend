@@ -2,21 +2,23 @@ from ..utils.logs import log
 from ..utils.minicrm import create_order
 from ..utils.minicrm_str_to_text import garancia_type_map
 
-from ..models import Offers, Felmeresek, MiniCrmAdatlapok
+from ..models import Offers, Felmeresek, MiniCrmAdatlapok, Logs
 
 import os
 import dotenv
 import requests
 import traceback
+import datetime
 
 dotenv.load_dotenv()
 
 
-def main(adatlap: MiniCrmAdatlapok):
+def fn(adatlap: MiniCrmAdatlapok):
     log(
         "Megrendelések létrehozása elkezdődött",
         script_name="pen_create_order",
-        status="INFO",
+        status="START",
+        data={"adatlap": adatlap.Id},
     )
 
     try:
@@ -123,14 +125,27 @@ def main(adatlap: MiniCrmAdatlapok):
     )
 
 
-try:
-    adatlapok = MiniCrmAdatlapok.objects.filter(CategoryId=21, StatusId=2896, Deleted=0)
-    for adatlap in adatlapok:
-        main(adatlap)
-except Exception as e:
-    log(
-        "Megrendelések létrehozása sikertelen",
-        script_name="pen_create_order",
-        status="ERROR",
-        details=f"Error: {e}. {traceback.format_exc()}",
-    )
+def main():
+    try:
+        adatlapok = MiniCrmAdatlapok.objects.filter(
+            CategoryId=21, StatusId=2896, Deleted=0
+        )
+        for adatlap in adatlapok:
+            if Logs.objects.filter(
+                status="START",
+                data__adatlap=adatlap.Id,
+                time__gte=datetime.datetime.now() - datetime.timedelta(minutes=5),
+            ).exists():
+                continue
+            fn(adatlap)
+    except Exception as e:
+        log(
+            "Megrendelések létrehozása sikertelen",
+            script_name="pen_create_order",
+            status="ERROR",
+            details=f"Error: {e}. {traceback.format_exc()}",
+        )
+
+
+main()
+main()
