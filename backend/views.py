@@ -1516,6 +1516,7 @@ class CopyFelmeres(APIView):
         felmeres.id = None
         felmeres.created_at = datetime.datetime.now()
         felmeres.status = "DRAFT"
+        felmeres.name = f"{felmeres.name} - Másolat"
 
         felmeres.save()
 
