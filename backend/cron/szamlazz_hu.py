@@ -38,6 +38,7 @@ def create_invoice_or_proform(
         datetime.datetime.now() + datetime.timedelta(days=3)
     ).strftime("%Y-%m-%d"),
     prefix="TMTSZ",
+    items=None,
 ):
     if proform:
         name = "díjbekérő"
@@ -277,7 +278,7 @@ def create_invoice_or_proform(
                 </vevo>
                 <tetelek>
                     <!-- items on invoice -->
-                    <tetel>
+                    {f'''<tetel>
                         <!-- item 2, details are same as above -->
                         <megnevezes>Felmérés</megnevezes>
                         <mennyiseg>1.0</mennyiseg>
@@ -287,7 +288,7 @@ def create_invoice_or_proform(
                         <nettoErtek>{net_price}</nettoErtek>
                         <afaErtek>{net_price * 0.27}</afaErtek>
                         <bruttoErtek>{net_price * 1.27}</bruttoErtek>
-                    </tetel>
+                    </tetel>''' if not items else items(adatlap)}
                 </tetelek>
             </xmlszamla>
             """
@@ -507,6 +508,32 @@ def garancia_proform_criteria(adatlap: MiniCrmAdatlapok):
     return False
 
 
+def garancia_items(adatlap: MiniCrmAdatlapok):
+    ret_str = f"""<tetel>
+                        <megnevezes>Kiszállási díj</megnevezes>
+                        <mennyiseg>1.0</mennyiseg>
+                        <mennyisegiEgyseg>db</mennyisegiEgyseg>
+                        <nettoEgysegar>{adatlap.NettoFelmeresiDij}</nettoEgysegar>
+                        <afakulcs>27</afakulcs>
+                        <nettoErtek>{adatlap.NettoFelmeresiDij}</nettoErtek>
+                        <afaErtek>{adatlap.NettoFelmeresiDij * 0.27}</afaErtek>
+                        <bruttoErtek>{adatlap.NettoFelmeresiDij * 1.27}</bruttoErtek>
+                    </tetel>"""
+    if adatlap.BejelentesTipusa == "Karbantartás":
+        net = adatlap.KarbantartasNettoDij if adatlap.KarbantartasNettoDij else 0
+        ret_str += f"""<tetel>
+                        <megnevezes>Karbantartási díj</megnevezes>
+                        <mennyiseg>1.0</mennyiseg>
+                        <mennyisegiEgyseg>db</mennyisegiEgyseg>
+                        <nettoEgysegar>{net}</nettoEgysegar>
+                        <afakulcs>27</afakulcs>
+                        <nettoErtek>{net}</nettoErtek>
+                        <afaErtek>{net * 0.27}</afaErtek>
+                        <bruttoErtek>{net* 1.27}</bruttoErtek>
+                    </tetel>"""
+    return ret_str
+
+
 data = {
     "city_field": "Telepules2",
     "update_data": update_data_garancia,
@@ -532,5 +559,6 @@ create_invoice_or_proform(
     cash=False,
     messages_field="DijbekeroUzenetek2",
     note_field="DijbekeroMegjegyzes3",
+    items=garancia_items,
     **data,
 )

@@ -7,10 +7,10 @@
                 </beallitasok>
                 <fejlec>
                     <!-- header -->
-                    <keltDatum>2024-02-12</keltDatum>
-                    <teljesitesDatum>2024-02-12</teljesitesDatum>
+                    <keltDatum>2024-03-02</keltDatum>
+                    <teljesitesDatum>2024-03-02</teljesitesDatum>
                     <!-- creating date, in this exact format -->
-                    <fizetesiHataridoDatum>2024-02-15</fizetesiHataridoDatum>
+                    <fizetesiHataridoDatum>2024-03-05</fizetesiHataridoDatum>
                     <!-- due date -->
                     <fizmod>Átutalás</fizmod>
                     <!-- payment type: it can be seen in case you create the invoice
@@ -22,9 +22,9 @@
                     <!-- language of invoice, can  be: de, en, it, hu, fr, ro, sk, hr
                                                     -->
                     <megjegyzes><![CDATA[None]]></megjegyzes>
-                    <rendelesSzam>45535</rendelesSzam>
+                    <rendelesSzam>47148</rendelesSzam>
                     <!-- order number -->
-                    <dijbekeroSzamlaszam>None</dijbekeroSzamlaszam>
+                    <dijbekeroSzamlaszam></dijbekeroSzamlaszam>
                     <!-- reference to pro forma invoice number -->
                     <vegszamla>false</vegszamla>
                     <!-- invoice (after a deposit invoice) -->
@@ -48,35 +48,43 @@
                 </elado>
                 <vevo>
                     <!--Buyer details -->
-                    <nev><![CDATA[Ember Teszt]]></nev>
+                    <nev><![CDATA[Attila Karbantartó]]></nev>
                     <!-- name -->
-                    <irsz><![CDATA[2181]]></irsz>
+                    <irsz><![CDATA[1201]]></irsz>
                     <!-- ZIP code -->
-                    <telepules><![CDATA[Iklad]]></telepules>
+                    <telepules><![CDATA[Budapest]]></telepules>
                     <!-- city -->
-                    <cim><![CDATA[Petőfi utca 38/B]]></cim>
+                    <cim><![CDATA[Gátlás utca 123]]></cim>
                     <!-- address -->
-                    <email><![CDATA[tester@gmail.com]]></email>
+                    <email><![CDATA[zsamboki@gmail.com]]></email>
                     <!-- should we send the e-mail to the customer (by email) -->
                     <adoszam></adoszam>
                     <!-- fiscal number/tax number -->
-                    <azonosito>52508</azonosito>
+                    <azonosito>50417</azonosito>
                     <!-- identification -->
-                    <telefonszam></telefonszam>
+                    <telefonszam>+36 20 210 1756</telefonszam>
                     <!-- phone number -->
                 </vevo>
                 <tetelek>
                     <!-- items on invoice -->
                     <tetel>
-                        <!-- item 2, details are same as above -->
-                        <megnevezes>Felmérés</megnevezes>
+                        <megnevezes>Kiszállási díj</megnevezes>
                         <mennyiseg>1.0</mennyiseg>
                         <mennyisegiEgyseg>db</mennyisegiEgyseg>
-                        <nettoEgysegar>100</nettoEgysegar>
+                        <nettoEgysegar>20000.0</nettoEgysegar>
                         <afakulcs>27</afakulcs>
-                        <nettoErtek>100</nettoErtek>
-                        <afaErtek>27.0</afaErtek>
-                        <bruttoErtek>127.0</bruttoErtek>
+                        <nettoErtek>20000.0</nettoErtek>
+                        <afaErtek>5400.0</afaErtek>
+                        <bruttoErtek>25400.0</bruttoErtek>
+                    </tetel><tetel>
+                        <megnevezes>Karbantartási díj</megnevezes>
+                        <mennyiseg>1.0</mennyiseg>
+                        <mennyisegiEgyseg>db</mennyisegiEgyseg>
+                        <nettoEgysegar>20000.0</nettoEgysegar>
+                        <afakulcs>27</afakulcs>
+                        <nettoErtek>20000.0</nettoErtek>
+                        <afaErtek>5400.0</afaErtek>
+                        <bruttoErtek>25400.0</bruttoErtek>
                     </tetel>
                 </tetelek>
             </xmlszamla>
