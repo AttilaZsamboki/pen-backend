@@ -377,7 +377,8 @@ class FelmeresekList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresekSerializer
     permission_classes = [AllowAny]
     pagination_class = PageNumberPagination
-    filter_backends = [SearchFilter, OrderingFilter]
+    filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
+    filterset_fields = ["adatlap_id"]
     ordering_fields = "__all__"
     search_fields = [
         "adatlap_id__Name",
