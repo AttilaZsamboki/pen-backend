@@ -1864,7 +1864,7 @@ class Felmeresek(models.Model):
     hourly_wage = models.FloatField(blank=True, null=True)
     is_conditional = models.BooleanField(blank=True, null=True, default=False)
     condition = models.TextField(blank=True, null=True)
-    detailed_offer = models.(blank=True, null=True)
+    is_detailed_offer = models.BooleanField(blank=True, null=True)
 
     @property
     def netOrderTotal(self):
