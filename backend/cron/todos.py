@@ -112,7 +112,7 @@ def main(
                     continue
                 log(
                     "Hiba akadt a feladat létrehozása közben",
-                    "ERROR",
+                    "FAILED",
                     script_name=script_name,
                     details="Adatlap: "
                     + str(adatlap.Id)

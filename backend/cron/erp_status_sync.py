@@ -40,7 +40,7 @@ def main():
             if not resp.ok or not resp2["code"] != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
-                    "ERROR",
+                    "FAILED",
                     "pen_erp_status_sync",
                     f"OrderId: {order.order_id}. Response: {resp.text}",
                 )
@@ -53,7 +53,7 @@ def main():
             if not resp.ok or not resp2["code"] != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
-                    "ERROR",
+                    "FAILED",
                     "pen_erp_status_sync",
                     f"OrderId: {order.order_id}. Response: {resp.text}",
                 )

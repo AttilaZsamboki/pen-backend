@@ -54,6 +54,9 @@ class FelmeresekSerializer(serializers.ModelSerializer):
     offer_status = serializers.CharField(
         required=False, allow_null=True, read_only=True
     )
+    felmeres_total = serializers.FloatField(
+        required=False, allow_null=True, read_only=True
+    )
 
     class Meta:
         model = models.Felmeresek

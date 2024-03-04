@@ -123,6 +123,6 @@ except Exception as e:
     log(
         "Kifizetett számlák csekkolása sikertelen",
         script_name="pen_paid_invoice",
-        status="ERROR",
+        status="FAILED",
         details=traceback.format_exc(),
     )

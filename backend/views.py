@@ -186,15 +186,18 @@ class OrderWebhook(APIView):
 
             save_webhook(data["Data"], process_data=process_data)
 
-            models.Orders(
-                adatlap_id=data["Id"],
-                order_id=data["Head"]["Id"],
-            ).save()
-            log(
-                "Penészmentesítés rendelés webhook sikeresen lefutott",
-                "SUCCESS",
-                "pen_order_webhook",
-            )
+            if not models.Orders.objects.filter(
+                adatlap_id=data["Id"], order_id=data["Head"]["Id"]
+            ).exists():
+                models.Orders(
+                    adatlap_id=data["Id"],
+                    order_id=data["Head"]["Id"],
+                ).save()
+                log(
+                    "Penészmentesítés rendelés webhook sikeresen lefutott",
+                    "SUCCESS",
+                    "pen_order_webhook",
+                )
             return Response("Succesfully received data", status=HTTP_200_OK)
         except:
             log(
@@ -397,22 +400,17 @@ class FelmeresekList(generics.ListCreateAPIView):
 
 def felmeresek_detail(pk):
     felmeres = models.Felmeresek.objects.get(id=pk)
-    adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
-    if not adatlap.exists():
-        return serializers.FelmeresekSerializer(
-            {
-                "adatlap_id": felmeres.adatlap_id,
-                **felmeres.__dict__,
-            },
-        )
-    adatlap = adatlap.first()
-    return serializers.FelmeresekSerializer(
-        {
-            "offer_status": adatlap.StatusIdStr,
-            "adatlap_id": felmeres.adatlap_id,
-            **felmeres.__dict__,
-        },
-    )
+    payload = {
+        "adatlap_id": felmeres.adatlap_id,
+        "felmeres_total": felmeres.netOrderTotal,
+        **felmeres.__dict__,
+    }
+    offer_adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
+    if offer_adatlap.exists():
+        offer_adatlap = offer_adatlap.first()
+        payload["offer_status"] = (offer_adatlap.StatusIdStr,)
+
+    return serializers.FelmeresekSerializer(payload)
 
 
 class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -430,7 +428,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
         except Exception as e:
             log(
                 "Felmérés lekérdezése sikertelen",
-                "ERROR",
+                "FAILED",
                 "pen_felmeresek_detail",
                 details=f"Error: {e}. {traceback.format_exc()}",
             )
@@ -945,7 +943,7 @@ class UnasGetOrder(APIView):
                     + str(e)
                     + ". Traceback: "
                     + traceback.format_exc(),
-                    "ERROR",
+                    "FAILED",
                     "pen_unas_get_order",
                 )
                 return Response(str(e), status=HTTP_401_UNAUTHORIZED)

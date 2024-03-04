@@ -8,6 +8,7 @@ from multiprocessing import Pool, freeze_support, cpu_count
 
 import numpy as np
 from django.db.models import Q
+from django import db
 
 from ..utils.logs import log
 from ..models import (
@@ -912,6 +913,14 @@ class Generation:
         # Wrapper function to evaluate fitness of an individual
         return individual.calculate_fitness()
 
+    def generate_child(self, parents):
+        db.connections.close_all()  # Close existing connections
+        parent1, parent2 = parents
+        print("Crossover...")
+        child = self.crossover(parent1, parent2)
+        print("Mutation...")
+        return child.mutate()
+
     def run_one_generation(self):
         num_processes = cpu_count()
         pool = Pool(processes=num_processes)
@@ -925,22 +934,13 @@ class Generation:
 
         elites = population[: self.elitism_size]
 
-        new_population: List[Generation.Individual] = []
+        parents = [
+            (self.tournament_selection(), self.tournament_selection())
+            for _ in range(population_size)
+        ]
 
-        for _ in range(population_size):
-            parent1, parent2 = (
-                self.tournament_selection(),
-                self.tournament_selection(),
-            )
-            if not parent1 or not parent2:
-                continue
+        new_population = pool.map(self.generate_child, parents)
 
-            print("Crossover...")
-            child = self.crossover(parent1, parent2)
-            print("Mutation...")
-            child = child.mutate()
-
-            new_population.append(child)
         self.population = new_population + elites
 
     def tournament_selection(self):
@@ -1062,7 +1062,7 @@ class MiniCRMConnector:
 
 
 initial_population_size = 5
-population_size = 10
+population_size = 5
 max_generations = 10
 tournament_size = 4
 elitism_size = 10
