@@ -7,9 +7,11 @@ from django.db.models import Q
 def main():
     log("MiniCRM ERP státusz szinkron megkezdődött", "INFO", "pen_erp_status_sync")
     adatlapok = MiniCrmAdatlapok.objects.filter(
-        ~Q(StatusId=3009),
+        ~Q(StatusId=3009)
+        & ~Q(Enum1951="Lezárva")
+        & ~Q(Enum1951="Szervezésre vár")
+        & ~Q(StatusId=3011),
         CategoryId=29,
-        Enum1951="Beépítésre vár",
         Deleted=0,
     ).values()
     if not adatlapok:
@@ -32,25 +34,12 @@ def main():
                 adatlap["Id"],
             )
             continue
-        if order.order_status == "Completed":
-            resp2 = update_offer_order(
-                order.webshop_id, {"Enum1951": "Lezárva"}, type="Order"
-            )
-            resp = update_order_status(order.webshop_id)
-            if not resp.ok or not resp2["code"] != 200:
-                log(
-                    "Hiba történt a MiniCRM API hívás során",
-                    "FAILED",
-                    "pen_erp_status_sync",
-                    f"OrderId: {order.order_id}. Response: {resp.text}",
-                )
-                continue
         if order.payment_status == "Completed":
             resp2 = update_offer_order(
                 order.webshop_id, {"Enum1951": "Lezárva"}, type="Order"
             )
             resp = update_order_status(order.webshop_id, "Paid")
-            if not resp.ok or not resp2["code"] != 200:
+            if not resp.ok or not resp2.status_code != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
                     "FAILED",
@@ -58,6 +47,20 @@ def main():
                     f"OrderId: {order.order_id}. Response: {resp.text}",
                 )
                 continue
+        if order.order_status == "Completed":
+            resp2 = update_offer_order(
+                order.webshop_id, {"Enum1951": "Elszámolásra vár"}, type="Order"
+            )
+            resp = update_order_status(order.webshop_id)
+            if not resp.ok or not resp2.status_code != 200:
+                log(
+                    "Hiba történt a MiniCRM API hívás során",
+                    "FAILED",
+                    "pen_erp_status_sync",
+                    f"OrderId: {order.order_id}. Response: {resp.text}",
+                )
+                continue
+
         log(
             "MiniCRM ERP státusz szinkron sikeresen lefutott",
             "INFO",

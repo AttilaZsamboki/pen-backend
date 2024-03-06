@@ -306,6 +306,9 @@ def create_invoice_or_proform(
             response = requests.post(
                 url, files={"action-xmlagentxmlfile": open(invoice_path, "rb")}
             )
+            if not response.ok:
+                log("Hiba történt a számla készítésekor", "ERROR", script_name)
+                return
             try:
                 szamlaszam = response.headers["szlahu_szamlaszam"]
             except:

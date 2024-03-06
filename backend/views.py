@@ -408,7 +408,7 @@ def felmeresek_detail(pk):
     offer_adatlap = models.MiniCrmAdatlapok.objects.filter(Felmeresid=pk)
     if offer_adatlap.exists():
         offer_adatlap = offer_adatlap.first()
-        payload["offer_status"] = (offer_adatlap.StatusIdStr,)
+        payload["offer_status"] = offer_adatlap.StatusIdStr
 
     return serializers.FelmeresekSerializer(payload)
 
@@ -444,7 +444,6 @@ class FelmeresItemsList(generics.ListCreateAPIView):
         data = request.data
         adatlap_ids_in_request = [item.get("adatlap") for item in data]
 
-        # Delete items not in request
         models.FelmeresItems.objects.filter(
             adatlap_id__in=adatlap_ids_in_request
         ).delete()
@@ -464,7 +463,7 @@ class FelmeresItemsList(generics.ListCreateAPIView):
                 if k in [f.name for f in models.FelmeresItems._meta.get_fields()]
             }
             instance, created = models.FelmeresItems.objects.update_or_create(
-                id=item.get("id", None),  # assuming 'id' is the unique field
+                id=item.get("id", None),
                 defaults=item,
             )
         return Response(status=HTTP_200_OK)
