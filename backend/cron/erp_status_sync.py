@@ -34,11 +34,11 @@ def main():
                 adatlap["Id"],
             )
             continue
-        if order.payment_status == "Completed":
+        if order.order_status == "Completed" and adatlap["StatusId"] == 3008:
             resp2 = update_offer_order(
-                order.webshop_id, {"Enum1951": "Lezárva"}, type="Order"
+                order.webshop_id, {"Enum1951": "Elszámolásra vár"}, type="Order"
             )
-            resp = update_order_status(order.webshop_id, "Paid")
+            resp = update_order_status(order.webshop_id)
             if not resp.ok or not resp2.status_code != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
@@ -47,11 +47,11 @@ def main():
                     f"OrderId: {order.order_id}. Response: {resp.text}",
                 )
                 continue
-        if order.order_status == "Completed":
+        elif order.payment_status == "Completed":
             resp2 = update_offer_order(
-                order.webshop_id, {"Enum1951": "Elszámolásra vár"}, type="Order"
+                order.webshop_id, {"Enum1951": "Lezárva"}, type="Order"
             )
-            resp = update_order_status(order.webshop_id)
+            resp = update_order_status(order.webshop_id, "Paid")
             if not resp.ok or not resp2.status_code != 200:
                 log(
                     "Hiba történt a MiniCRM API hívás során",
