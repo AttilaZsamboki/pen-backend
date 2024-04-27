@@ -1,15 +1,13 @@
-from ..utils.minicrm import (
-    create_to_do,
-    update_adatlap_fields,
-    get_order_address,
-    contact_details,
-)
-from ..utils.minicrm_str_to_text import todo_map
-from ..utils.utils import round_to_five
-from ..utils.logs import log
-from ..models import MiniCrmAdatlapok, MiniCrmTodos, Orders, Felmeresek, Logs
+from ..utils.logs import log  # noqa
+
+import os
 import traceback
 from datetime import datetime, timedelta
+
+from ..models import Felmeresek, Logs, MiniCrmAdatlapok, MiniCrmTodos, Orders
+from ..utils.minicrm import MiniCrmClient, Contact
+from ..utils.minicrm_str_to_text import todo_map
+from ..utils.utils import round_to_five
 
 
 def main(
@@ -26,6 +24,11 @@ def main(
 ):
     script_name = script_name + "_todo"
     log("Felmérés feladatok készítése elindult", "INFO", script_name=script_name)
+    minicrm_client = MiniCrmClient(
+        system_id=os.environ.get("PEN_MINICRM_SYSTEM_ID"),
+        api_key=os.environ.get("PEN_MINICRM_API_KEY"),
+        script_name=script_name,
+    )
 
     adatlapok = [
         i
@@ -59,7 +62,7 @@ def main(
                 details=adatlap.Id,
             )
             if update_adatlap is not None:
-                urlap = update_adatlap_fields(
+                urlap = minicrm_client.update_adatlap_fields(
                     id=adatlap.Id,
                     fields=update_adatlap(adatlap),
                     script_name=script_name,
@@ -74,21 +77,7 @@ def main(
                         + ", Error: "
                         + str(urlap["reason"]),
                     )
-            contact = contact_details(
-                contact_id=adatlap.ContactId, script_name=script_name
-            )
-            if contact["status"] == "Error":
-                log(
-                    "Hiba akadt a kapcsolat lekérdezése közben",
-                    "ERROR",
-                    script_name=script_name,
-                    details="Adatlap: "
-                    + str(adatlap["Id"])
-                    + ", Error: "
-                    + str(contact["response"]),
-                )
-                continue
-            contact = contact["response"]
+            contact = minicrm_client.contact_details(contact_id=adatlap.ContactId)
             todo_comment_str = todo_comment(adatlap=adatlap, contact=contact)
             if custom_create_todo is not None:
                 custom_create_todo(
@@ -96,16 +85,14 @@ def main(
                     type=type(adatlap),
                     comment=todo_comment_str,
                     deadline=adatlap.__dict__[deadline_field],
-                    script_name=script_name,
                 )
             else:
-                todo = create_to_do(
+                todo = minicrm_client.create_to_do(
                     adatlap_id=adatlap.Id,
                     user=adatlap.__dict__[user_field],
                     type=type(adatlap),
                     comment=todo_comment_str,
                     deadline=adatlap.__dict__[deadline_field],
-                    script_name=script_name,
                 )
                 if todo.status_code == 200:
                     MiniCrmTodos(todo_id=adatlap.Id).save()
@@ -134,8 +121,8 @@ def update_adatlap(adatlap: MiniCrmAdatlapok):
     }
 
 
-def felmeres_comment(adatlap: MiniCrmAdatlapok, contact: dict):
-    return f"Új felmérést kaptál\nNév: {adatlap.Name}\nCím: {adatlap.Iranyitoszam} {adatlap.Telepules} {adatlap.Cim2}, {adatlap.Orszag}\nFizetési mód: {adatlap.FizetesiMod2}\nÖsszeg: {adatlap.FelmeresiDij} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: https://app.peneszmentesites.hu/new?page=1&adatlap_id={str(adatlap.Id)}\nUtcakép: {adatlap.StreetViewUrl}\nTel: {contact['Phone']}"
+def felmeres_comment(adatlap: MiniCrmAdatlapok, contact: Contact):
+    return f"Új felmérést kaptál\nNév: {adatlap.Name}\nCím: {adatlap.Iranyitoszam} {adatlap.Telepules} {adatlap.Cim2}, {adatlap.Orszag}\nFizetési mód: {adatlap.FizetesiMod2}\nÖsszeg: {adatlap.FelmeresiDij} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: https://app.peneszmentesites.hu/new?page=1&adatlap_id={str(adatlap.Id)}\nUtcakép: {adatlap.StreetViewUrl}\nTel: {contact.Phone}"
 
 
 def garancia_comment(adatlap: MiniCrmAdatlapok, contact: dict):
@@ -156,7 +143,12 @@ Ha már elvégezted a feladatot akkor zárd le ezt a teendőt!"""
 def beepites_comment(adatlap: MiniCrmAdatlapok, contact: dict):
     script_name = "pen_beepites_todo"
     order_id = Orders.objects.filter(adatlap_id=adatlap.Id).first().order_id
-    address = get_order_address(order_id=order_id, script_name=script_name)
+    minicrm_client = MiniCrmClient(
+        system_id=os.environ.get("PEN_MINICRM_SYSTEM_ID"),
+        api_key=os.environ.get("PEN_MINICRM_API_KEY"),
+        script_name=script_name,
+    )
+    address = minicrm_client.get_order(order_id=order_id).json()["Customer"]
 
     try:
         order = Felmeresek.objects.get(id=adatlap.FelmeresLink.split("/")[-1])
@@ -177,21 +169,12 @@ def beepites_comment(adatlap: MiniCrmAdatlapok, contact: dict):
         )
         return
 
-    if address["status"] == "Error":
-        log(
-            "Hiba akadt a rendelés lekérdezése közben",
-            "ERROR",
-            script_name="pen_beepites_todo",
-            details=f"Response: {address['response']}. OrderId: {str(order_id)}",
-        )
-        return
-    address = address["response"]
     return f"""Új beépítési munkát kaptál
 
 Ügyfél: {adatlap.Name}
 Cím: {address["PostalCode"]}  {address["City"]}. {address["Address"]}
-Tel: {contact["Phone"]} 
-Email: {contact["Email"]} 
+Tel: {contact.Phone} 
+Email: {contact.Email} 
 
 Beépítők: {adatlap.Beepitok} 
 Beépítés ideje: {adatlap.DateTime1953.strftime("%Y-%m-%d %H:%M:%S")} 
@@ -215,17 +198,16 @@ Igazolva: {adatlap.KiepitesFelteteleIgazolva}
 
 
 def create_beepites_todo(
-    adatlap: MiniCrmAdatlapok, type: int, comment: str, deadline: str, script_name: str
+    adatlap: MiniCrmAdatlapok, type: int, comment: str, deadline: str
 ):
     beepitok = adatlap.Beepitok.split(", ")
     for beepito in beepitok:
-        todo = create_to_do(
+        todo = MiniCrmClient().create_to_do(
             adatlap_id=adatlap.Id,
             user=beepito,
             type=type,
             comment=comment,
             deadline=deadline,
-            script_name=script_name,
         )
         if todo.status_code == 200:
             MiniCrmTodos(todo_id=str(adatlap.Id) + beepito).save()
@@ -233,7 +215,6 @@ def create_beepites_todo(
         log(
             "Hiba akadt a feladat létrehozása közben",
             "ERROR",
-            script_name=script_name,
             details="Adatlap: " + str(adatlap.Id) + ", Error: " + str(todo.text),
         )
 

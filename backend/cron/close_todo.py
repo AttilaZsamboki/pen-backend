@@ -1,8 +1,10 @@
-from ..utils.logs import log
-from ..utils.utils import get_spreadsheet
-from ..utils.minicrm import update_todo, list_to_dos
-from ..utils.minicrm_str_to_text import todo_map
+import os
+
+from ..utils.logs import log  # noqa
 from ..models import MiniCrmAdatlapok, MiniCrmTodos
+from ..utils.minicrm import MiniCrmClient
+from ..utils.minicrm_str_to_text import todo_map
+from ..utils.utils import get_spreadsheet
 
 
 class Project:
@@ -14,14 +16,20 @@ class Project:
         return str(self.category_id)
 
     def close_todo(self, adatlap_id, type):
-        todos = list_to_dos(
+        minicrm_client = MiniCrmClient(
+            os.environ.get("PEN_MINICRM_SYSTEM_ID"),
+            os.environ.get("PEN_MINICRM_API_KEY"),
+            script_name="pen_close_todo",
+        )
+
+        todos = minicrm_client.list_todos(
             adatlap_id,
             criteria=lambda x: x["Status"] == "Open"
             and todo_map[self.get_category_id_str()].get(x["Type"]) == type,
         )
         if todos:
             for todo in todos:
-                update_todo(todo["Id"], {"Status": "Closed"})
+                minicrm_client.update_todo(todo.Id, {"Status": "Closed"})
 
 
 felmeres_action_map = {

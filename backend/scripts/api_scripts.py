@@ -1,5 +1,5 @@
 from ..utils.logs import log
-from ..utils.minicrm import update_adatlap_fields
+from ..utils.minicrm import MiniCrmClient
 
 from datetime import datetime
 
@@ -11,7 +11,8 @@ def mini_crm_proxy(request_data, adatlap_id, retry=False):
         "pen_mini_crm_proxy",
         request_data,
     )
-    data = update_adatlap_fields(
+    minicrm = MiniCrmClient()
+    data = minicrm.update_adatlap_fields(
         id=adatlap_id,
         fields=request_data,
         script_name="pen_mini_crm_proxy",

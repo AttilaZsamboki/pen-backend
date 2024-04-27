@@ -1,12 +1,11 @@
 from ..utils.logs import log
-from ..utils.minicrm import create_order
+from ..utils.minicrm import MiniCrmClient
 from ..utils.minicrm_str_to_text import garancia_type_map
 
 from ..models import Offers, Felmeresek, MiniCrmAdatlapok, Logs
 
 import os
 import dotenv
-import requests
 import traceback
 import datetime
 
@@ -14,23 +13,29 @@ dotenv.load_dotenv()
 
 
 def fn(adatlap: MiniCrmAdatlapok):
+    script_name = "pen_create_order"
     log(
         "Megrendelések létrehozása elkezdődött",
-        script_name="pen_create_order",
+        script_name=script_name,
         status="START",
         data={"adatlap": adatlap.Id},
+    )
+    minicrm_client = MiniCrmClient(
+        os.environ.get("PEN_MINICRM_SYSTEM_ID"),
+        os.environ.get("PEN_MINICRM_API_KEY"),
+        script_name=script_name,
     )
 
     try:
         log(
             f"{adatlap.Name} megrendelés létrehozása",
-            script_name="pen_create_order",
+            script_name=script_name,
             status="INFO",
         )
     except Exception as e:
         log(
             f"Adatlap nevének lekérése sikertelen, Error: {e}",
-            script_name="pen_create_order",
+            script_name=script_name,
             status="ERROR",
             details=f"Adatlap: {adatlap}",
         )
@@ -41,14 +46,14 @@ def fn(adatlap: MiniCrmAdatlapok):
     else:
         log(
             f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
-            script_name="pen_create_order",
+            script_name=script_name,
             status="ERROR",
             details=f"Felmérés: {felmeres}",
         )
         return
     offer = Offers.objects.filter(adatlap=adatlap.Id).first()
     if offer:
-        order = create_order(
+        order = minicrm_client.create_order(
             adatlap=felmeres.adatlap_id,
             offer_id=offer.id,
             adatlap_status="Szervezésre vár",
@@ -67,60 +72,58 @@ def fn(adatlap: MiniCrmAdatlapok):
                 "KiepitesFeltetelLeirasa": felmeres.condition,
             },
         )
-        if order["status"] == "error":
-            if order["response"].lower() == "xml is not valid!":
+        if order.ok:
+            if order.lower() == "xml is not valid!":
                 log(
                     f"{adatlap.Name} megrendelés létrehozása sikertelen, XML nem valid",
-                    script_name="pen_create_order",
+                    script_name=script_name,
                     status="ERROR",
                     details=order["xml"],
                 )
                 return
-            elif order["response"].lower() == "input doesn't look like it's an xml":
+            elif order.lower() == "input doesn't look like it's an xml":
                 log(
                     f"{adatlap.Name} megrendelés létrehozása sikertelen, input nem XML",
-                    script_name="pen_create_order",
+                    script_name=script_name,
                     status="ERROR",
                     details=order["xml"],
                 )
                 return
             log(
                 f"{adatlap.Name} megrendelés létrehozása sikertelen",
-                script_name="pen_create_order",
+                script_name=script_name,
                 status="ERROR",
-                details=order["response"],
+                details=order,
             )
             return
-        system_id = os.environ.get("PEN_MINICRM_SYSTEM_ID")
-        api_key = os.environ.get("PEN_MINICRM_API_KEY")
-        resp = requests.post(
-            f"https://r3.minicrm.hu/Api/Offer/{offer.id}/Project",
-            auth=(system_id, api_key),
-            json={"StatusId": "Sikeres megrendelés"},
+
+        resp = minicrm_client.update_adatlap_fields(
+            adatlap.Id,
+            fields={"StatusId": "Sikeres megrendelés"},
         )
         if resp.status_code != 200:
             log(
                 f"{adatlap['Name']} megrendelés létrehozása sikertelen, megrendelés státusz frissítése sikertelen",
-                script_name="pen_create_order",
+                script_name=script_name,
                 status="ERROR",
                 details=resp.text,
             )
             return
         log(
             f"{adatlap.Name} megrendelés létrehozása sikeres",
-            script_name="pen_create_order",
+            script_name=script_name,
             status="SUCCESS",
         )
         return
     log(
         f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
-        script_name="pen_create_order",
+        script_name=script_name,
         status="ERROR",
         details=f"Offer: {offer}. Felmérés: {felmeres}",
     )
     log(
         "Megrendelések létrehozása sikeresen befejeződött",
-        script_name="pen_create_order",
+        script_name=script_name,
         status="SUCCESS",
     )
 

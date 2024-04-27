@@ -1,10 +1,10 @@
 from ..utils.logs import log
-from ..utils.minicrm import get_all_adatlap_details
+from ..models import MiniCrmAdatlapok
 from ..utils.calculate_distance import calculate_distance_fn
 
 
-def criteria(adatlap):
-    if adatlap["Tavolsag"] and adatlap["FelmeresiDij"]:
+def criteria(adatlap: MiniCrmAdatlapok):
+    if adatlap.Tavolsag and adatlap.FelmeresiDij:
         return False
     return True
 
@@ -15,9 +15,11 @@ def main():
         "INFO",
         "pen_calculate_distance_cron",
     )
-    adatlapok = get_all_adatlap_details(
-        category_id=23, criteria=criteria, status_id=2927
-    )
+    adatlapok = [
+        i
+        for i in MiniCrmAdatlapok.objects.filter(CategoryId=23, StatusId=2927)
+        if criteria(i)
+    ]
     for adatlap in adatlapok:
         stat = calculate_distance_fn(adatlap, source="cron")
         if stat == "Error":
@@ -25,14 +27,14 @@ def main():
                 "Penészmentesítés távolságszámítás sikertelen",
                 "ERROR",
                 "pen_calculate_distance_cron",
-                details=adatlap["Id"],
+                details=adatlap.Id,
             )
             continue
         log(
             "Penészmentesítés távolságszámítás sikeresen lefutott",
             "SUCCESS",
             "pen_calculate_distance_cron",
-            details=adatlap["Id"],
+            details=adatlap.Id,
         )
     log(
         "Penészmentesítés távolságszámítás befejeződött",

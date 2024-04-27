@@ -1,10 +1,15 @@
-from ..utils.minicrm import update_offer_order
-from ..utils.logs import log
+from ..utils.minicrm import MiniCrmClient
+from ..utils.logs import log as l
 from ..models import Orders, Order, MiniCrmAdatlapok
+from functools import partial
 
 
 def main():
-    log("MiniCRM ERP rendelésszám szinkron megkezdődött", "INFO", "pen_erp_order_id")
+    script_name = "pen_erp_order_id"
+    log = partial(l, script_name=script_name)
+    minicrm_client = MiniCrmClient(script_name=script_name)
+
+    log("MiniCRM ERP rendelésszám szinkron megkezdődött", "INFO")
     adatlapok = MiniCrmAdatlapok.objects.filter(
         CategoryId=29, ClouderpMegrendeles__isnull=True, RendelesSzama__isnull=True
     )
@@ -14,7 +19,6 @@ def main():
             log(
                 "Nem található megfelelő rendelés a megrendeléshez",
                 "WARNING",
-                "pen_erp_order_id",
                 adatlap.Id,
             )
             continue
@@ -25,11 +29,10 @@ def main():
             log(
                 "Nincs benne a rendelés az ERP feedben",
                 "WARNING",
-                "pen_erp_order_id",
                 adatlap.Id,
             )
             continue
-        resp = update_offer_order(
+        resp = minicrm_client.update_offer_order(
             order.webshop_id,
             {
                 "ClouderpMegrendeles": "https://app.clouderp.hu/v2/order?search="
@@ -42,14 +45,12 @@ def main():
             log(
                 "Rendelésszám sikeresen frissítve",
                 "SUCCESS",
-                "pen_erp_order_id",
                 order_id,
             )
         else:
             log(
                 "Rendelésszám frissítése sikertelen",
                 "ERROR",
-                "pen_erp_order_id",
                 f"OrderId: {order_id}. Response: {resp.text}",
             )
 

@@ -1,6 +1,6 @@
 from django.db import models
 from .utils.minicrm_str_to_text import status_map
-from .utils.minicrm import update_adatlap_fields
+from .utils.minicrm import MiniCrmClient
 from .utils.gmail import gmail_authenticate, send_email
 
 
@@ -401,15 +401,6 @@ class Counties(models.Model):
     class Meta:
         managed = False
         db_table = "counties"
-
-
-class Offers(models.Model):
-    id = models.IntegerField(primary_key=True)
-    adatlap = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING)
-
-    class Meta:
-        managed = False
-        db_table = "pen_offers"
 
 
 class QuestionProducts(models.Model):
@@ -1683,9 +1674,13 @@ class MiniCrmAdatlapok(models.Model):
             return status_map[self.StatusId]
         return ""
 
+    @property
+    def FullAddress(self):
+        return f"{self.Cim2} {self.Telepules}, {self.Iranyitoszam} {self.Orszag}"
+
     def change_status(self, status_id):
-        resp = update_adatlap_fields(
-            self.Id, {"StatusId": status_id}, script_name="pen_change_status"
+        resp = MiniCrmClient(script_name="pen_change_status").update_adatlap_fields(
+            self.Id, {"StatusId": status_id}
         )
         return resp
 
@@ -1727,6 +1722,15 @@ class FelmeresMunkadijak(models.Model):
     class Meta:
         managed = False
         db_table = "pen_felmeres_munkadijak"
+
+
+class Offers(models.Model):
+    id = models.IntegerField(primary_key=True)
+    adatlap: MiniCrmAdatlapok = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = "pen_offers"
 
 
 class MiniCrmTodos(models.Model):

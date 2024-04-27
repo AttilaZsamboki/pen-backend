@@ -7,21 +7,22 @@ import string
 import traceback
 import uuid
 import xml.etree.ElementTree as ET
+from functools import partial
 
 # Create your views here.
 from typing import Dict, List
 
 import boto3
-from collections import defaultdict
+import requests
 from django.db import connection
-from django.db.models import CharField, F, Q, Value, Case, When, IntegerField
+from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -37,18 +38,12 @@ from rest_framework.views import APIView
 from rest_framework_xml.parsers import XMLParser
 from rest_framework_xml.renderers import XMLRenderer
 
+from .utils.logs import log
 from . import models, serializers
 from .auth0backend import CustomJWTAuthentication
 from .scripts.api_scripts import mini_crm_proxy
 from .utils.calculate_distance import calculate_distance_fn
-from .utils.logs import log
-from .utils.minicrm import (
-    address_details,
-    address_ids,
-    contact_details,
-    update_offer_order,
-    get_request,
-)
+from .utils.minicrm import Address, Contact, MiniCrmClient
 from .utils.utils import replace_self_closing_tags
 
 
@@ -67,7 +62,7 @@ def map_wh_fields(data: Dict, field_names: List[str]):
     return data
 
 
-def save_webhook(adatlap, process_data=None, name="felmeres"):
+def save_webhook(adatlap, process_data=None, _="felmeres"):
     if process_data:
         adatlap = process_data(adatlap)
     adatlap_db = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
@@ -87,6 +82,28 @@ def save_webhook(adatlap, process_data=None, name="felmeres"):
         **filtered_data,
     ).save()
     return adatlap
+
+
+class BaseAPIView(APIView):
+    script_name = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.script_name is None:
+            self.script_name = self.__class__.__name__
+        self.log = partial(log, script_name=self.script_name)
+
+
+class MiniCrmAPIView(BaseAPIView):
+    mini_crm_client = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mini_crm_client = MiniCrmClient(
+            os.environ.get("PEN_MINICRM_SYSTEM_ID"),
+            os.environ.get("PEN_MINICRM_API_KEY"),
+            script_name=self.script_name,
+        )
 
 
 class CalculateDistance(APIView):
@@ -116,14 +133,14 @@ class CalculateDistance(APIView):
 
             response = calculate_distance_fn(
                 data,
-                address=lambda x: f"{x['Cim2']} {x['Telepules']}, {x['Iranyitoszam']} {x['Orszag']}",
+                address=lambda x: x.FullAddress,
                 update_data=update_data,
             )
             if response == "Error":
                 return Response({"status": "error"}, status=HTTP_200_OK)
         return Response({"status": "success"}, status=HTTP_200_OK)
 
-    def get(self, request):
+    def get(self, _):
         log(
             "Penészmentesítés webhook meghívva de 'GET' methoddal",
             "INFO",
@@ -142,7 +159,7 @@ class FelmeresQuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.FelmeresQuestions.objects.all()
     serializer_class = serializers.FelmeresQuestionsSerializer
 
-    def get(self, request, pk):
+    def get(self, _, pk):
         felmeres = models.FelmeresQuestions.objects.filter(adatlap_id=pk)
         serializer = serializers.FelmeresQuestionsSerializer(felmeres, many=True)
         return Response(serializer.data)
@@ -441,32 +458,38 @@ class FelmeresItemsList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresItemsSerializer
 
     def post(self, request):
+
+        def filter_item_fields(item):
+            valid_fields = [f.name for f in models.FelmeresItems._meta.get_fields()]
+            return {k: v for k, v in item.items() if k in valid_fields}
+
+        def create_or_update_item(item):
+            adatlap_id = item.pop("adatlap", None)
+            product_id = item.pop("product", None)
+            if adatlap_id is not None:
+                item["adatlap"] = get_object_or_404(models.Felmeresek, id=adatlap_id)
+            if product_id is not None:
+                item["product"] = get_object_or_404(models.Products, id=product_id)
+            item = filter_item_fields(item)
+            instance, _ = models.FelmeresItems.objects.update_or_create(
+                id=item.get("id", None),
+                defaults=item,
+            )
+            return instance
+
         data = request.data
-        adatlap_ids_in_request = [item.get("adatlap") for item in data]
+        adatlap_ids_in_request = list(map(lambda i: i.get("adatlap"), data))
 
         models.FelmeresItems.objects.filter(
             adatlap_id__in=adatlap_ids_in_request
         ).delete()
 
-        for item in data:
-            adatlap_id = item.pop("adatlap", None)
-            product_id = item.pop("product", None)
-            if adatlap_id is not None:
-                adatlap = get_object_or_404(models.Felmeresek, id=adatlap_id)
-                item["adatlap"] = adatlap
-            if product_id is not None:
-                product = get_object_or_404(models.Products, id=product_id)
-                item["product"] = product
-            item = {
-                k: v
-                for k, v in item.items()
-                if k in [f.name for f in models.FelmeresItems._meta.get_fields()]
-            }
-            instance, created = models.FelmeresItems.objects.update_or_create(
-                id=item.get("id", None),
-                defaults=item,
-            )
-        return Response(status=HTTP_200_OK)
+        instances = list(map(lambda i: create_or_update_item(i), data))
+
+        return Response(
+            data=serializers.FelmeresItemsSerializer(instances, many=True).data,
+            status=HTTP_200_OK,
+        )
 
     def get(self, request):
         if request.query_params.get("adatlap_id"):
@@ -647,103 +670,76 @@ class UnasLogin(APIView):
 
 
 def get_unas_order_data(type):
+    script_name = "pen_unas_get_order"
+    minicrm_client = MiniCrmClient(
+        script_name=script_name,
+    )
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
         Q(Enum1951="Beépítésre vár") | Q(StatusId=3008), CategoryId=29, Deleted="0"
-    ).values()
-    if not adatlapok:
+    )
+    if not adatlapok.exists():
         return """<?xml version="1.0" encoding="UTF-8" ?>
                             <Orders>
                             </Orders>"""
 
     datas = []
     for adatlap in adatlapok:
-        if adatlap["RendelesSzama"] != "" and adatlap["RendelesSzama"] is not None:
+        if adatlap.RendelesSzama != "" and adatlap.RendelesSzama is not None:
             continue
-        order_data = models.Orders.objects.get(adatlap_id=adatlap["Id"]).__dict__
-        script_name = "pen_unas_get_order"
-        kapcsolat = contact_details(
-            contact_id=adatlap["ContactId"],
-            script_name=script_name,
-            description="Vevő adatok",
+        order_data = models.Orders.objects.get(adatlap_id=adatlap.Id)
+        kapcsolat = minicrm_client.contact_details(
+            contact_id=adatlap.ContactId,
         )
-        if kapcsolat["status"] == "Error":
+        if not kapcsolat:
             log(
                 "Hiba akadt a kontaktok lekérdezése közben",
                 "ERROR",
                 script_name,
-                details=kapcsolat["response"],
             )
-            return f"<Error>{kapcsolat['response']}</Error>"
-        kapcsolat = kapcsolat["response"]
-        if adatlap["MainContactId"] != adatlap["ContactId"]:
-            business_kapcsolat = contact_details(
-                contact_id=adatlap["MainContactId"],
-                script_name=script_name,
-                description="Számlázási adatok",
+            return f"<Error></Error>"
+        if adatlap.MainContactId != adatlap.ContactId:
+            business_kapcsolat = minicrm_client.contact_details(
+                contact_id=adatlap.MainContactId,
             )
-            if business_kapcsolat["status"] == "Error":
+            if not business_kapcsolat:
                 log(
                     "Hiba akadt a kontaktok lekérdezése közben",
                     "ERROR",
                     script_name,
-                    business_kapcsolat["response"],
                 )
-                return f"<Error>{business_kapcsolat['response']}</Error>"
-            business_kapcsolat = business_kapcsolat["response"]
+                return f"<Error></Error>"
         else:
-            business_kapcsolat = {
-                "Name": (
-                    kapcsolat["LastName"] + " " + kapcsolat["FirstName"]
-                    if not kapcsolat.get("Name")
-                    else kapcsolat.get("Name")
-                ),
-                "EUVatNumber": "",
+            business_kapcsolat = Contact(
+                Name=kapcsolat.FullName,
+                EUVatNumber="",
                 **kapcsolat,
-            }
+            )
 
         try:
-            cim = address_details(
+            cim = minicrm_client.address_details(
                 list(
-                    address_ids(
-                        adatlap["MainContactId"],
-                        script_name=script_name,
-                        description="Cím lista",
+                    minicrm_client.address_ids(
+                        adatlap.MainContactId,
                     )
                 )[0],
-                script_name=script_name,
-                description="Cím részlet",
             )
         except:
             ids = list(
-                address_ids(
-                    adatlap["ContactId"],
-                    script_name=script_name,
-                    description="Cím lista",
+                minicrm_client.address_ids(
+                    adatlap.ContactId,
                 )
             )
             if ids:
-                cim = address_details(
-                    ids[0], script_name=script_name, description="Cím részlet"
-                )
+                cim = minicrm_client.address_details(ids[0])
             else:
-                cim = {
-                    "PostalCode": "",
-                    "City": "",
-                    "Address": "",
-                    "County": "",
-                    "CountryId": "",
-                    "Country": "",
-                }
+                cim = Address()
 
         felmeres = models.Felmeresek.objects.filter(
-            id=adatlap["FelmeresLink"].split("/")[-1] if adatlap["FelmeresLink"] else 0
+            id=adatlap.FelmeresLink.split("/")[-1] if adatlap.FelmeresLink else 0
         ).first()
         if felmeres is None:
-            log("Nem található felmérés", "ERROR", script_name, adatlap["Id"])
+            log("Nem található felmérés", "ERROR", script_name, adatlap.Id)
             continue
-        print(felmeres)
-
-        # Add the data to the datas list
 
         datas.append(
             {
@@ -751,7 +747,7 @@ def get_unas_order_data(type):
                 "AdatlapDetails": adatlap,
                 "FelmeresAdatlapDetails": felmeres.adatlap_id,
                 "BusinessKapcsolat": business_kapcsolat,
-                "Cím": cim["response"],
+                "Cím": cim,
                 "Kapcsolat": kapcsolat,
                 "Tételek": list(
                     models.FelmeresItems.objects.filter(
@@ -921,10 +917,11 @@ class UnasGetOrder(APIView):
     renderer_classes = (XMLRenderer,)
 
     def post(self, request, type):
+        script_name = "pen_unas_get_order"
         log(
             "Unas rendelések lekérdezése meghívva",
             "INFO",
-            "pen_unas_get_order",
+            script_name,
         )
         auth_header = request.headers.get("Authorization")
         if auth_header and auth_header.startswith("Bearer "):
@@ -943,26 +940,10 @@ class UnasGetOrder(APIView):
                     + ". Traceback: "
                     + traceback.format_exc(),
                     "FAILED",
-                    "pen_unas_get_order",
+                    script_name,
                 )
                 return Response(str(e), status=HTTP_401_UNAUTHORIZED)
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
-
-    def get(self, request, type):
-        if os.environ.get("ENVIRONMENT") == "development":
-            log(
-                "Unas rendelések lekérdezése meghívva",
-                "INFO",
-                "pen_unas_get_order_dev",
-            )
-            response = get_unas_order_data(type)
-            return HttpResponse(response, HTTP_200_OK)
-        log(
-            "Unas rendelések lekérdezése sikertelen",
-            "ERROR",
-            "pen_unas_get_order",
-            "Nem development környezetben fut",
-        )
 
 
 class UnasSetProduct(APIView):
@@ -1067,12 +1048,13 @@ class FilterItemsDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-class CancelOffer(APIView):
+class CancelOffer(MiniCrmAPIView):
+    script_name = "pen_cancel_offer"
+
     def post(self, request):
-        log(
+        self.log(
             "MiniCRM ajánlat sztornózása megkezdődött",
             "INFO",
-            "pen_cancel_offer",
             request.body.decode("utf-8"),
         )
 
@@ -1080,22 +1062,21 @@ class CancelOffer(APIView):
             Felmeresid=request.data["adatlap_id"]
         )
         if not adatlap.exists():
-            log("Nem található adatlap", "ERROR", "pen_cancel_offer")
+            self.log("Nem található adatlap", "ERROR")
             return Response("Nem található adatlap", HTTP_400_BAD_REQUEST)
         offer = models.Offers.objects.filter(adatlap=adatlap.first().Id)
         if not offer.exists():
-            log("Nem található ajánlat", "ERROR", "pen_cancel_offer")
+            self.log("Nem található ajánlat", "ERROR")
             return Response("Nem található ajánlat", HTTP_400_BAD_REQUEST)
-        update_resp = update_offer_order(
+        update_resp = self.mini_crm_client.update_offer_order(
             offer_id=offer.first().id,
             fields={"StatusId": "Sztornózva"},
             project=True,
         )
         if update_resp.status_code != 200:
-            log(
+            self.log(
                 "MiniCRM ajánlat sztornózása sikertelen",
                 "ERROR",
-                "pen_cancel_offer",
                 update_resp.text,
                 {"adatlap_id": request.data["adatlap_id"]},
             )
@@ -1207,11 +1188,12 @@ def get_queryset_from_felmeres(self, model):
 
 
 class UserRole(APIView):
-    def get(self, request, user):
+    def get(self, _, user):
         try:
             user_role = models.UserRoles.objects.get(user=user).role
             return Response(serializers.RolesSerializer(user_role).data)
         except models.UserRoles.DoesNotExist:
+            log("Nem található felhasználó", "ERROR", "pen_user_role")
             return Response(status=HTTP_404_NOT_FOUND)
 
 
@@ -1406,7 +1388,7 @@ class GaranciaWebhook(APIView):
 
             response = calculate_distance_fn(
                 adatlap,
-                address=lambda x: f"{x['Cim3']} {x['Telepules2']}, {x['Iranyitoszam2']} {x['Orszag2']}",
+                address=lambda x: x.FullAddress,
                 city_field="Telepules2",
                 update_data=update_data,
             )
@@ -1438,17 +1420,14 @@ class SchedulerSettings(generics.ListAPIView):
     filterset_fields = "__all__"
 
 
-import requests
-from rest_framework.decorators import api_view
+class MiniCrmProxy(MiniCrmAPIView):
+    script_name = "pen_minicrm_proxy"
 
-
-class MiniCrmProxy(APIView):
     def post(self, request):
         data = request.body.decode("utf-8")
-        log(
+        self.log(
             "Minicrm proxy meghívva",
             "INFO",
-            "pen_minicrm_proxy",
             data,
         )
         endpoint = request.GET.get("endpoint")
@@ -1465,41 +1444,37 @@ class MiniCrmProxy(APIView):
             )
 
             if response.ok:
-                log("Minicrm proxy sikeres", "INFO", "pen_minicrm_proxy", response.text)
+                self.log("Minicrm proxy sikeres", "INFO", response.text)
                 return Response(response.json())
             else:
-                log(
+                self.log(
                     "Minicrm proxy sikertelen",
                     "ERROR",
-                    "pen_minicrm_proxy",
                     response.text,
                 )
                 return Response({"error": "Error " + response.text}, status=400)
-        log(
-            "Minicrm proxy sikertelen", "ERROR", "pen_minicrm_proxy", "Missing endpoint"
-        )
+        self.log("Minicrm proxy sikertelen", "ERROR", "Missing endpoint")
         return Response({"error": "Missing endpoint"}, status=400)
 
     def get(self, request):
         endpoint = request.GET.get("endpoint")
         id = request.GET.get("id")
 
-        resp = get_request(endpoint=endpoint, id=id)
-        if resp["status"] == "Error":
-            log(
+        resp = self.mini_crm_client.get_request(endpoint=endpoint, id=id)
+        if not resp.ok:
+            self.log(
                 "Minicrm proxy sikertelen",
                 "ERROR",
-                "pen_minicrm_proxy",
-                resp["response"],
+                resp.text,
             )
-            return Response(resp["response"], status=400)
+            return Response(resp.text, status=400)
 
-        log("Minicrm proxy sikeres", "INFO", "pen_minicrm_proxy", resp["response"])
-        return Response(resp["response"])
+        self.log("Minicrm proxy sikeres", "INFO", resp.json())
+        return Response(resp.json())
 
 
 class CopyFelmeres(APIView):
-    def post(self, request, id):
+    def post(self, _, id):
         log("Másolás API meghívva", "INFO", "pen_felmeres_webhook", details=id)
         felmeres = models.Felmeresek.objects.filter(id=id)
         if not felmeres.exists():

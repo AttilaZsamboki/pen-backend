@@ -1,11 +1,12 @@
 import os
-from ..utils.logs import log
-from ..models import MiniCrmAdatlapok
+from functools import partial
+
 import requests
 from dotenv import load_dotenv
-from ..utils.minicrm import (
-    update_adatlap_fields,
-)
+
+from ..utils.logs import log as l
+from ..models import MiniCrmAdatlapok
+from ..utils.minicrm import MiniCrmClient
 
 load_dotenv()
 
@@ -29,7 +30,10 @@ class InvoiceCheck:
 
 def main(invoice_check: InvoiceCheck):
     script_name = "pen_check_invoice" + "_" + invoice_check.name
-    log("Szamlazz.hu számla ellenőrzés", "INFO", script_name=script_name)
+    minicrm_client = MiniCrmClient(script_name=script_name)
+    log = partial(l, script_name=script_name)
+
+    log("Szamlazz.hu számla ellenőrzés", "INFO")
     adatlapok = [
         i
         for i in MiniCrmAdatlapok.objects.filter(Deleted="0")
@@ -39,7 +43,6 @@ def main(invoice_check: InvoiceCheck):
         log(
             "Szamlazz.hu számla ellenőrzés",
             "INFO",
-            script_name=script_name,
             details=f"adatlap: {adatlap.Id}",
         )
         query_xml = f"""
@@ -59,30 +62,27 @@ def main(invoice_check: InvoiceCheck):
             szamlaszam = query_response.headers["szlahu_szamlaszam"]
             if szamlaszam[0] == "E":
                 update_data = invoice_check.update_adatlap(adatlap, szamlaszam)
-                update_resp = update_adatlap_fields(
+                update_resp = minicrm_client.update_adatlap_fields(
                     adatlap.Id,
                     update_data,
                 )
-                if update_resp["code"] == 200:
+                if update_resp.status_code == 200:
                     log(
                         "Számlaszám feltöltve",
                         "INFO",
-                        script_name=script_name,
                         details=f"adatlap: {adatlap.Id}, szamlaszam: {szamlaszam}",
                     )
                     continue
                 log(
                     f"Hiba akadt a számlaszám feltöltésében",
                     "ERROR",
-                    script_name=script_name,
-                    details=f"adatlap: {adatlap.Id}, error: {update_resp['reason']}",
+                    details=f"adatlap: {adatlap.Id}, error: {update_resp.text}",
                     data=update_data,
                 )
                 continue
             log(
                 "Nincs számla",
                 "INFO",
-                script_name=script_name,
                 details=f"adatlap: {adatlap.Id}",
             )
             continue
@@ -90,7 +90,6 @@ def main(invoice_check: InvoiceCheck):
             log(
                 "Nincs díjbekérő",
                 "INFO",
-                script_name=script_name,
                 details=f"adatlap: {adatlap.Id}",
             )
 

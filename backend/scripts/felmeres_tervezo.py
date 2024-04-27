@@ -4,7 +4,7 @@ import time
 from datetime import date as dt_date
 from datetime import datetime, timedelta
 from typing import List
-from multiprocessing import Pool, freeze_support, cpu_count
+from dataclasses import dataclass, field
 
 import numpy as np
 from django.db.models import Q
@@ -35,43 +35,16 @@ import time
 from django.db import OperationalError
 
 
-class Generation:
-    class Individual:
-        class Chromosome:
-            def __init__(
-                self,
-                dates,
-                external_id=0,
-                zip=None,
-                date=None,
-                felmero: Salesmen | None = None,
-            ):
-                # Validate external_id is an integer
-                if not isinstance(external_id, str) and not isinstance(
-                    external_id, int
-                ):
-                    raise ValueError("external_id must be an integer")
+class Population:
+    class Chromosome:
 
-                # Validate dates is a list of datetime objects
-                if not all(isinstance(d, datetime) or d == "*" for d in dates):
-                    raise ValueError("dates must be a list of datetime objects")
-
-                # Validate zip is a string and follows a specific format (e.g., 5 digits)
-                if zip is not None and type(zip) != str:
-                    raise ValueError("zip must be a 5-digit string")
-
-                # Validate felmero is an instance of Salesmen
-                if felmero is not None and not isinstance(felmero, Salesmen):
-                    raise ValueError("felmero must be an instance of Salesmen")
-
-                if date is not None and not isinstance(date, datetime) and date != "*":
-                    raise ValueError("date must be a datetime object or None")
-
-                self.external_id = external_id
-                self.dates: List[datetime] = dates
-                self.date: datetime = date
-                self.zip: str = zip
-                self.felmero: Salesmen = felmero
+        @dataclass
+        class Gene:
+            dates: List[datetime]
+            date: datetime = field(default=None)
+            zip: str = field(default="")
+            felmero: Salesmen = field(default=None)
+            external_id: int = field(default=0)
 
             def random_date(self):
                 if not self.dates:
@@ -82,17 +55,12 @@ class Generation:
                 available_dates = [d for d in self.dates if d != self.date]
                 return random.choice(available_dates) if available_dates else None
 
-            def __str__(self):
-                return str(self.__dict__)
-
         def __init__(self, outer_instance, data=None):
             if data:
-                self.data = [
-                    self.Chromosome(**i.__dict__) for i in data if i is not None
-                ]
+                self.data = [self.Gene(**i.__dict__) for i in data if i is not None]
             else:
                 self.data = None
-            self.outer_instace: Generation = outer_instance
+            self.outer_instace: Population = outer_instance
 
         def __eq__(self, other):
             self.sort_route()
@@ -105,8 +73,20 @@ class Generation:
                     return False
             return True
 
+        def set_data(self, data):
+            self.data = [self.Gene(**i.__dict__) for i in data if i is not None]
+            return self
+
+        def filter(self, **kwargs):
+            return [
+                i
+                for i in self.data
+                if all([i.__dict__[k] == v for k, v in kwargs.items()])
+            ]
+
+        # < 0.0 seconds
         def sort_route(self):
-            def sort_key(x: Generation.Individual.Chromosome):
+            def sort_key(x: Population.Chromosome.Gene):
                 if isinstance(x.date, dt_date):
                     return x.date
                 else:
@@ -118,19 +98,24 @@ class Generation:
             return str(self.data)
 
         def calculate_distance(self):
+
             distances = []
             for i in self.outer_instace.qualified_salesmen:
                 data = [k for k in self.data if k.felmero == i]
+
                 for j in range(len(data)):
                     origin = 0 if j == 0 else data[j - 1].zip
                     dest = data[j].zip
                     if origin and dest:
+
+                        # 0 time
                         distance = [
                             route
                             for route in self.outer_instace.all_routes
                             if (route.origin_zip == origin and route.dest_zip == dest)
                             or (route.origin_zip == dest and route.dest_zip == origin)
                         ]
+
                         if distance:
                             distances.append(distance[0].duration)
 
@@ -156,41 +141,62 @@ class Generation:
                 for i in self.data
             ]
 
-            print(route)
+        # def mutate(self):
+        #     size = len(self.data)
+        #     num_actual_mutations = 0
+        #     while num_actual_mutations < self.outer_instace.mutation_range:
+        #         start = np.random.randint(0, size)
+        #         dates = self.data[start].dates
+        #         if len(dates) == 1:
+        #             if dates[0] == "*":
+        #                 possible_dates = Population.Chromosome(
+        #                     data=self.outer_instace.data,
+        #                     outer_instance=self.outer_instace,
+        #                 ).get_possible_dates(self.data[start])
+        #                 if possible_dates:
+        #                     new_date = possible_dates[
+        #                         np.random.randint(low=0, high=len(possible_dates))
+        #                     ]
+        #                     self.data[start].date = new_date["date"]
+        #                     self.data[start].felmero = new_date["felmero"]
+        #                     num_actual_mutations += 1
+        #         elif len(dates):
+        #             new_date = self.data[start].random_date()
+        #             self.data[start].date = new_date
+        #         self.sort_route()
+        #     print("Mutációk száma: " + str(num_actual_mutations) + "/10")
+        #     return self
 
         def mutate(self):
-            size = len(self.data)
-            num_actual_mutations = 0
-            while num_actual_mutations < self.outer_instace.mutation_range:
-                start = np.random.randint(0, size)
-                dates = self.data[start].dates
-                if len(dates):
-                    if len(dates) == 1:
-                        if dates[0] == "*":
-                            possible_dates = Generation.Individual(
+            mutate_rate = 0.025
+            for i, gene in enumerate(self.data):
+                if i > len(self.data) // 2:
+                    mutate_rate = 0.05
+                if np.random.rand() < mutate_rate:
+                    if len(gene.dates) == 1:
+                        if gene.dates[0] == "*":
+                            possible_dates = Population.Chromosome(
                                 data=self.outer_instace.data,
                                 outer_instance=self.outer_instace,
-                            ).get_possible_dates(self.data[start])
+                            ).get_possible_dates(gene)
                             if possible_dates:
                                 new_date = possible_dates[
                                     np.random.randint(low=0, high=len(possible_dates))
                                 ]
-                                self.data[start].date = new_date["date"]
-                                self.data[start].felmero = new_date["felmero"]
-                                num_actual_mutations += 1
-                    else:
-                        new_date = self.data[start].random_date()
-                        self.data[start].date = new_date
+                                gene.date = new_date["date"]
+                                gene.felmero = new_date["felmero"]
+                    elif len(gene.dates):
+                        new_date = gene.random_date()
+                        gene.date = new_date
                     self.sort_route()
-            print("Mutációk száma: " + str(num_actual_mutations) + "/10")
             return self
 
         def get_gap_appointment(
-            self, chromosome: Chromosome, date: dt_date, felmero: Salesmen
+            self, chromosome: Gene, date: dt_date, felmero: Salesmen
         ):
             all_routes = self.outer_instace.all_routes
             jobs_on_day = [
-                self.Chromosome(
+                self.Gene(
                     felmero=felmero,
                     zip=felmero.zip,
                     external_id="XXX",
@@ -318,7 +324,7 @@ class Generation:
                         return False
             return True
 
-        def get_possible_dates(self, chromosome: Chromosome):
+        def get_possible_dates(self, chromosome: Gene):
             MAX_RETRIES = 5
 
             for attempt in range(MAX_RETRIES):
@@ -406,7 +412,7 @@ class Generation:
             date,
             felmero: Salesmen,
             plus_time=0,
-            chromosome: Chromosome = None,
+            chromosome: Gene = None,
         ) -> List[datetime]:
             jobs_on_day = [
                 i
@@ -539,7 +545,7 @@ class Generation:
                         break
                 return possible_hours
 
-        def get_time_home(self, chromosome: Chromosome, felmero: Salesmen = None):
+        def get_time_home(self, chromosome: Gene, felmero: Salesmen = None):
             time_home = [
                 route
                 for route in self.outer_instace.all_routes
@@ -573,7 +579,7 @@ class Generation:
                 i.zip for i in adatlapok if len(i.dates) > 1 or i.date == "*"
             ]
 
-            def sort_key(x: Generation.Individual.Chromosome):
+            def sort_key(x: Population.Chromosome.Gene):
                 return x.date if isinstance(x.date, dt_date) else datetime.min.date()
 
             fixed_adatalapok = [
@@ -641,12 +647,12 @@ class Generation:
         print("Requestek száma: " + str(num_requests))
 
     def generate_route(self):
-        routes = self.Individual(self)
+        routes = self.Chromosome(self)
         for day in self.dates:
 
             def get_homes(start=True):
                 return [
-                    self.Individual.Chromosome(
+                    self.Chromosome.Gene(
                         date=datetime.combine(
                             day, datetime.min.time() if start else datetime.max.time()
                         ),
@@ -657,11 +663,11 @@ class Generation:
                     for i in self.qualified_salesmen
                 ]
 
-            day_cities = self.Individual(
+            day_cities = self.Chromosome(
                 outer_instance=self,
                 data=[i for i in self.data if i.date == "*" or i.date.date() == day],
             )
-            day_cities = self.Individual(
+            day_cities = self.Chromosome(
                 data=(
                     get_homes()
                     + (day_cities.data if day_cities.data else [])
@@ -670,11 +676,11 @@ class Generation:
                 outer_instance=self,
             )
 
-            self.Individual(data=day_cities.data, outer_instance=self).sort_route()
+            self.Chromosome(data=day_cities.data, outer_instance=self).sort_route()
             if routes.data is None:
-                routes = self.Individual(data=day_cities.data, outer_instance=self)
+                routes = self.Chromosome(data=day_cities.data, outer_instance=self)
             else:
-                routes = self.Individual(
+                routes = self.Chromosome(
                     data=routes.data + day_cities.data, outer_instance=self
                 )
 
@@ -682,23 +688,25 @@ class Generation:
 
     def __init__(
         self,
-        initial_population_size=None,
-        population_size=None,
-        max_generations=None,
-        tournament_size=None,
-        max_appointment_per_day=0,
-        number_of_work_hours=None,
-        time_for_one_appointment=None,
-        first_appointment=None,
-        needed_skill: Skills = Skills(),
-        data: List[Individual.Chromosome] = [],
-        fixed_appointments: List[Individual.Chromosome] = [],
-        plan_timespan=31,
+        initial_population_size=10,
+        population_size=10,
+        max_generations=10,
+        tournament_size=2,
+        max_appointment_per_day=5,
+        number_of_work_hours=8,
+        time_for_one_appointment=90,
+        first_appointment="8:00",
+        needed_skill: Skills = Skills.objects.get(id=1),
+        data: List[Chromosome.Gene] = [],
+        fixed_appointments: List[Chromosome.Gene] = [],
+        plan_timespan=90,
         num_best_slots=5,
         allow_weekends=False,
         selection_within_time_period=3,
         elitism_size=10,
-        mutation_range=5,
+        mutation_range=3,
+        crossover_range=5,
+        elitism=True,
     ):
         # Parameters
         self.population_size = population_size
@@ -718,6 +726,8 @@ class Generation:
         self.selection_within_time_period = selection_within_time_period
         self.elitism_size = elitism_size
         self.mutation_range = mutation_range
+        self.crossover_range = crossover_range
+        self.elitism = elitism
 
         self.qualified_salesmen = [
             i
@@ -757,10 +767,39 @@ class Generation:
 
         self.all_routes = list(Routes.objects.all())
         self.all_unschedulable_times = list(UnschedulableTimes.objects.all())
+        self.all_slots = list(Slots.objects.filter(booked=False))
 
-    def crossover(self, parent1: Individual, parent2: Individual):
+    # def crossover(self, father: Chromosome, mother: Chromosome):
+    #     start_time = time.time()
+
+    #     size = len(father.data)
+    #     best_child = self.Chromosome(data=mother.data.copy(), outer_instance=self)
+    #     best_fitness = best_child.calculate_fitness()
+
+    #     for i in range(size):
+    #         current_child = self.Chromosome(
+    #             data=best_child.data.copy(), outer_instance=self
+    #         )
+    #         for i in current_child.data[i:]:
+    #             if i.external_id and (len(i.dates) > 1 or i.dates == ["*"]):
+    #                 i.date = list(
+    #                     filter(lambda x: x.external_id == i.external_id, father.data)
+    #                 )[0].date
+    #         current_child.sort_route()
+    #         current_fitness = current_child.calculate_fitness()
+    #         if current_fitness > best_fitness:
+    #             best_child = current_child
+    #             best_fitness = current_fitness
+
+    #     end_time = time.time()
+    #     elapsed_time = end_time - start_time
+    #     print(f"Elapsed time for crossover function: {elapsed_time} seconds")
+
+    #     return best_child
+
+    def crossover(self, parent1: Chromosome, parent2: Chromosome):
         size = len(parent1.data)
-        child = self.Individual(data=parent2.data.copy(), outer_instance=self)
+        child = self.Chromosome(data=parent2.data.copy(), outer_instance=self)
         while True:
             start, end = sorted(np.random.choice(range(size), size=2, replace=False))
             if (
@@ -787,9 +826,14 @@ class Generation:
     def assign_new_applicants_dates(self):
         for i in self.data:
             if i.dates == ["*"]:
-                possible_dates = self.Individual(
+
+                # util function, it works or it doesnt, it has been already tested
+                possible_dates = self.Chromosome(
                     data=self.data, outer_instance=self
                 ).get_possible_dates(i)
+                # ----------------------------------------------------
+
+                # may have some issues, but it is not worth testing, the only thing that can go wrong is the random choice (not likely)
                 if possible_dates:
                     num_possible_dates = len(possible_dates)
                     rand_date = possible_dates[
@@ -797,55 +841,60 @@ class Generation:
                     ]
                     i.date = rand_date["date"]
                     i.felmero = rand_date["felmero"]
+                # ----------------------------------------------------
 
     def generate_individual(self):
+
+        # not a 100% sure, but it is not worth testing, the only thing that can go wrong is the random choice (not likely)
         self.assign_new_applicants_dates()
-        return self.generate_route()
+        # ----------------------------------------------------
 
-    def generate_individuals_batch(self, batch_size):
-        """Generate a batch of individuals."""
-        return [self.generate_individual() for _ in range(batch_size)]
+        # util function that sorts that organizes the routes, it works or it doesnt, no need to test
+        result = self.generate_route()
+        # ----------------------------------------------------
 
-    def generate_initial_population_batched(self, num_processes=None):
-        batch_size = 10
-        num_full_batches = self.population_size // batch_size
-        remainder = self.population_size % batch_size
-
-        batch_sizes = [batch_size] * num_full_batches
-        if remainder > 0:
-            batch_sizes.append(remainder)
-
-        with Pool(processes=num_processes) as pool:
-            population_batches = pool.map(self.generate_individuals_batch, batch_sizes)
-
-        population = [
-            individual for batch in population_batches for individual in batch
-        ]
-        return population
+        return result
 
     def main(self, test=False):
         start_time = time.time()
 
-        num_process = cpu_count()
+        # util function it works or it doesnt, no need to test
         if not test:
             self.create_distance_matrix(test)
+        # ----------------------------------------------------
 
-        self.population = self.generate_initial_population_batched(
-            num_processes=num_process
-        )
+        # its not a 100% efficient, but it is not worth testing, the only thing that can go wrong is the random choice (not likely)
+        self.population = [
+            self.generate_individual() for _ in range(self.initial_population_size)
+        ]
         print(
             "Initial population length: " + str(len([i for i in self.population if i]))
         )
+        # ----------------------------------------------------
 
         for _ in range(self.max_generations):
             self.run_one_generation()
         print("Population length: " + str(len(self.population)))
 
+        self.process_individuals()
+
+        end_time = time.time()
+        print(f"Execution time: {end_time - start_time} seconds")
+
+    def create_or_get_slot(self, chromosome: Chromosome.Gene):
+        slot, _ = Slots.objects.get_or_create(
+            external_id=chromosome.external_id,
+            at=chromosome.date,
+            user=chromosome.felmero,
+        )
+        return slot
+
+    def process_individuals(self):
         print("Calculating fitnesses...")
         fitnesses = np.array([route.calculate_fitness() for route in self.population])
 
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
-        sorted_population: List[Generation.Individual] = [
+        sorted_population: List[Population.Chromosome] = [
             self.population[i] for i in sorted_fitnesses
         ]
         print("Sorted population len:" + str(len(sorted_population)))
@@ -863,26 +912,11 @@ class Generation:
             ]
         )
         BestSlots.objects.all().delete()
-
-        self.process_individuals(sorted_population)
-
-        end_time = time.time()
-        print(f"Execution time: {end_time - start_time} seconds")
-
-    def create_or_get_slot(self, chromosome: Individual.Chromosome):
-        slot, _ = Slots.objects.get_or_create(
-            external_id=chromosome.external_id,
-            at=chromosome.date,
-            user=chromosome.felmero,
-        )
-        return slot
-
-    def process_individuals(self, population: List[Individual]):
         saved_slots = {}
         print("Processing individuals...")
         for item in self.data:
             if item.dates == ["*"]:
-                for individual in population:
+                for individual in self.population:
                     for chromosome in individual.data:
                         if str(chromosome.external_id) == str(item.external_id):
                             if chromosome.date != "*" and (
@@ -909,45 +943,77 @@ class Generation:
                                     level=level,
                                 ).save()
 
-    def evaluate_fitness_wrapper(self, individual: Individual):
-        # Wrapper function to evaluate fitness of an individual
-        return individual.calculate_fitness()
+    def generate_child(
+        self,
+        parents,
+    ):
+        db.connections.close_all()
+        print("Generating child...")
 
-    def generate_child(self, parents):
-        db.connections.close_all()  # Close existing connections
         parent1, parent2 = parents
-        print("Crossover...")
+
+        # has been tested and it works
         child = self.crossover(parent1, parent2)
-        print("Mutation...")
-        return child.mutate()
+        # ----------------------------------------------------
+
+        start_mutation_time = time.time()
+        mutated_child = child.mutate()
+        end_mutation_time = time.time()
+        print("Total time for mutation: ", end_mutation_time - start_mutation_time)
+
+        return mutated_child
+
+    def get_parents(self, _):
+        return (self.tournament_selection(), self.tournament_selection())
 
     def run_one_generation(self):
-        num_processes = cpu_count()
-        pool = Pool(processes=num_processes)
+        start_time = time.time()
 
-        fitnesses = pool.map(self.evaluate_fitness_wrapper, self.population)
+        # has been tested and it works, the efficiency can be improved
+        start_fitness_time = time.time()
+        fitnesses = [i.calculate_fitness() for i in self.population]
+        end_fitness_time = time.time()
+        print("Time to calculate fitnesses: ", end_fitness_time - start_fitness_time)
+        # ----------------------------------------------------
 
+        # Tested and works correctly, efficiency is also good (less than 0.00 seconds)
         sorted_fitnesses = np.argsort(fitnesses)[::-1]
-        population: List[Generation.Individual] = [
+        population: List[Population.Chromosome] = [
             self.population[i] for i in sorted_fitnesses
         ]
+        # ----------------------------------------------------
 
-        elites = population[: self.elitism_size]
+        # Tested and works correctly, takes around 0.00 seconds
+        parents = map(self.get_parents, range(self.population_size))
+        # ----------------------------------------------------
 
-        parents = [
-            (self.tournament_selection(), self.tournament_selection())
-            for _ in range(population_size)
-        ]
+        # Time is decent compared to this is the main function (around 7 seconds)
+        start_new_population_time = time.time()
+        new_population = map(self.generate_child, parents)
+        print(
+            "External ids",
+            set(list(map(lambda x: x.external_id, list(new_population)[0].data))),
+        )
+        end_new_population_time = time.time()
+        print(
+            "Time to generate new population: ",
+            end_new_population_time - start_new_population_time,
+        )
+        # ----------------------------------------------------
 
-        new_population = pool.map(self.generate_child, parents)
+        if self.elitism:
+            self.population = list(new_population) + population[: self.elitism_size]
+        else:
+            self.population = list(new_population) + population
 
-        self.population = new_population + elites
+        end_time = time.time()
+        print("Total time: ", end_time - start_time)
 
     def tournament_selection(self):
         if not self.population:
             return None
         indices = np.random.choice(len(self.population), self.tournament_size)
-        tournament_individuals: List[Generation.Individual] = [
+        tournament_individuals: List[Population.Chromosome] = [
             self.population[i] for i in indices
         ]
         tournament_fitnesses = [
@@ -956,6 +1022,7 @@ class Generation:
             if self.population[i] is not None
         ]
         if not tournament_fitnesses:
+            print("Tournament fitnesses are empty")
             return None
 
         winner_index = np.argmax(tournament_fitnesses)
@@ -980,8 +1047,8 @@ class MiniCRMConnector:
         self.new_aplicant_condition = new_aplicant_condition
         self.appointments = Slots.objects.filter(booked=True)
 
-    def fix_appointments(self) -> List[Generation.Individual.Chromosome]:
-        appointments: List[Generation.Individual.Chromosome] = []
+    def fix_appointments(self) -> List[Population.Chromosome.Gene]:
+        appointments: List[Population.Chromosome.Gene] = []
         for i in MiniCrmAdatlapok.objects.filter(
             ~Q(
                 Id__in=[
@@ -990,7 +1057,7 @@ class MiniCRMConnector:
             ),
             Deleted=0,
         ).values():
-            if len(appointments) > 10:
+            if len(appointments) > 65:
                 break
             if (
                 self.fixed_appointment_condition(i)
@@ -1002,7 +1069,7 @@ class MiniCRMConnector:
                     continue
 
                 appointments.append(
-                    Generation.Individual.Chromosome(
+                    Population.Chromosome.Gene(
                         dates=[i[self.date_field]],
                         date=i[self.date_field],
                         external_id=i[self.id_field],
@@ -1012,9 +1079,9 @@ class MiniCRMConnector:
                 )
         return appointments
 
-    def main(self) -> List[Generation.Individual.Chromosome]:
+    def main(self) -> List[Population.Chromosome.Gene]:
         new_applicants = [
-            Generation.Individual.Chromosome(
+            Population.Chromosome.Gene(
                 dates=["*"],
                 external_id=i[self.id_field],
                 zip=i[self.zip_field],
@@ -1024,11 +1091,11 @@ class MiniCRMConnector:
                 Deleted=0,
             ).values()
             if self.new_aplicant_condition(i) and i[self.zip_field]
-        ][:5]
-        data: List[Generation.Individual.Chromosome] = []
+        ]
+        data: List[Population.Chromosome.Gene] = []
         for i in (
             [
-                Generation.Individual.Chromosome(
+                Population.Chromosome.Gene(
                     dates=[
                         j.at
                         for j in self.appointments
@@ -1053,7 +1120,7 @@ class MiniCRMConnector:
             attr = i.__dict__.copy()
             attr["date"] = i.random_date()
             data.append(
-                Generation.Individual.Chromosome(
+                Population.Chromosome.Gene(
                     **attr,
                 )
             )
@@ -1061,16 +1128,6 @@ class MiniCRMConnector:
         return data
 
 
-initial_population_size = 5
-population_size = 5
-max_generations = 10
-tournament_size = 4
-elitism_size = 10
-
-number_of_work_hours = 8
-time_for_one_appointment = 90
-max_felmeres_per_day = 5
-first_appointment = "08:00"
 needed_skill = Skills.objects.get(id=1)
 minicrm_conn = MiniCRMConnector(
     felmero_field="Felmero2",
@@ -1084,35 +1141,17 @@ minicrm_conn = MiniCRMConnector(
     and x["StatusId"] not in [3086, 2929]
     and x["Iranyitoszam"],
 )
-num_best_slots = 5
-plan_timespan = 90
 allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
-selection_within_time_period = 3
-mutation_range = 10
 
 fixed_appointments = minicrm_conn.fix_appointments()
-result = Generation(
-    initial_population_size=initial_population_size,
-    max_generations=max_generations,
-    tournament_size=tournament_size,
-    population_size=population_size,
-    max_appointment_per_day=max_felmeres_per_day,
-    number_of_work_hours=number_of_work_hours,
-    time_for_one_appointment=time_for_one_appointment,
-    first_appointment=first_appointment,
-    needed_skill=needed_skill,
+result = Population(
     data=minicrm_conn.main(),
     fixed_appointments=fixed_appointments,
-    plan_timespan=plan_timespan,
-    num_best_slots=num_best_slots,
     allow_weekends=allow_weekends,
-    selection_within_time_period=selection_within_time_period,
-    elitism_size=elitism_size,
-    mutation_range=mutation_range,
+    needed_skill=needed_skill,
 )
 
 
 # Example usage:
 if __name__ == "__main__":
-    freeze_support()
     result.main(False)

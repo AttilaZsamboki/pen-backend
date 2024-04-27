@@ -10,10 +10,12 @@ import requests
 from django.db.models import Q
 
 from ..utils.logs import log
-from ..utils.minicrm import contact_details
+from ..utils.minicrm import MiniCrmClient
 from ..models import Felmeresek, FelmeresItems, MiniCrmAdatlapok  # noqa
 
 dotenv.load_dotenv()
+
+script_name = "pen_check_offer_created"
 
 felmeresek = Felmeresek.objects.filter(
     ~Q(
@@ -40,11 +42,9 @@ def assemble_offer_xml(
     user_id=39636,
     template_name=None,
 ):
+    minicrm_client = MiniCrmClient(script_name=script_name)
     random_id = random.randint(0, 1000000)
-    contact_data = contact_details(adatlap.ContactId)
-    if contact_data["status"] == "Error":
-        return
-    contact_data = contact_data["response"]
+    contact_data = minicrm_client.contact_details(adatlap.ContactId)
     date = datetime.datetime.now() + datetime.timedelta(days=30)
     validity_date = (date + datetime.timedelta(days=31)).strftime("%Y-%m-%d")
 
@@ -53,18 +53,18 @@ def assemble_offer_xml(
     project.set("Id", str(random_id))
     SubElement(project, "StatusId").text = "3099"
     SubElement(project, "Name").text = adatlap.Name
-    SubElement(project, "ContactId").text = str(contact_data["Id"])
+    SubElement(project, "ContactId").text = str(contact_data.Id)
     SubElement(project, "UserId").text = str(user_id)
     SubElement(project, "CategoryId").text = "32"
 
     contacts = SubElement(project, "Contacts")
     contact = SubElement(contacts, "Contact")
     contact.set("Id", str(random_id))
-    SubElement(contact, "FirstName").text = contact_data["FirstName"]
-    SubElement(contact, "LastName").text = contact_data["LastName"]
-    SubElement(contact, "Type").text = contact_data["Type"]
-    SubElement(contact, "Email").text = contact_data["Email"]
-    SubElement(contact, "Phone").text = contact_data["Phone"]
+    SubElement(contact, "FirstName").text = contact_data.FirstName
+    SubElement(contact, "LastName").text = contact_data.LastName
+    SubElement(contact, "Type").text = contact_data.Type
+    SubElement(contact, "Email").text = contact_data.Email
+    SubElement(contact, "Phone").text = contact_data.Phone
 
     offers = SubElement(project, "Offers")
     offer = SubElement(offers, "Offer")
@@ -80,7 +80,7 @@ def assemble_offer_xml(
 
     customer = SubElement(offer, "Customer")
     SubElement(customer, "Name").text = (
-        contact_data["LastName"] + " " + contact_data["FirstName"]
+        contact_data.LastName + " " + contact_data.FirstName
     )
     SubElement(customer, "CountryId").text = adatlap.Orszag
     SubElement(customer, "PostalCode").text = adatlap.Iranyitoszam
@@ -111,9 +111,9 @@ def assemble_offer_xml(
     SubElement(project_element, "UserId").text = (
         str(adatlap.Felmero2) if adatlap.Felmero2 else ""
     )
-    SubElement(
-        project_element, "KapcsolodoFelmeres"
-    ).text = "https://app.peneszmentesites.hu/" + str(felmeres.id)
+    SubElement(project_element, "KapcsolodoFelmeres").text = (
+        "https://app.peneszmentesites.hu/" + str(felmeres.id)
+    )
     SubElement(project_element, "ArajanlatMegjegyzes").text = felmeres.description
     SubElement(project_element, "KiallitasDatuma5").text = (
         date.year + "-" + date.month + "-" + date.day
@@ -138,7 +138,7 @@ def main():
         log(
             "Nem jött létre az ajánlat a minicrm-ben",
             "URGENT ERROR",
-            "pen_check_offer_created",
+            script_name,
             details=f"\nFelmérés: https://app.peneszmentesites.hu/{felmeres.id}.\nAdatalap: https://r3.minicrm.hu/119/#Project-23/{felmeres.adatlap_id.Id}",
         )
 

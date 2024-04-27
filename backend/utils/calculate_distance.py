@@ -1,14 +1,14 @@
 from ..utils.google_maps import calculate_distance, get_street_view, get_street_view_url
 from ..utils.logs import log
-from ..utils.minicrm import update_adatlap_fields
+from ..utils.minicrm import MiniCrmClient
 
-from ..models import Counties
+from ..models import Counties, MiniCrmAdatlapok
 
 import math
 
 
 def calculate_distance_fn(
-    data,
+    data: MiniCrmAdatlapok,
     source="webhook",
     address=None,
     telephely="Budapest, Nagytétényi út 218-220, 1225",
@@ -23,7 +23,7 @@ def calculate_distance_fn(
             "Penészmentesítés MiniCRM webhook sikertelen",
             "FAILED",
             script_name,
-            f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}",
+            f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data.Id}",
         )
         return "Error"
     if type(gmaps_result) == str:
@@ -44,7 +44,7 @@ def calculate_distance_fn(
             "Távolság 0",
             "FAILED",
             script_name,
-            f"Adatlap id: {data['Id']}. Cím: {address}",
+            f"Adatlap id: {data.Id}. Cím: {address}",
         )
         return "Error"
     fee = fee_map[[i for i in fee_map.keys() if i < distance][-1]]
@@ -55,39 +55,40 @@ def calculate_distance_fn(
                 "Penészmentesítés MiniCRM webhook sikertelen",
                 "ERROR",
                 script_name,
-                f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data['Id']}. Google API válasz: {resp.text}",
+                f"Hiba a Google Maps API-al való kommunikáció során {address}, adatlap id: {data.Id}. Google API válasz: {resp.text}",
             )
         else:
             log(
                 "Google streetview kép sikeresen mentve",
                 "INFO",
                 script_name,
-                f"Adatlap id: {data['Id']}. URL: {resp.url}",
+                f"Adatlap id: {data.Id}. URL: {resp.url}",
             )
     except Exception as e:
         log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
     street_view_url = get_street_view_url(location=address)
     try:
-        county = Counties.objects.get(telepules=data[city_field]).megye
+        county = Counties.objects.get(telepules=data.__dict__[city_field]).megye
     except:
         county = ""
         log(
             log_value="Penészmentesítés MiniCRM webhook sikertelen",
             status="FAILED",
             script_name=script_name,
-            details=f"Nem található megye a településhez: {data[city_field]}",
+            details=f"Nem található megye a településhez: {data.__dict__[city_field]}",
         )
     data_to_update = update_data(
         formatted_duration, distance, fee, street_view_url, county, address
     )
 
-    response = update_adatlap_fields(data["Id"], data_to_update)
+    minicrm = MiniCrmClient()
+    response = minicrm.update_adatlap_fields(data.Id, data_to_update)
     if response["code"] == 200:
         log(
             "Penészmentesítés MiniCRM webhook sikeresen lefutott",
             "SUCCESS",
             script_name,
-            data["Id"],
+            data.Id,
         )
     else:
         if response["reason"] == "Too Many Requests":

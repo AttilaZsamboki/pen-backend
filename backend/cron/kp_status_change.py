@@ -1,4 +1,4 @@
-from ..utils.minicrm import update_adatlap_fields
+from ..utils.minicrm import MiniCrmClient
 from ..models import MiniCrmAdatlapok
 from ..utils.logs import log
 
@@ -13,7 +13,9 @@ def main():
         FizetesiMod2="Készpénz",
     ).values("Id")
     for adatlap in adatlapok:
-        update_adatlap_fields(adatlap["Id"], {"StatusId": "Felmérésre vár"})
+        MiniCrmClient().update_adatlap_fields(
+            adatlap["Id"], {"StatusId": "Felmérésre vár"}
+        )
     log(
         "Készpénzes adatlapok átállítva 'Felmérésre vár' státuszra",
         "INFO",
