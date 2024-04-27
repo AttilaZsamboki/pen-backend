@@ -441,32 +441,38 @@ class FelmeresItemsList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresItemsSerializer
 
     def post(self, request):
+
+        def filter_item_fields(item):
+            valid_fields = [f.name for f in models.FelmeresItems._meta.get_fields()]
+            return {k: v for k, v in item.items() if k in valid_fields}
+
+        def create_or_update_item(item):
+            adatlap_id = item.pop("adatlap", None)
+            product_id = item.pop("product", None)
+            if adatlap_id is not None:
+                item["adatlap"] = get_object_or_404(models.Felmeresek, id=adatlap_id)
+            if product_id is not None:
+                item["product"] = get_object_or_404(models.Products, id=product_id)
+            item = filter_item_fields(item)
+            instance, _ = models.FelmeresItems.objects.update_or_create(
+                id=item.get("id", None),
+                defaults=item,
+            )
+            return instance
+
         data = request.data
-        adatlap_ids_in_request = [item.get("adatlap") for item in data]
+        adatlap_ids_in_request = list(map(lambda i: i.get("adatlap"), data))
 
         models.FelmeresItems.objects.filter(
             adatlap_id__in=adatlap_ids_in_request
         ).delete()
 
-        for item in data:
-            adatlap_id = item.pop("adatlap", None)
-            product_id = item.pop("product", None)
-            if adatlap_id is not None:
-                adatlap = get_object_or_404(models.Felmeresek, id=adatlap_id)
-                item["adatlap"] = adatlap
-            if product_id is not None:
-                product = get_object_or_404(models.Products, id=product_id)
-                item["product"] = product
-            item = {
-                k: v
-                for k, v in item.items()
-                if k in [f.name for f in models.FelmeresItems._meta.get_fields()]
-            }
-            instance, created = models.FelmeresItems.objects.update_or_create(
-                id=item.get("id", None),
-                defaults=item,
-            )
-        return Response(status=HTTP_200_OK)
+        instances = list(map(lambda i: create_or_update_item(i), data))
+
+        return Response(
+            data=serializers.FelmeresItemsSerializer(instances, many=True).data,
+            status=HTTP_200_OK,
+        )
 
     def get(self, request):
         if request.query_params.get("adatlap_id"):

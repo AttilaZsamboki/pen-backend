@@ -40,6 +40,9 @@ class FelmeresQuestions(models.Model):
     product = models.ForeignKey(
         "Products", models.DO_NOTHING, db_column="product", blank=True, null=True
     )
+    felmeres_item = models.ForeignKey(
+        "FelmeresItems", models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
         managed = False
