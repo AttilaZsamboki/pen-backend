@@ -54,7 +54,7 @@ def create_invoice_or_proform(
     log(f"{name.capitalize()} készítésének futtatása", "INFO", script_name)
 
     def def_criteria(adatlap: MiniCrmAdatlapok):
-        if criteria(adatlap):
+        if criteria(adatlap) and adatlap.Deleted == "0":
             if payment_method_field and (
                 (not cash and adatlap.__dict__[payment_method_field] != "Átutalás")
                 or (cash and adatlap.__dict__[payment_method_field] == "Átutalás")
