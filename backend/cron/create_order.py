@@ -99,6 +99,8 @@ def fn(adatlap: MiniCrmAdatlapok):
             json={"StatusId": "Sikeres megrendelés"},
         )
         if resp.status_code != 200:
+            adatlap.StatusId = 3112
+            adatlap.save()
             log(
                 f"{adatlap['Name']} megrendelés létrehozása sikertelen, megrendelés státusz frissítése sikertelen",
                 script_name="pen_create_order",
