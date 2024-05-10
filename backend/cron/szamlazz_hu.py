@@ -39,6 +39,7 @@ def create_invoice_or_proform(
     ).strftime("%Y-%m-%d"),
     prefix="TMTSZ",
     items=None,
+    invoice_number_field="SzamlaSorszama",
 ):
     if proform:
         name = "díjbekérő"
@@ -133,7 +134,12 @@ def create_invoice_or_proform(
                     update_adatlap_fields(
                         adatlap.Id,
                         {
-                            messages_field: f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}"
+                            messages_field: f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}",
+                            (
+                                proform_number_field
+                                if proform
+                                else invoice_number_field
+                            ): query_response.headers["szlahu_szamlaszam"],
                         },
                     )
                     continue
@@ -443,6 +449,7 @@ data = {
     "calc_net_price": lambda adatlap: adatlap.FelmeresiDij,
     "proform_number_field": "DijbekeroSzama2",
     "type_name": "felmeres",
+    "invoice_number_field": "SzamlaSorszama2",
 }
 
 create_invoice_or_proform(
