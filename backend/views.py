@@ -72,20 +72,24 @@ def save_webhook(adatlap, process_data=None, name="felmeres"):
         adatlap = process_data(adatlap)
     adatlap_db = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
     if adatlap_db.exists():
-        adatlap_db = adatlap_db.first()
-        if adatlap_db.StatusId != adatlap["StatusId"]:
+        if adatlap_db.first().StatusId != adatlap["StatusId"]:
             adatlap["StatusUpdatedAt"] = datetime.datetime.now()
         else:
-            adatlap["StatusUpdatedAt"] = adatlap_db.StatusUpdatedAt
+            adatlap["StatusUpdatedAt"] = adatlap_db.first().StatusUpdatedAt
     else:
         adatlap["StatusUpdatedAt"] = datetime.datetime.now()
 
     valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
     filtered_data = {k: v for k, v in adatlap.items() if k in valid_fields}
 
-    models.MiniCrmAdatlapok(
-        **filtered_data,
-    ).save()
+    if adatlap_db.first().exists():
+        for key, value in filtered_data.items():
+            setattr(adatlap_db, key, value)
+        adatlap_db.first().save()
+    else:
+        models.MiniCrmAdatlapok(
+            **filtered_data,
+        ).save()
     return adatlap
 
 
