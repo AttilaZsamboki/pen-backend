@@ -1679,6 +1679,8 @@ class MiniCrmAdatlapok(models.Model):
     FizetesiHatarido2 = models.DateTimeField(blank=True, null=True)
     SzamlaSorszama = models.TextField(blank=True, null=True)
     VisszafizetesDatuma2 = models.DateTimeField(blank=True, null=True)
+    Forras2 = models.TextField(blank=True, null=True)
+    Forras3 = models.TextField(blank=True, null=True)
 
     @property
     def StatusIdStr(self):

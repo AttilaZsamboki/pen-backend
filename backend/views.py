@@ -94,7 +94,7 @@ class CalculateDistance(APIView):
         log("Felmérés webhook meghívva", "INFO", "pen_felmeres_webhook", data=data)
         data = map_wh_fields(
             data,
-            ["Felmero2", "FizetesiMod2", "SzamlazasIngatlanCimre2"],
+            ["Felmero2", "FizetesiMod2", "SzamlazasIngatlanCimre2", "Forras"],
         )["Data"]
 
         save_webhook(data)
@@ -176,6 +176,7 @@ class OrderWebhook(APIView):
                     "KiepitesFeltetele",
                     "KiepitesFelteteleIgazolva",
                     "Enum1951",
+                    "Forras2",
                 ],
             )
 
@@ -501,13 +502,14 @@ class OfferWebhook(APIView):
             "Penészmentesítés rendelés webhook meghívva",
             "INFO",
             "pen_offer_webhook",
-            request.body,
+            data=data,
         )
         try:
             if data["Data"]["Felmeresid"] is None:
                 return Response("Succesfully received data", status=HTTP_200_OK)
+            adatlap = map_wh_fields(data, ["Forras3"])["Data"]
 
-            save_webhook(data["Data"])
+            save_webhook(adatlap)
             models.Offers(
                 adatlap=models.MiniCrmAdatlapok.objects.get(Id=data["Id"]),
                 id=data["Head"]["Id"],
