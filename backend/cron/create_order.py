@@ -65,6 +65,7 @@ def fn(adatlap: MiniCrmAdatlapok):
                 "Indoklas": felmeres.garancia_reason,
                 "KiepitesFeltetele": "Van" if felmeres.is_conditional else "Nincs",
                 "KiepitesFeltetelLeirasa": felmeres.condition,
+                "Forras2": adatlap.Forras3,
             },
         )
         if order["status"] == "error":
