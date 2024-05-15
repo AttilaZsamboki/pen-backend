@@ -655,21 +655,24 @@ class UnasLogin(APIView):
 
 def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
-        Q(Enum1951="Beépítésre vár") | Q(StatusId=3008), CategoryId=29, Deleted="0"
-    ).values()
-    if not adatlapok:
+        Q(Enum1951="Beépítésre vár" if type != "dev" else "Szervezésre vár")
+        | Q(StatusId=3008),
+        CategoryId=29,
+        Deleted="0",
+    )
+    if not adatlapok.exists():
         return """<?xml version="1.0" encoding="UTF-8" ?>
                             <Orders>
                             </Orders>"""
 
     datas = []
     for adatlap in adatlapok:
-        if adatlap["RendelesSzama"] != "" and adatlap["RendelesSzama"] is not None:
+        if adatlap.RendelesSzama != "" and adatlap.RendelesSzama is not None:
             continue
-        order_data = models.Orders.objects.get(adatlap_id=adatlap["Id"]).__dict__
+        order_data = models.Orders.objects.get(adatlap_id=adatlap.Id).__dict__
         script_name = "pen_unas_get_order"
         kapcsolat = contact_details(
-            contact_id=adatlap["ContactId"],
+            contact_id=adatlap.ContactId,
             script_name=script_name,
             description="Vevő adatok",
         )
@@ -682,9 +685,9 @@ def get_unas_order_data(type):
             )
             return f"<Error>{kapcsolat['response']}</Error>"
         kapcsolat = kapcsolat["response"]
-        if adatlap["MainContactId"] != adatlap["ContactId"]:
+        if adatlap.MainContactId != adatlap.ContactId:
             business_kapcsolat = contact_details(
-                contact_id=adatlap["MainContactId"],
+                contact_id=adatlap.MainContactId,
                 script_name=script_name,
                 description="Számlázási adatok",
             )
@@ -712,7 +715,7 @@ def get_unas_order_data(type):
             cim = address_details(
                 list(
                     address_ids(
-                        adatlap["MainContactId"],
+                        adatlap.MainContactId,
                         script_name=script_name,
                         description="Cím lista",
                     )
@@ -723,7 +726,7 @@ def get_unas_order_data(type):
         except:
             ids = list(
                 address_ids(
-                    adatlap["ContactId"],
+                    adatlap.ContactId,
                     script_name=script_name,
                     description="Cím lista",
                 )
@@ -743,10 +746,10 @@ def get_unas_order_data(type):
                 }
 
         felmeres = models.Felmeresek.objects.filter(
-            id=adatlap["FelmeresLink"].split("/")[-1] if adatlap["FelmeresLink"] else 0
+            id=adatlap.FelmeresLink.split("/")[-1] if adatlap.FelmeresLink else 0
         ).first()
         if felmeres is None:
-            log("Nem található felmérés", "ERROR", script_name, adatlap["Id"])
+            log("Nem található felmérés", "ERROR", script_name, adatlap.Id)
             continue
         print(felmeres)
 
@@ -756,7 +759,7 @@ def get_unas_order_data(type):
             {
                 "OrderData": order_data,
                 "AdatlapDetails": adatlap,
-                "FelmeresAdatlapDetails": felmeres.adatlap_id,
+                "FelmeresAdatlapDetails": felmeres,
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
@@ -775,6 +778,8 @@ def get_unas_order_data(type):
                 ),
             }
         )
+        if type == "dev":
+            break
 
     return (
         """<?xml version="1.0" encoding="UTF-8" ?>
@@ -783,8 +788,8 @@ def get_unas_order_data(type):
             [
                 f"""<Order>
             <Key>{data["OrderData"]["order_id"] if type != "dev" else str(uuid.uuid4())}</Key>
-            <Date>{data["AdatlapDetails"]["CreatedAt"].strftime('%Y.%m.%d %H:%M:%S')}</Date>
-            <DateMod>{data["AdatlapDetails"]["CreatedAt"].strftime('%Y.%m.%d %H:%M:%S')}</DateMod>
+            <Date>{data["AdatlapDetails"].CreatedAt.strftime('%Y.%m.%d %H:%M:%S')}</Date>
+            <DateMod>{data["AdatlapDetails"].CreatedAt.strftime('%Y.%m.%d %H:%M:%S')}</DateMod>
             <Lang>hu</Lang>
             <Customer>
                 <Id>{data["Kapcsolat"]["Id"]}</Id>
@@ -811,11 +816,11 @@ def get_unas_order_data(type):
                     </Invoice>
                     <Shipping>
                         <Name>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</Name>
-                        <ZIP>{data["FelmeresAdatlapDetails"].Iranyitoszam}</ZIP>
-                        <City>{data["FelmeresAdatlapDetails"].Telepules}</City>
-                        <Street>{data["FelmeresAdatlapDetails"].Cim2}</Street>
-                        <County>{data["FelmeresAdatlapDetails"].Megye}</County>
-                        <Country>{data["FelmeresAdatlapDetails"].Orszag}</Country>
+                        <ZIP>{data["FelmeresAdatlapDetails"].adatlap_id.Iranyitoszam}</ZIP>
+                        <City>{data["FelmeresAdatlapDetails"].adatlap_id.Telepules}</City>
+                        <Street>{data["FelmeresAdatlapDetails"].adatlap_id.Cim2}</Street>
+                        <County>{data["FelmeresAdatlapDetails"].adatlap_id.Megye}</County>
+                        <Country>{data["FelmeresAdatlapDetails"].adatlap_id.Orszag}</Country>
                     <CountryCode>hu</CountryCode>
                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
@@ -828,15 +833,15 @@ def get_unas_order_data(type):
             <StatusDateMod><![CDATA[2021.03.25 20:15:39]]></StatusDateMod>
             <StatusID>3008</StatusID>
             <Payment>
-                <Id>{models.PaymentMethods.objects.get(name=data["AdatlapDetails"]["FizetesiMod3"]).id if data["AdatlapDetails"]["FizetesiMod3"] else ""}</Id>
-                <Name>{data["AdatlapDetails"]["FizetesiMod3"]}</Name>
+                <Id>{models.PaymentMethods.objects.get(name=data["AdatlapDetails"].FizetesiMod3).id if data["AdatlapDetails"].FizetesiMod3 else ""}</Id>
+                <Name>{data["AdatlapDetails"].FizetesiMod3}</Name>
                 <Type>transfer</Type>
             </Payment>
             <Shipping>
                 <Id>3372937</Id>
                 <Name><![CDATA[GLS CsomagPontok]]></Name>
             </Shipping>
-            <SumPriceGross>{sum([(float(i.netPrice) if i.valueType != "percent" else (get_total(data) * (int(i.netPrice)/100) if i.type != 'Discount' else -(get_total(data) * (int(i.netPrice)/100)))) * sum([j["ammount"] for j in i.inputValues]) for i in data["Tételek"]])*1.27}</SumPriceGross>
+            <SumPriceGross>{data["FelmeresAdatlapDetails"].grossOrderTotal}</SumPriceGross>
             <Items>
                 """
                 + "\n".join(
@@ -891,7 +896,7 @@ def get_unas_order_data(type):
 <Value><![CDATA[{i}]]></Value>
 </Param>"""
                         for index, i in enumerate(
-                            data["AdatlapDetails"]["Beepitok"].split(", ")
+                            data["AdatlapDetails"].Beepitok.split(", ")
                         )
                     ]
                 )
@@ -899,7 +904,7 @@ def get_unas_order_data(type):
                 <Param>
                     <Id>99999</Id>
                     <Name><![CDATA[Forrás]]></Name>
-                    <Value><![CDATA[{data["AdatlapDetails"]["Forras2"]}]]></Value>
+                    <Value><![CDATA[{data["AdatlapDetails"].Forras2}]]></Value>
                 </Param>
             </Params>
         </Order> """
