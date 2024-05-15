@@ -895,7 +895,12 @@ def get_unas_order_data(type):
                         )
                     ]
                 )
-                + """
+                + f"""
+                <Param>
+                    <Id>99999</Id>
+                    <Name><![CDATA[Forrás]]></Name>
+                    <Value><![CDATA[{data["AdatlapDetails"]["Forras2"]}]]></Value>
+                </Param>
             </Params>
         </Order> """
                 for index, data in enumerate(datas)
