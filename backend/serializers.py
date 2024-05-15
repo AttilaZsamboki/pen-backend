@@ -148,6 +148,7 @@ class MiniCrmAdatlapokSerializer(serializers.ModelSerializer):
             "FelmeresDatuma2",
             "RendelesSzama",
             "FelmeresCim",
+            "Forras",
         ]
 
 
