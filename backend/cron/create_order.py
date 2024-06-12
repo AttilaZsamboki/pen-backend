@@ -2,7 +2,7 @@ from ..utils.logs import log
 from ..utils.minicrm import create_order
 from ..utils.minicrm_str_to_text import garancia_type_map
 
-from ..models import Offers, Felmeresek, MiniCrmAdatlapok, Logs
+from ..models import Offers, Felmeresek, MiniCrmAdatlapok, Logs, Orders
 
 from django.db.models import Q
 import os
@@ -139,14 +139,22 @@ def main():
             CategoryId=21, StatusId=2896, Deleted=0
         )
         for adatlap in adatlapok:
-            if Logs.objects.filter(
-                Q(
-                    status="START",
-                    time__gte=datetime.datetime.now() - datetime.timedelta(minutes=5),
-                )
-                | Q(status="SUCCESS"),
-                data__adatlap=adatlap.Id,
-            ).exists():
+            if (
+                Logs.objects.filter(
+                    Q(
+                        status="START",
+                        time__gte=datetime.datetime.now()
+                        - datetime.timedelta(minutes=5),
+                    )
+                    | Q(status="SUCCESS"),
+                    data__adatlap=adatlap.Id,
+                ).exists()
+                or MiniCrmAdatlapok.objects.filter(
+                    CategoryId=29,
+                    FelmeresLink="https://app.peneszmentesites.hu/"
+                    + str(adatlap.Felmeresid),
+                ).exists()
+            ):
                 adatlap.StatusId = 3112
                 adatlap.save()
                 continue
