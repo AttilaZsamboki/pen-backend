@@ -147,6 +147,8 @@ def main():
                 | Q(status="SUCCESS"),
                 data__adatlap=adatlap.Id,
             ).exists():
+                adatlap.StatusId = 3112
+                adatlap.save()
                 continue
             fn(adatlap)
     except Exception as e:
