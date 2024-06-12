@@ -4,6 +4,7 @@ from ..utils.minicrm_str_to_text import garancia_type_map
 
 from ..models import Offers, Felmeresek, MiniCrmAdatlapok, Logs
 
+from django.db.models import Q
 import os
 import dotenv
 import requests
@@ -42,7 +43,7 @@ def fn(adatlap: MiniCrmAdatlapok):
         log(
             f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
             script_name="pen_create_order",
-            status="ERROR",
+            status="FAILED",
             details=f"Felmérés: {felmeres}",
         )
         return
@@ -97,11 +98,13 @@ def fn(adatlap: MiniCrmAdatlapok):
         resp = requests.post(
             f"https://r3.minicrm.hu/Api/Offer/{offer.id}/Project",
             auth=(system_id, api_key),
-            json={"StatusId": "Sikeres megrendelés"},
+            json={
+                "StatusId": "Sikeres megrendelés",
+            },
         )
+        adatlap.StatusId = 3112
+        adatlap.save()
         if resp.status_code != 200:
-            adatlap.StatusId = 3112
-            adatlap.save()
             log(
                 f"{adatlap['Name']} megrendelés létrehozása sikertelen, megrendelés státusz frissítése sikertelen",
                 script_name="pen_create_order",
@@ -113,6 +116,7 @@ def fn(adatlap: MiniCrmAdatlapok):
             f"{adatlap.Name} megrendelés létrehozása sikeres",
             script_name="pen_create_order",
             status="SUCCESS",
+            data={"adatlap": adatlap.Id},
         )
         return
     log(
@@ -125,6 +129,7 @@ def fn(adatlap: MiniCrmAdatlapok):
         "Megrendelések létrehozása sikeresen befejeződött",
         script_name="pen_create_order",
         status="SUCCESS",
+        data={"adatlap": adatlap.Id},
     )
 
 
@@ -135,9 +140,12 @@ def main():
         )
         for adatlap in adatlapok:
             if Logs.objects.filter(
-                status="START",
+                Q(
+                    status="START",
+                    time__gte=datetime.datetime.now() - datetime.timedelta(minutes=5),
+                )
+                | Q(status="SUCCESS"),
                 data__adatlap=adatlap.Id,
-                time__gte=datetime.datetime.now() - datetime.timedelta(minutes=5),
             ).exists():
                 continue
             fn(adatlap)
