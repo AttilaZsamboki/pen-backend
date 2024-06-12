@@ -57,7 +57,7 @@ def create_invoice_or_proform(
     def def_criteria(adatlap: MiniCrmAdatlapok):
         if criteria(adatlap) and adatlap.Deleted == "0":
             if payment_method_field and (
-                (not cash and adatlap.__dict__[payment_method_field] != "Átutalás")
+                (not cash and adatlap.__dict__[payment_method_field] == "Készpénz")
                 or (cash and adatlap.__dict__[payment_method_field] == "Átutalás")
             ):
                 log(
@@ -454,7 +454,8 @@ data = {
 
 create_invoice_or_proform(
     criteria=lambda adatlap: adatlap.StatusId == 3086
-    and (adatlap.SzamlaSorszama2 == "" or adatlap.SzamlaSorszama2 is None),
+    and (adatlap.SzamlaSorszama2 == "" or adatlap.SzamlaSorszama2 is None)
+    and not adatlap.Forras == "Klíma",
     proform=False,
     cash=True,
     messages_field="SzamlaUzenetek",
