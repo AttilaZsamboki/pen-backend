@@ -337,14 +337,44 @@ def create_invoice_or_proform(
             with open(pdf_path, "wb") as f:
                 f.write(response.content)
                 f.close()
+
+            def access_file(url):
+                try:
+                    response = requests.get(url)
+                    response.raise_for_status()
+                    return response.content
+                except requests.exceptions.HTTPError as http_err:
+                    log(
+                        f"HTTP hiba akadt",
+                        "FAILED",
+                        script_name=script_name,
+                        details=f"adatlap: {adatlap.Id}, error: {http_err}",
+                        data=update_request_payload,
+                    )
+                except Exception as err:
+                    log(
+                        f"Más hiba akadt",
+                        "FAILED",
+                        script_name=script_name,
+                        details=f"adatlap: {adatlap.Id}, error: {err}",
+                        data=update_request_payload,
+                    )
+                return None
+
             for _ in range(2):
-                update_request_payload = update_data(proform, name, adatlap, szamlaszam)
-                update_resp = update_adatlap_fields(
-                    adatlap.Id,
-                    update_request_payload,
+                file_content = access_file(
+                    f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
                 )
-                if update_resp["code"] == 200:
-                    break
+                if file_content:
+                    update_request_payload = update_data(
+                        proform, name, adatlap, szamlaszam
+                    )
+                    update_resp = update_adatlap_fields(
+                        adatlap.Id,
+                        update_request_payload,
+                    )
+                    if update_resp["code"] == 200:
+                        break
                 else:
                     log(
                         f"Hiba akadt a {name} feltöltésében",
