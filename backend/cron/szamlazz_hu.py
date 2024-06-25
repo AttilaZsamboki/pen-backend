@@ -58,7 +58,7 @@ def create_invoice_or_proform(
         if criteria(adatlap) and adatlap.Deleted == "0":
             if payment_method_field and (
                 (not cash and adatlap.__dict__[payment_method_field] == "Készpénz")
-                or (cash and adatlap.__dict__[payment_method_field] == "Átutalás")
+                or (cash and adatlap.__dict__[payment_method_field] != "Készpénz")
             ):
                 log(
                     "Nem megfelelő fizetési mód",
@@ -432,7 +432,9 @@ def update_data_garancia(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 
 # Felmérés
 def proform_criteria(adatlap: MiniCrmAdatlapok):
-    if adatlap.StatusId == 3079:
+    if adatlap.Forras == "Klíma":
+        return False
+    elif adatlap.StatusId == 3079:
         return True
     elif adatlap.StatusId == 3082 and (
         (datetime.datetime.now() - adatlap.StatusUpdatedAt) > datetime.timedelta(days=1)

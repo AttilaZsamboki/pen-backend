@@ -135,7 +135,15 @@ def update_adatlap(adatlap: MiniCrmAdatlapok):
 
 
 def felmeres_comment(adatlap: MiniCrmAdatlapok, contact: dict):
-    return f"Új felmérést kaptál\nNév: {adatlap.Name}\nCím: {adatlap.Iranyitoszam} {adatlap.Telepules} {adatlap.Cim2}, {adatlap.Orszag}\nFizetési mód: {adatlap.FizetesiMod2}\nÖsszeg: {adatlap.FelmeresiDij} Ft\nA felmérő kérdőív megnyitásához kattints a következő linkre: https://app.peneszmentesites.hu/new?page=1&adatlap_id={str(adatlap.Id)}\nUtcakép: {adatlap.StreetViewUrl}\nTel: {contact['Phone']}"
+    return f"""Új felmérést kaptál innen: {adatlap.Forras}
+Név: {adatlap.Name}
+Cím: {adatlap.Iranyitoszam} {adatlap.Telepules} {adatlap.Cim2}, {adatlap.Orszag}
+{f'''Fizetési mód: {adatlap.FizetesiMod2}
+ Összeg: {adatlap.FelmeresiDij} Ft
+ ''' if adatlap.Forras != 'Klíma' else ''}
+A felmérő kérdőív megnyitásához kattints a következő linkre: https://app.peneszmentesites.hu/new?page=1&adatlap_id={str(adatlap.Id)}
+Utcakép: {adatlap.StreetViewUrl}
+Tel: {contact['Phone']}"""
 
 
 def garancia_comment(adatlap: MiniCrmAdatlapok, contact: dict):
