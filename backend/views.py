@@ -12,9 +12,8 @@ import xml.etree.ElementTree as ET
 from typing import Dict, List
 
 import boto3
-from collections import defaultdict
-from django.db import connection
-from django.db.models import CharField, F, Q, Value, Case, When, IntegerField
+from django.db import connection, IntegrityError
+from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -189,15 +188,25 @@ class OrderWebhook(APIView):
             if not models.Orders.objects.filter(
                 adatlap_id=data["Id"], order_id=data["Head"]["Id"]
             ).exists():
-                models.Orders(
-                    adatlap_id=data["Id"],
-                    order_id=data["Head"]["Id"],
-                ).save()
-                log(
-                    "Penészmentesítés rendelés webhook sikeresen lefutott",
-                    "SUCCESS",
-                    "pen_order_webhook",
-                )
+                try:
+                    order, created = models.Orders.objects.get_or_create(
+                        adatlap_id=data["Id"],
+                        defaults={
+                        'order_id':data["Head"]["Id"],
+                        }
+                    ).save()
+                    log(
+                        "Penészmentesítés rendelés webhook sikeresen lefutott",
+                        "SUCCESS",
+                        "pen_order_webhook",
+                    )
+                except IntegrityError as e:
+                    log(
+                        "Penészmentesítés rendelés webhook sikertelen",
+                        "ERROR",
+                        "pen_order_webhook",
+                        details=e,
+                    )
             return Response("Succesfully received data", status=HTTP_200_OK)
         except:
             log(
@@ -711,6 +720,13 @@ def get_unas_order_data(type):
                 **kapcsolat,
             }
 
+        felmeres = models.Felmeresek.objects.filter(
+            id=adatlap.FelmeresLink.split("/")[-1] if adatlap.FelmeresLink else 0
+        ).first()
+        if felmeres is None:
+            log("Nem található felmérés", "ERROR", script_name, adatlap.Id)
+            continue
+
         try:
             cim = address_details(
                 list(
@@ -724,36 +740,16 @@ def get_unas_order_data(type):
                 description="Cím részlet",
             )
         except:
-            ids = list(
-                address_ids(
-                    adatlap.ContactId,
-                    script_name=script_name,
-                    description="Cím lista",
-                )
-            )
-            if ids:
-                cim = address_details(
-                    ids[0], script_name=script_name, description="Cím részlet"
-                )
-            else:
-                cim = {
-                    "response": {
-                        "PostalCode": "",
-                        "City": "",
-                        "Address": "",
-                        "County": "",
-                        "CountryId": "",
-                        "Country": "",
-                    }
+            cim = {
+                "response": {
+                    "PostalCode": felmeres.adatlap_id.Iranyitoszam,
+                    "City": felmeres.adatlap_id.Telepules,
+                    "Address": felmeres.adatlap_id.Cim2,
+                    "County": felmeres.adatlap_id.Megye,
+                    "CountryId": felmeres.adatlap_id.Orszag,
+                    "Country": felmeres.adatlap_id.Orszag,
                 }
-
-        felmeres = models.Felmeresek.objects.filter(
-            id=adatlap.FelmeresLink.split("/")[-1] if adatlap.FelmeresLink else 0
-        ).first()
-        if felmeres is None:
-            log("Nem található felmérés", "ERROR", script_name, adatlap.Id)
-            continue
-        print(felmeres)
+            }
 
         # Add the data to the datas list
 
