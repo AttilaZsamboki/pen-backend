@@ -192,9 +192,9 @@ class OrderWebhook(APIView):
                     order, created = models.Orders.objects.get_or_create(
                         adatlap_id=data["Id"],
                         defaults={
-                        'order_id':data["Head"]["Id"],
-                        }
-                    ).save()
+                            "order_id": data["Head"]["Id"],
+                        },
+                    )
                     log(
                         "Penészmentesítés rendelés webhook sikeresen lefutott",
                         "SUCCESS",
