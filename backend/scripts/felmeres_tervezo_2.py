@@ -410,29 +410,29 @@ class Population:
 #             if self.new_aplicant_condition(i) and i[self.zip_field]
 #         ]
 
-from .felmeres_tervezo import MiniCRMConnector
-
-minicrm_conn = MiniCRMConnector(
-    id_field="Id",
-    zip_field="Iranyitoszam",
-    new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
-    and x["StatusId"] not in [3086, 2929]
-    and x["Iranyitoszam"],
-    felmero_field="Felmero2",
-    date_field="FelmeresIdopontja2",
-    fixed_appointment_condition=lambda x: x["FelmeresIdopontja2"] is not None
-    and x["StatusId"] not in [3086, 2929]
-    and x["Iranyitoszam"]
-    and x["Deleted"] == "0",
-)
-
-result = Population(
-    initial_data=minicrm_conn.main(),
-    max_generations=100,
-    population_size=100,
-)
-
 
 # Example usage:
 if __name__ == "__main__":
+
+    from .felmeres_tervezo import MiniCRMConnector
+
+    minicrm_conn = MiniCRMConnector(
+        id_field="Id",
+        zip_field="Iranyitoszam",
+        new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
+        and x["StatusId"] not in [3086, 2929]
+        and x["Iranyitoszam"],
+        felmero_field="Felmero2",
+        date_field="FelmeresIdopontja2",
+        fixed_appointment_condition=lambda x: x["FelmeresIdopontja2"] is not None
+        and x["StatusId"] not in [3086, 2929]
+        and x["Iranyitoszam"]
+        and x["Deleted"] == "0",
+    )
+
+    result = Population(
+        initial_data=minicrm_conn.main(),
+        max_generations=100,
+        population_size=100,
+    )
     result.main(False)

@@ -1128,30 +1128,28 @@ class MiniCRMConnector:
         return data
 
 
-needed_skill = Skills.objects.get(id=1)
-minicrm_conn = MiniCRMConnector(
-    felmero_field="Felmero2",
-    date_field="FelmeresIdopontja2",
-    id_field="Id",
-    zip_field="Iranyitoszam",
-    fixed_appointment_condition=lambda x: x["FelmeresIdopontja2"] is not None
-    and x["StatusId"] not in [3086, 2929]
-    and x["Iranyitoszam"],
-    new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
-    and x["StatusId"] not in [3086, 2929]
-    and x["Iranyitoszam"],
-)
-allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
-
-fixed_appointments = minicrm_conn.fix_appointments()
-result = Population(
-    data=minicrm_conn.main(),
-    fixed_appointments=fixed_appointments,
-    allow_weekends=allow_weekends,
-    needed_skill=needed_skill,
-)
-
-
 # Example usage:
 if __name__ == "__main__":
+    needed_skill = Skills.objects.get(id=1)
+    minicrm_conn = MiniCRMConnector(
+        felmero_field="Felmero2",
+        date_field="FelmeresIdopontja2",
+        id_field="Id",
+        zip_field="Iranyitoszam",
+        fixed_appointment_condition=lambda x: x["FelmeresIdopontja2"] is not None
+        and x["StatusId"] not in [3086, 2929]
+        and x["Iranyitoszam"],
+        new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
+        and x["StatusId"] not in [3086, 2929]
+        and x["Iranyitoszam"],
+    )
+    allow_weekends = SchedulerSettings.objects.get(name="Allow weekends").value == "1"
+
+    fixed_appointments = minicrm_conn.fix_appointments()
+    result = Population(
+        data=minicrm_conn.main(),
+        fixed_appointments=fixed_appointments,
+        allow_weekends=allow_weekends,
+        needed_skill=needed_skill,
+    )
     result.main(False)

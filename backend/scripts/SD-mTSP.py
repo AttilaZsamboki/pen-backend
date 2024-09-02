@@ -1,36 +1,41 @@
 from django.db.models import Q
 from pulp import *
+from random import uniform
 
-from ..utils.logs import log
-from ..models import Routes, Salesmen, UserSkills
-from .felmeres_tervezo_2 import MiniCRMConnector, Population
+# from ..utils.logs import log
+# from ..models import Routes, Salesmen, UserSkills
+# from .felmeres_tervezo_2 import MiniCRMConnector, Population
 
-NEEDED_SKILL = 1
-L = 10
-m = 2
-starting_city = [
-    i.zip
-    for i in Salesmen.objects.all()
-    if UserSkills.objects.filter(user=i, skill=NEEDED_SKILL).exists()
-][0]
+# NEEDED_SKILL = 1
+# m = 2
+# starting_city = [
+#     i.zip
+#     for i in Salesmen.objects.all()
+#     if UserSkills.objects.filter(user=i, skill=NEEDED_SKILL).exists()
+# ][0]
+
+
+# minicrm_conn = MiniCRMConnector(
+#     id_field="Id",
+#     zip_field="Iranyitoszam",
+#     new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
+#     and x["StatusId"] not in [3086, 2929]
+#     and x["Iranyitoszam"],
+# )
+# adatlapok = [Population.Chromosome.Gene(starting_city)] + minicrm_conn.main()
+# Population(adatlapok).create_distance_matrix()
+# cities = list(map(lambda x: x.zip, adatlapok))
+# distances = {
+#     ((i.origin_zip, i.dest_zip) if j == 0 else (i.dest_zip, i.origin_zip)): i.duration
+#     for j in range(2)
+#     for i in Routes.objects.filter(Q(origin_zip__in=cities) | Q(dest_zip__in=cities))
+# }
 
 prob = LpProblem("Traveling Salesman Problem", LpMinimize)
-
-minicrm_conn = MiniCRMConnector(
-    id_field="Id",
-    zip_field="Iranyitoszam",
-    new_aplicant_condition=lambda x: x["FelmeresIdopontja2"] is None
-    and x["StatusId"] not in [3086, 2929]
-    and x["Iranyitoszam"],
-)
-adatlapok = [Population.Chromosome.Gene(starting_city)] + minicrm_conn.main()
-Population(adatlapok).create_distance_matrix()
-cities = list(map(lambda x: x.zip, adatlapok))
-distances = {
-    ((i.origin_zip, i.dest_zip) if j == 0 else (i.dest_zip, i.origin_zip)): i.duration
-    for j in range(2)
-    for i in Routes.objects.filter(Q(origin_zip__in=cities) | Q(dest_zip__in=cities))
-}
+L = 2
+cities = range(10)
+distances = {(i, j): uniform(0, 50) for i in cities for j in cities if i != j}
+starting_city = 0
 
 x = LpVariable.dicts(
     "x",
@@ -55,7 +60,7 @@ for i in cities:
     prob += lpSum([x[j][i] for j in cities if i != j]) == 1
 
     # (6)
-    prob += u[i] + (L - 2) * x[starting_city][i] - x[i][starting_city] <= L - 1
+    # prob += u[i] + (L - 2) * x[starting_city][i] - x[i][starting_city] <= L - 1
     # (7)
     prob += u[i] + x[starting_city][i] + 2 * x[i][starting_city] >= 0
 
