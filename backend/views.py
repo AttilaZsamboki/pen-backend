@@ -1,4 +1,5 @@
 import datetime
+import googlemaps
 import json
 import os
 import random
@@ -49,6 +50,7 @@ from .utils.minicrm import (
     get_request,
 )
 from .utils.utils import replace_self_closing_tags
+from .scripts.tsp import generate_tsp
 
 
 def map_wh_fields(data: Dict, field_names: List[str]):
@@ -1588,6 +1590,34 @@ class SalesmenList(generics.ListCreateAPIView):
     queryset = models.Salesmen.objects.all()
     permission_classes = [AllowAny]
 
+
 class TspAPi(APIView):
     def post(self, request):
-        data = request.body.decode("utf-8")
+        try:
+            generate_tsp()
+        except Exception as e:
+            log("TSP API hiba", "ERROR", "pen_tsp_api", details=traceback.format_exc())
+            return Response("Hiba", status=HTTP_400_BAD_REQUEST)
+        return Response(status=HTTP_200_OK)
+
+
+class TspResults(APIView):
+    def get(self, request):
+        results = models.Results.objects.all()
+        gmaps = googlemaps.Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
+        for res in results:
+            coo = models.TspGeocoding.objects.filter(zip=res.destination.zip)
+            if coo.exists():
+                res.lat = coo.first().lat
+                res.lng = coo.first().lng
+            else:
+                geocode_result = gmaps.geocode(f"{res.destination.zip}, Hungary")
+                if geocode_result:
+                    res.lat = geocode_result[0]["geometry"]["location"]["lat"]
+                    res.lng = geocode_result[0]["geometry"]["location"]["lng"]
+                    models.TspGeocoding.objects.create(
+                        zip=res.destination.zip,
+                        lat=res.lat,
+                        lng=res.lng,
+                    )
+        return Response(serializers.TspResultsSerializer(results, many=True).data)

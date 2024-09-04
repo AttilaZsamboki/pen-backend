@@ -8,83 +8,95 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from ortools.sat.python import cp_model
 
-from ..models import Destinations, DestinationTimes, Routes
+from ..models import Destinations, DestinationTimes, Results, Routes
 from ..utils.google_routes import Client
 
 
-def generate_random_zip_codes(n, start=90001, end=96162):
-    return random.sample(range(start, end + 1), n)
+def generate_random_zip_codes(n):
+    zips = list(set(Routes.objects.all().values_list("origin_zip", flat=True)))
+    return random.sample(zips, n)
 
 
-def main():
-    zip_codes = [90210] + [90148, 94254, 92094, 93825, 91375]
-    num_cities = len(zip_codes)
+from typing import List, Dict
+import os
+from ..models import Routes
+
+
+def create_distance_matrix(addresses: List[str]) -> Dict[str, Dict[str, float]]:
+    print("Creating distance matrix...")
+    num_requests = 0
+    all_routes = list(Routes.objects.all())
+    gmaps = Client(key=os.environ.get("GOOGLE_MAPS_API_KEY"))
+    distance_matrix = {}
+
+    for origin in list(set(addresses)):
+        distance_matrix[origin] = {}
+        for destination in addresses:
+            if origin != destination:
+                existing_route = [
+                    route
+                    for route in all_routes
+                    if (
+                        (route.origin_zip == origin and route.dest_zip == destination)
+                        or (
+                            route.origin_zip == destination and route.dest_zip == origin
+                        )
+                    )
+                ]
+                if not existing_route:
+                    num_requests += 1
+                    print(num_requests)
+                    response = gmaps.routes(
+                        origin=str(origin), destination=str(destination)
+                    )
+                    duration = response.routes[0].parse_duration() / 60
+                    save = Routes(
+                        origin_zip=origin,
+                        dest_zip=destination,
+                        distance=response.routes[0].distance_meters,
+                        duration=duration,
+                    )
+                    all_routes.append(save)
+                    save.save()
+                else:
+                    duration = existing_route[0].duration
+
+                distance_matrix[origin][destination] = duration
+
+    print("Number of requests: ", num_requests)
+    return distance_matrix
+
+
+def generate_tsp():
+    Destinations.objects.all().delete()
+    DestinationTimes.objects.all().delete()
+    zip_codes = [2181] + [int(i) for i in generate_random_zip_codes(20)]
 
     days = range(30)
     time_slots_per_day = list(range(8, 18))
-    starting_zip = 90210
+    starting_zip = 2181
 
-    # fixed_destinations = [
-    #     {
-    #         "zip": zip_codes[i],
-    #         "day": random.choice(days),
-    #         "time": random.choice(time_slots_per_day),
-    #     }
-    #     for i in range(1, 3)
-    # ]
-    # works
     fixed_destinations = [
-        {"zip": 90148, "day": 0, "time": 10},
-        {"zip": 94254, "day": 1, "time": 14},
+        {
+            "zip": zip_codes[i],
+            "day": random.choice(days),
+            "time": random.choice(time_slots_per_day[:3]),
+        }
+        for i in range(1, 8)
     ]
-    # doesnt work
-    # fixed_destinations = [{'zip': 90148, 'day': 21, 'time': 12}, {'zip': 94254, 'day': 19, 'time': 13}]
-    print(fixed_destinations)
 
-    # semi_fixed_destinations = [
-    #     {
-    #         "zip": zip_codes[i],
-    #         "options": [
-    #             (random.choice(days), random.choice(time_slots_per_day))
-    #             for _ in range(3)
-    #         ],
-    #     }
-    #     for i in range(3, 5)
-    # ]
-    # doesnt work
-    # semi_fixed_destinations = [
-    #     {"zip": 92094, "options": [(1, 15), (12, 16), (28, 17)]},
-    #     {"zip": 93825, "options": [(28, 10), (4, 17), (3, 16)]},
-    # ]
-    # works
     semi_fixed_destinations = [
-        {"zip": 92094, "options": [(0, 11), (2, 10), (1, 10)]},
-        {"zip": 93825, "options": [(2, 15), (3, 13), (4, 12)]},
+        {
+            "zip": zip_codes[i],
+            "options": [
+                (random.choice(days), random.choice(time_slots_per_day[:3]))
+                for _ in range(3)
+            ],
+        }
+        for i in range(8, 15)
     ]
 
-    print(semi_fixed_destinations)
-    # free_destinations = [{"zip": zip_codes[i]} for i in range(5, 6)]
-    free_destinations = [{"zip": 91375}]
-
-    distance_matrix = [
-        [0, 81, 91, 78, 12, 6],
-        [63, 0, 77, 92, 49, 77],
-        [37, 33, 0, 100, 82, 29],
-        [8, 46, 10, 0, 54, 91],
-        [13, 8, 67, 22, 0, 10],
-        [59, 78, 48, 34, 77, 0],
-    ]
-    # for i in range(num_cities):
-    #     row = []
-    #     for j in range(num_cities):
-    #         if i == j:
-    #             row.append(0)
-    #         else:
-    #             row.append(random.randint(1, 100))
-    #     distance_matrix.append(row)
-
-    # print(distance_matrix)
-    n = len(distance_matrix)
+    free_destinations = [{"zip": zip_codes[i]} for i in range(15, 21)]
 
     job_duration = 30
 
@@ -92,6 +104,7 @@ def main():
 
     free_vars = {}
     for destination in free_destinations:
+        Destinations(zip=destination["zip"], type="free").save()
         day_var = model.NewIntVar(0, len(days) - 1, f"day_{destination['zip']}")
         time_var = model.NewIntVar(
             min(time_slots_per_day),
@@ -102,9 +115,12 @@ def main():
 
     semi_fixed_vars = {}
     for destination in semi_fixed_destinations:
+        dest = Destinations(zip=destination["zip"], type="semi-fixed")
+        dest.save()
         option_vars = []
         for option in destination["options"]:
             day, time = option
+            DestinationTimes(destination=dest, day=day, hour=time).save()
             var = model.NewBoolVar(f"option_{destination['zip']}_{day}_{time}")
             option_vars.append(var)
         semi_fixed_vars[destination["zip"]] = option_vars
@@ -112,12 +128,20 @@ def main():
         model.Add(sum(option_vars) == 1)
 
     for destination in fixed_destinations:
+        dest = Destinations(zip=destination["zip"], type="fixed")
+        dest.save()
+        DestinationTimes(
+            destination=dest, day=destination["day"], hour=destination["time"]
+        ).save()
         free_vars[destination["zip"]] = (
             model.NewConstant(destination["day"]),
             model.NewConstant(destination["time"]),
         )
         model.Add(free_vars[destination["zip"]][0] == destination["day"])
         model.Add(free_vars[destination["zip"]][1] == destination["time"])
+
+    distance_matrix = create_distance_matrix(zip_codes)
+    n = len(distance_matrix)
 
     for day in days:
         for time in time_slots_per_day:
@@ -336,15 +360,26 @@ def main():
         for i in range(1, n):
             for j in range(n):
                 if i != j:
-                    travel_time = distance_matrix[i][j]
+                    if (
+                        zip_codes[i] in distance_matrix
+                        and zip_codes[j] in distance_matrix[zip_codes[i]]
+                    ):
+                        travel_time = distance_matrix[zip_codes[i]][zip_codes[j]]
+                    else:
+                        print(
+                            f"Error: Missing distance data for {zip_codes[i]} to {zip_codes[j]}"
+                        )
+                        return
+
+                    travel_time = distance_matrix[zip_codes[i]][zip_codes[j]]
                     end_time_i = model.NewIntVar(
                         min(time_slots_per_day) * 60,
-                        max(time_slots_per_day) * 60,
+                        (max(time_slots_per_day) + 1) * 60,
                         f"end_time_{zip_codes[i]}_day_{day}",
                     )
                     start_time_j = model.NewIntVar(
                         min(time_slots_per_day) * 60,
-                        max(time_slots_per_day) * 60,
+                        (max(time_slots_per_day) + 1) * 60,
                         f"start_time_{zip_codes[j]}_day_{day}",
                     )
                     if zip_codes[i] in free_vars.keys():
@@ -374,13 +409,14 @@ def main():
                         ):
                             if option_day == day:
                                 model.Add(start_time_j == option_time * 60)
-                    model.Add(start_time_j >= end_time_i + travel_time).OnlyEnforceIf(
-                        tsp_vars[(zip_codes[i], zip_codes[j], day)]
-                    )
+                    model.Add(
+                        start_time_j >= end_time_i + int(travel_time)
+                    ).OnlyEnforceIf(tsp_vars[(zip_codes[i], zip_codes[j], day)])
 
     model.Minimize(
         sum(
-            distance_matrix[i][j] * tsp_vars[(zip_codes[i], zip_codes[j], day)]
+            distance_matrix[zip_codes[i]][zip_codes[j]]
+            * tsp_vars[(zip_codes[i], zip_codes[j], day)]
             for day in days
             for i in range(n)
             for j in range(n)
@@ -398,6 +434,11 @@ def main():
             print(
                 f"Free Destination {free_zip}: Day {solver.Value(day_var)}, Time {solver.Value(time_var)}"
             )
+            Results(
+                destination=Destinations.objects.get(zip=free_zip),
+                day=solver.Value(day_var),
+                hour=solver.Value(time_var),
+            ).save()
 
         for semi_zip, option_vars in semi_fixed_vars.items():
             chosen_option = [
@@ -408,6 +449,11 @@ def main():
                     i for i in semi_fixed_destinations if semi_zip == i["zip"]
                 ][0]["options"][chosen_option[0]]
                 print(f"Semi-Fixed Destination {semi_zip}: Day {day}, Time {time}")
+                Results(
+                    destination=Destinations.objects.get(zip=semi_zip),
+                    day=solver.Value(day),
+                    hour=solver.Value(time),
+                ).save()
 
         G = nx.Graph()
         G.add_nodes_from(zip_codes)
@@ -424,11 +470,8 @@ def main():
                         print(f"Travel from {zip_codes[i]} to {zip_codes[j]}")
 
         G.add_edges_from(routes)
-        # nx.draw(G, with_labels=True)
-        # plt.title("Traveling Salesman Problem Solution")
-        # plt.show()
+        nx.draw(G, with_labels=True)
+        plt.title("Traveling Salesman Problem Solution")
+        plt.show()
     else:
         print("No solution found.")
-
-
-main()

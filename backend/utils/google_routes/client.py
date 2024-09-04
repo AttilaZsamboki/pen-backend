@@ -4,10 +4,10 @@ from .distance_matrix import DistanceMatrix
 
 
 class Client:
-    def __init__(self, key):
+    def __init__(self, key, country="Hungary"):
         self.api_key = key
         self.base_url = "https://routes.googleapis.com/directions/v2:"
-        self.country = "Hungary"
+        self.country = country
 
     def distance_matrix(
         self, origin_addresses, dest_addresses, travel_mode="DRIVE", fields=["*"]

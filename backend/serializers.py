@@ -208,3 +208,12 @@ class SalesmenSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Salesmen
         fields = "__all__"
+
+
+class TspResultsSerializer(serializers.ModelSerializer):
+    lng = serializers.FloatField(required=False, allow_null=True, read_only=True)
+    lat = serializers.FloatField(required=False, allow_null=True, read_only=True)
+
+    class Meta:
+        model = models.Results
+        fields = "__all__"

@@ -1933,7 +1933,7 @@ class MiniCrmAdatlapokV2(models.Model):
 
 
 class Destinations(models.Model):
-    id = models.IntegerField(blank=True, null=True)
+    id = models.AutoField(primary_key=True)
     zip = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=32, blank=True, null=True)
 
@@ -1943,8 +1943,10 @@ class Destinations(models.Model):
 
 
 class DestinationTimes(models.Model):
-    id = models.IntegerField(blank=True, null=True)
-    destination = models.ForeignKey("Destinations", models.CASCADE, blank=True, null=True)
+    id = models.AutoField(primary_key=True)
+    destination = models.ForeignKey(
+        "Destinations", models.CASCADE, blank=True, null=True
+    )
     day = models.IntegerField(blank=True, null=True)
     hour = models.FloatField(blank=True, null=True)
 
@@ -1954,11 +1956,22 @@ class DestinationTimes(models.Model):
 
 
 class Results(models.Model):
-    id = models.IntegerField(blank=True, null=True)
-    destination = models.ForeignKey("Destinations", models.CASCADE, blank=True, null=True)
+    id = models.AutoField(primary_key=True)
+    destination: Destinations = models.ForeignKey(
+        "Destinations", models.CASCADE, blank=True, null=True
+    )
     day = models.IntegerField(blank=True, null=True)
     hour = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "results"
+
+class TspGeocoding(models.Model):
+    zip = models.IntegerField(primary_key=True)
+    lng = models.FloatField(blank=True, null=True)
+    lat = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tsp_geocoding'
