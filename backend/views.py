@@ -1587,3 +1587,7 @@ class SalesmenList(generics.ListCreateAPIView):
     serializer_class = serializers.SalesmenSerializer
     queryset = models.Salesmen.objects.all()
     permission_classes = [AllowAny]
+
+class TspAPi(APIView):
+    def post(self, request):
+        data = request.body.decode("utf-8")

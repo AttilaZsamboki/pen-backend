@@ -6,7 +6,10 @@ from ..models import Orders, Order, MiniCrmAdatlapok
 def main():
     log("MiniCRM ERP rendelésszám szinkron megkezdődött", "INFO", "pen_erp_order_id")
     adatlapok = MiniCrmAdatlapok.objects.filter(
-        CategoryId=29, ClouderpMegrendeles__isnull=True, RendelesSzama__isnull=True
+        CategoryId=29,
+        ClouderpMegrendeles__isnull=True,
+        RendelesSzama__isnull=True,
+        Deleted="0",
     )
     for adatlap in adatlapok:
         order_id = Orders.objects.filter(adatlap_id=adatlap.Id).first()

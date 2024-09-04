@@ -7,12 +7,12 @@ from django.db.models import Q
 def main():
     log("MiniCRM ERP státusz szinkron megkezdődött", "INFO", "pen_erp_status_sync")
     adatlapok = MiniCrmAdatlapok.objects.filter(
-        ~Q(StatusId=3009)
-        & ~Q(Enum1951="Lezárva")
-        & ~Q(Enum1951="Szervezésre vár")
-        & ~Q(StatusId=3011),
-        CategoryId=29,
-        Deleted=0,
+        ~Q(Enum1951="Lezárva") & Q(Enum1951__isnull=False),
+        ~Q(Enum1951="Szervezésre vár") & Q(Enum1951__isnull=False),
+        ~Q(StatusId=3009),
+        ~Q(StatusId=3011),
+        Q(CategoryId=29),
+        Q(Deleted="0"),
     ).values()
     if not adatlapok:
         log("Nincs új adatlap a MiniCRM-ben", "INFO", "pen_erp_status_sync")

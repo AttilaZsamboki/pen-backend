@@ -1930,3 +1930,35 @@ class MiniCrmAdatlapokV2(models.Model):
     class Meta:
         managed = False
         db_table = "pen_minicrm_adatlapok_v2"
+
+
+class Destinations(models.Model):
+    id = models.IntegerField(blank=True, null=True)
+    zip = models.IntegerField(blank=True, null=True)
+    type = models.CharField(max_length=32, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "destinations"
+
+
+class DestinationTimes(models.Model):
+    id = models.IntegerField(blank=True, null=True)
+    destination = models.ForeignKey("Destinations", models.CASCADE, blank=True, null=True)
+    day = models.IntegerField(blank=True, null=True)
+    hour = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "destination_times"
+
+
+class Results(models.Model):
+    id = models.IntegerField(blank=True, null=True)
+    destination = models.ForeignKey("Destinations", models.CASCADE, blank=True, null=True)
+    day = models.IntegerField(blank=True, null=True)
+    hour = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "results"
