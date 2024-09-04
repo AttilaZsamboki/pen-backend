@@ -1,5 +1,4 @@
 from django.db.models import Q
-from pulp import *
 
 from ..utils.logs import log
 from ..models import Routes, Salesmen, UserSkills
@@ -74,7 +73,6 @@ for v in prob.variables():
         print(v.name)
 
 import matplotlib.pyplot as plt
-import networkx as nx
 
 G = nx.Graph()
 

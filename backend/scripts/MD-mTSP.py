@@ -1,7 +1,4 @@
-import numpy as np
 from django.db.models import Q
-from pulp import *
-from pyscipopt import Model
 
 from ..utils.google_routes import Client
 from ..utils.logs import log

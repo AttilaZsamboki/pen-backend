@@ -45,3 +45,6 @@ def cron():
             )
             globals()[retry.log.script_name.split("pen_")[-1]](**retry.log.data)
             retry.delete()
+
+
+cron()
