@@ -49,7 +49,7 @@ def create_distance_matrix(addresses: List[str]) -> Dict[str, Dict[str, float]]:
                     response = gmaps.routes(
                         origin=str(origin), destination=str(destination)
                     )
-                    duration = response.routes[0].parse_duration() / 60
+                    duration = response.routes[0].parse_duration()
                     save = Routes(
                         origin_zip=origin,
                         dest_zip=destination,
@@ -61,7 +61,7 @@ def create_distance_matrix(addresses: List[str]) -> Dict[str, Dict[str, float]]:
                 else:
                     duration = existing_route[0].duration
 
-                distance_matrix[origin][destination] = duration
+                distance_matrix[origin][destination] = duration / 60
 
     print("Number of requests: ", num_requests)
     return distance_matrix
@@ -70,7 +70,7 @@ def create_distance_matrix(addresses: List[str]) -> Dict[str, Dict[str, float]]:
 def generate_tsp():
     Destinations.objects.all().delete()
     DestinationTimes.objects.all().delete()
-    zip_codes = [2181] + [int(i) for i in generate_random_zip_codes(20)]
+    zip_codes = [2181] + [int(i) for i in generate_random_zip_codes(10)]
 
     days = range(30)
     time_slots_per_day = list(range(8, 18))
@@ -80,23 +80,23 @@ def generate_tsp():
         {
             "zip": zip_codes[i],
             "day": random.choice(days),
-            "time": random.choice(time_slots_per_day[:3]),
+            "time": random.choice(time_slots_per_day),
         }
-        for i in range(1, 8)
+        for i in range(1, 3)
     ]
 
     semi_fixed_destinations = [
         {
             "zip": zip_codes[i],
             "options": [
-                (random.choice(days), random.choice(time_slots_per_day[:3]))
+                (random.choice(days), random.choice(time_slots_per_day))
                 for _ in range(3)
             ],
         }
-        for i in range(8, 15)
+        for i in range(3, 6)
     ]
 
-    free_destinations = [{"zip": zip_codes[i]} for i in range(15, 21)]
+    free_destinations = [{"zip": zip_codes[i]} for i in range(6, 11)]
 
     job_duration = 30
 
@@ -475,3 +475,7 @@ def generate_tsp():
         plt.show()
     else:
         print("No solution found.")
+
+
+if __name__ == "__main__":
+    generate_tsp()
