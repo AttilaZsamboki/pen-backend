@@ -669,6 +669,7 @@ class Order(models.Model):
     class Meta:
         managed = False
         db_table = "pen_order"
+        app_label = 'orders'
 
 
 class PaymentMethods(models.Model):

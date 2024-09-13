@@ -92,7 +92,15 @@ DATABASES = {
         "TEST": {
             "NAME": "mytestdatabase",
         },
-    }
+    },
+    "orders_db": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("ORDERS_DB_NAME", "not found"),
+        "USER": os.getenv("ORDERS_DB_USER", "not found"),
+        "PASSWORD": os.getenv("ORDERS_DB_PASS", "not found"),
+        "HOST": os.getenv("ORDERS_DB_HOST", "not found"),
+        "PORT": os.getenv("ORDERS_DB_PORT", "not found"),
+    },
 }
 
 # Password validation
@@ -152,3 +160,4 @@ FILE_UPLOAD_TEMP_DIR = (
 )
 
 USE_TZ = False
+DATABASE_ROUTERS = ["backend.db_router.OrdersRouter"]
