@@ -1,6 +1,6 @@
 from ..utils.minicrm import update_adatlap_fields
-from ..models import MiniCrmAdatlapok
 from ..utils.logs import log
+from ..models import MiniCrmAdatlapok
 
 
 def main():
