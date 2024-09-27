@@ -361,30 +361,22 @@ def create_invoice_or_proform(
                     )
                 return None
 
-            for _ in range(2):
-                file_content = access_file(
-                    f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
+            file_content = access_file(
+                f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
+            )
+            update_request_payload = update_data(proform, name, adatlap, szamlaszam)
+            update_resp = update_adatlap_fields(
+                adatlap.Id,
+                update_request_payload,
+            )
+            if update_resp["code"] != 200:
+                log(
+                    f"{name.capitalize()} feltöltése sikertelen",
+                    "ERROR",
+                    script_name,
+                    details=update_resp,
                 )
-                if file_content:
-                    update_request_payload = update_data(
-                        proform, name, adatlap, szamlaszam
-                    )
-                    update_resp = update_adatlap_fields(
-                        adatlap.Id,
-                        update_request_payload,
-                    )
-                    if update_resp["code"] == 200:
-                        break
-                else:
-                    log(
-                        f"Hiba akadt a {name} feltöltésében",
-                        "ERROR",
-                        script_name=script_name,
-                        details=f"adatlap: {adatlap.Id}, error: {update_resp['reason']}",
-                        data=update_request_payload,
-                    )
-                    if ENVIRONMENT == "production":
-                        time.sleep(180)
+                continue
 
             if ENVIRONMENT == "production":
                 time.sleep(60)
