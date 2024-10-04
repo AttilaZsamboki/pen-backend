@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.abspath("/home/atti/googleds/dataupload"))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "peneszmentesites.settings")
 django.setup()
-from backend.models import Logs, MiniCrmRequests, ScriptRetries  # noqa
+from backend.models import Logs, MiniCrmRequests, ScriptRetries, Systems  # noqa
 
 
 def log(
@@ -16,6 +16,7 @@ def log(
     details="",
     data={},
     retry=False,
+    system_id=None,
 ):
     log = Logs(
         script_name=script_name,
@@ -24,6 +25,7 @@ def log(
         value=log_value,
         details=details,
         data=data,
+        system=Systems.objects.get(pk=system_id) if system_id else None,
     )
     log.save()
     if retry:

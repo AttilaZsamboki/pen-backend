@@ -1,6 +1,14 @@
 from ..utils.logs import log
-from ..models import MiniCrmAdatlapok
+from ..models import MiniCrmAdatlapok, Systems, Settings
 from ..utils.calculate_distance import calculate_distance_fn
+from dataclasses import dataclass
+
+
+@dataclass
+class Input:
+    CategoryId: int
+    StatusId: int
+    System: Systems
 
 
 def criteria(adatlap: MiniCrmAdatlapok):
@@ -9,25 +17,31 @@ def criteria(adatlap: MiniCrmAdatlapok):
     return True
 
 
-def main():
+def main(input: Input):
     log(
         "Penészmentesítés távolságszámítás megkezdődött",
-        "INFO",
+        "START",
         "pen_calculate_distance_cron",
+        system_id=input.SystemId,
     )
-    adatlapok = [
-        i
-        for i in MiniCrmAdatlapok.objects.filter(CategoryId=23, StatusId=2927)
-        if criteria(i)
-    ]
+    adatlapok = MiniCrmAdatlapok.objects.filter(
+        CategoryId=input.CategoryId,
+        StatusId=input.StatusId,
+        SystemId=input.SystemId,
+        Tavolsag__isnull=True,
+        FelmeresiDij__isnull=True,
+    )
     for adatlap in adatlapok:
-        stat = calculate_distance_fn(adatlap, source="cron")
+        stat = calculate_distance_fn(
+            adatlap, source="cron", telephely=input.System.telephely
+        )
         if stat == "Error":
             log(
                 "Penészmentesítés távolságszámítás sikertelen",
                 "ERROR",
                 "pen_calculate_distance_cron",
                 details=adatlap.Id,
+                system_id=input.SystemId,
             )
             continue
         log(
@@ -35,12 +49,29 @@ def main():
             "SUCCESS",
             "pen_calculate_distance_cron",
             details=adatlap.Id,
+            system_id=input.SystemId,
         )
     log(
         "Penészmentesítés távolságszámítás befejeződött",
-        "INFO",
+        "END",
         "pen_calculate_distance_cron",
+        system_id=input.SystemId,
     )
 
 
-main()
+if __name__ == "__main__":
+    for system in Systems.objects.all():
+        category_id = Settings.objects.get(
+            system=system, label="Felmérés", type="Category_Id"
+        ).value
+        status_id = Settings.objects.get(
+            system=system, label="Új érdeklődő", type="Status_Id"
+        ).value
+        if category_id and status_id:
+            main(
+                Input(
+                    CategoryId=category_id,
+                    StatusId=status_id,
+                    System=system,
+                )
+            )

@@ -11,8 +11,7 @@ def calculate_distance_fn(
     data: MiniCrmAdatlapok,
     source="webhook",
     address=None,
-    telephely="Budapest, Nagytétényi út 218-220, 1225",
-    city_field="Telepules",
+    telephely=None,
     update_data=None,
 ):
     address = address(data)
@@ -68,14 +67,14 @@ def calculate_distance_fn(
         log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
     street_view_url = get_street_view_url(location=address)
     try:
-        county = Counties.objects.get(telepules=data.__dict__[city_field]).megye
+        county = Counties.objects.get(telepules=data.Telepules).megye
     except:
         county = ""
         log(
             log_value="Penészmentesítés MiniCRM webhook sikertelen",
             status="FAILED",
             script_name=script_name,
-            details=f"Nem található megye a településhez: {data.__dict__[city_field]}",
+            details=f"Nem található megye a településhez: {data.Telepules}",
         )
     data_to_update = update_data(
         formatted_duration, distance, fee, street_view_url, county, address

@@ -13,6 +13,7 @@ class Logs(models.Model):
     value = models.TextField()
     details = models.TextField()
     data = models.JSONField(blank=True, null=True)
+    system = models.ForeignKey("Systems", models.DO_NOTHING, db_column="system_id")
 
     class Meta:
         managed = False
@@ -1667,6 +1668,7 @@ class MiniCrmAdatlapok(models.Model):
     FizetesiHatarido2 = models.DateTimeField(blank=True, null=True)
     SzamlaSorszama = models.TextField(blank=True, null=True)
     VisszafizetesDatuma2 = models.DateTimeField(blank=True, null=True)
+    SystemId = models.IntegerField(max_length=50, blank=True, null=True)
 
     @property
     def StatusIdStr(self):
@@ -1929,3 +1931,34 @@ class MiniCrmAdatlapokV2(models.Model):
     class Meta:
         managed = False
         db_table = "pen_minicrm_adatlapok_v2"
+
+
+class Systems(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True)
+    system_id = models.IntegerField(blank=True, null=True, primary_key=True)
+    api_key = models.TextField(blank=True, null=True)
+    email = models.TextField(blank=True, null=True)
+    password = models.TextField(blank=True, null=True)
+    telephely = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "systems"
+
+
+class Settings(models.Model):
+    TYPE_CHOICES = [
+        ("Category_Id", "Category_Id"),
+        ("Status_Id", "Status_Id"),
+    ]
+
+    label = models.TextField(blank=True, null=True)
+    value = models.TextField(blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, blank=True, null=True
+    )
+    type = models.CharField(max_length=100, blank=True, null=True, choices=TYPE_CHOICES)
+
+    class Meta:
+        managed = False
+        db_table = "settings"
