@@ -15,6 +15,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "peneszmentesites.settings")
 if not "DJANGO_SETTINGS_MODULE" in os.environ:
     django.setup()
 
+
 load_dotenv()
 
 
@@ -227,9 +228,12 @@ class MiniCrmClient:
         description=None,
         script_name=None,
     ):
+        from ..models import Systems
+
         self.script_name = script_name
         self.description = description
         self.system_id = system_id
+        self.system = Systems.objects.get(system_id=system_id) if system_id else None
         self.api_key = api_key
 
     def list_todos(self, adatlap_id, criteria=lambda _: True) -> List[Todo]:
@@ -454,8 +458,17 @@ class MiniCrmClient:
                 json=fields,
             )
 
-    def update_adatlap_fields(self, id, fields):
-        return self.update_request(id=id, fields=fields, endpoint="Project")
+    def update_adatlap_fields(self, id, fields: dict):
+        from ..models import SystemSettings
+
+        mapped_fields = {
+            SystemSettings.objects.get(
+                label=k, system=self.system, type="Field"
+            ).value: v
+            for k, v in fields.items()
+        }
+
+        return self.update_request(id=id, fields=mapped_fields, endpoint="Project")
 
     def create_to_do(self, adatlap_id, user, type, comment, deadline):
         from ..utils.logs import log_minicrm_request

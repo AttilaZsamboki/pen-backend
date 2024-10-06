@@ -1,5 +1,5 @@
 from ..utils.logs import log
-from ..models import MiniCrmAdatlapok, Systems, Settings
+from ..models import MiniCrmAdatlapok, Systems, SystemSettings
 from ..utils.calculate_distance import calculate_distance_fn
 from dataclasses import dataclass
 
@@ -61,10 +61,10 @@ def main(input: Input):
 
 if __name__ == "__main__":
     for system in Systems.objects.all():
-        category_id = Settings.objects.get(
+        category_id = SystemSettings.objects.get(
             system=system, label="Felmérés", type="Category_Id"
         ).value
-        status_id = Settings.objects.get(
+        status_id = SystemSettings.objects.get(
             system=system, label="Új érdeklődő", type="Status_Id"
         ).value
         if category_id and status_id:

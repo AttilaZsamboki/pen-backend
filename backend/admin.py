@@ -1,5 +1,5 @@
 from django.contrib import admin
-from backend.models import Settings
+from backend.models import SystemSettings
 from django.contrib import admin
 from django.contrib.auth.models import User, Group
 
@@ -17,4 +17,4 @@ class SettingsAdmin(admin.ModelAdmin):
     has_module_perms = has_perm = __getattr__ = lambda s, *a, **kw: True
 
 
-admin.site.register(Settings, SettingsAdmin)
+admin.site.register(SystemSettings, SettingsAdmin)

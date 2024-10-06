@@ -25,7 +25,7 @@ def log(
         value=log_value,
         details=details,
         data=data,
-        system=Systems.objects.get(pk=system_id) if system_id else None,
+        system=Systems.objects.get(system_id=system_id) if system_id else None,
     )
     log.save()
     if retry:
