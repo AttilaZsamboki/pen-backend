@@ -32,7 +32,7 @@ class SystemSettings(models.Model):
         "Systems", models.DO_NOTHING, to_field="system_id", blank=True, null=True
     )
     type = models.CharField(max_length=100, blank=True, null=True, choices=TYPE_CHOICES)
-    category_id = models.IntegerField(blank=True, null=True)
+    category_id = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
