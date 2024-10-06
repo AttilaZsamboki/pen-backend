@@ -1908,6 +1908,7 @@ class Felmeresek(models.Model):
     is_conditional = models.BooleanField(blank=True, null=True, default=False)
     condition = models.TextField(blank=True, null=True)
     is_detailed_offer = models.BooleanField(blank=True, null=True)
+    system: Systems = models.ForeignKey("Systems", models.DO_NOTHING, to_field="system_id", blank=True, null=True)
 
     @property
     def netOrderTotal(self):
