@@ -1,16 +1,24 @@
 from ..services.minicrm import MiniCRMWrapper
-from ..utils.logs import log
-from ..models import MiniCrmAdatlapok
+from ..models import MiniCrmAdatlapok, Systems
 
 
 class Main(MiniCRMWrapper):
     script_name = "pen_order_webhook_chceck"
 
     def main(self):
-        adatlapok = self.minicrm_client.get_adatlap(29, "3008")
-        db_adatlapok = MiniCrmAdatlapok.objects.filter(
-            CategoryId="29", Id__in=list(map(lambda adatlap: adatlap.Id, adatlapok))
-        ).exclude(StatusId="3008")
+        order_category_id = self.get_setting(
+            type="CategoryId", label="Megrendelés"
+        ).value
+        in_progress_status_id = self.get_setting(
+            type="StatusId", label="Folyamatban"
+        ).value
+        adatlapok = self.minicrm_client.get_adatlap(
+            order_category_id, in_progress_status_id
+        )
+        db_adatlapok = self.get_adatlapok(
+            CategoryIdStr="Megrendelés",
+            Id__in=[i.Id for i in adatlapok],
+        ).exclude(StatusIdStr="Folyamatban")
         for adatlap in db_adatlapok:
             adatlap = self.minicrm_client.get_adatlap_details(adatlap.Id)
             valid_fields = {f.name for f in MiniCrmAdatlapok._meta.get_fields()}
@@ -37,4 +45,6 @@ class Main(MiniCRMWrapper):
             ).save()
 
 
-Main().main()
+if __name__ == "__main__":
+    for i in Systems.objects.all():
+        Main(i).main()
