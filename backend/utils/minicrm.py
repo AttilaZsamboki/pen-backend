@@ -505,7 +505,7 @@ class MiniCrmClient:
     def update_offer_order(self, offer_id, fields, project=True, type="Offer"):
         return self.update_request(
             id=str(offer_id) + ("/Project" if project else ""),
-            fields=fields,
+            fields=self.map_fields(fields),
             endpoint=type,
             isR3=False,
             method="POST",

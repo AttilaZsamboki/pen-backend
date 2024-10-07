@@ -465,6 +465,14 @@ class ErpAuthTokens(models.Model):
 class Orders(models.Model):
     adatlap_id = models.IntegerField(db_column="ProjectId", blank=True, null=True)
     order_id = models.IntegerField(db_column="Id", primary_key=True)
+    system: Systems = models.ForeignKey(
+        "Systems",
+        models.DO_NOTHING,
+        db_column="system_id",
+        blank=True,
+        null=True,
+        to_field="system_id",
+    )
 
     class Meta:
         managed = False
@@ -1770,7 +1778,9 @@ class FelmeresMunkadijak(models.Model):
 class Offers(models.Model):
     id = models.IntegerField(primary_key=True)
     adatlap: MiniCrmAdatlapok = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING)
-    system = models.ForeignKey("Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id")
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id"
+    )
 
     class Meta:
         managed = False
@@ -1913,7 +1923,9 @@ class Felmeresek(models.Model):
     is_conditional = models.BooleanField(blank=True, null=True, default=False)
     condition = models.TextField(blank=True, null=True)
     is_detailed_offer = models.BooleanField(blank=True, null=True)
-    system: Systems = models.ForeignKey("Systems", models.DO_NOTHING, to_field="system_id", blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, to_field="system_id", blank=True, null=True
+    )
 
     @property
     def netOrderTotal(self):
