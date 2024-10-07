@@ -1,10 +1,10 @@
 import os
 
 from ..utils.logs import log  # noqa
-from ..models import MiniCrmAdatlapok, MiniCrmTodos
+from ..models import MiniCrmAdatlapok, MiniCrmTodos, Systems, SystemSettings
 from ..utils.minicrm import MiniCrmClient
 from ..utils.minicrm_str_to_text import todo_map
-from ..utils.utils import get_spreadsheet
+from ..utils.utils import GSS
 
 
 class Project:
@@ -76,7 +76,8 @@ felmeres_action_map = {
     ),
     (
         "Rendszerhiba E5",
-        lambda adatlap: adatlap.StatusId not in [3079, 3082],
+        lambda adatlap: adatlap.StatusIdStr
+        not in ["Díjbekérő küldés", "Felmérés előkészítés"],
     ),
     (
         "Rendszerhiba E4",
@@ -102,10 +103,10 @@ garancia_action_map = {
             "Rendszerhiba E1",
             "Új jelentkező - BOSS!",
         ),
-        lambda adatlap: adatlap.StatusId != 3121,
+        lambda adatlap: adatlap.StatusIdStr != "ÚJ BEJELENTÉS",
     ),
-    ("Ügyfélkapu szervezés", lambda adatlap: adatlap.StatusId != 3125),
-    ("Ügyfélkapu díjbekérő", lambda adatlap: adatlap.StatusId != 3127),
+    ("Ügyfélkapu szervezés", lambda adatlap: adatlap.StatusIdStr != "SZERVEZÉS"),
+    ("Ügyfélkapu díjbekérő", lambda adatlap: adatlap.StatusIdStr != "DÍJBEKÉRŐ KÜLDÉS"),
     (
         (
             "Ügyfélkapu kiszállás",
@@ -115,9 +116,9 @@ garancia_action_map = {
             "Karbantartás",
             "Szerviz",
         ),
-        lambda adatlap: adatlap.StatusId != 3129,
+        lambda adatlap: adatlap.StatusIdStr != "KISZÁLLÁSRA VÁR",
     ),
-    ("Műszaki egyeztetés", lambda adatlap: adatlap.StatusId != 3130),
+    ("Műszaki egyeztetés", lambda adatlap: adatlap.StatusIdStr != "MŰSZAKI EGYEZTETÉS"),
     ("Ügyfélkapu számlázás", lambda adatlap: adatlap.SzamlaSorszama is not None),
     (
         "Ügyfélkapu visszafizetés",
@@ -132,14 +133,9 @@ garancia_action_map = {
 }
 
 
-modules = [
-    Project(23, felmeres_action_map),
-    Project(33, garancia_action_map),
-]
-
-
 def main(module: Project):
-    sheet = get_spreadsheet("[SYS] ÖSSZES TEENDŐ", module.get_category_id_str())
+    client = GSS()
+    sheet = client.get_spreadsheet("[SYS] ÖSSZES TEENDŐ", module.get_category_id_str())
     for row in sheet.get("B2:C"):
         if len(row) == 2:
             data = {"Id": row[0].split("/")[-1], "Type": row[1]}
@@ -157,5 +153,17 @@ def main(module: Project):
                     break
 
 
-for module in modules:
-    main(module)
+if __name__ == "__main__":
+    modules = []
+    for system in Systems.objects.all():
+        felmeres_category_id = SystemSettings.objects.get(
+            system=system, label="Felmérés", type="CategoryId"
+        ).value
+        garancia_category_id = SystemSettings.objects.get(
+            system=system, label="Garancia", type="CategoryId"
+        ).value
+        modules.append(Project(felmeres_category_id, felmeres_action_map))
+        modules.append(Project(garancia_category_id, garancia_action_map))
+
+    for module in modules:
+        main(module)

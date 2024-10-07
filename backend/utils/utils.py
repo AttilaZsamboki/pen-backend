@@ -43,20 +43,27 @@ def filter_fields(model, data):
     return {k: v for k, v in data.items() if k in model._meta.fields}
 
 
-def get_spreadsheet(sheet_name, worksheet_name):
-    scope = [
-        "https://spreadsheets.google.com/feeds",
-        "https://www.googleapis.com/auth/drive",
-    ]
-    SERVICE_ACCOUNT_FILE = "gds-dataupload-444ed56fca7c.json"
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        SERVICE_ACCOUNT_FILE, scope
-    )
+class GSS:
+    def __init__(self):
+        self.client = self.login()
 
-    client = gspread.authorize(credentials)
+    def login(self):
+        scope = [
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/drive",
+        ]
+        SERVICE_ACCOUNT_FILE = "gds-dataupload-444ed56fca7c.json"
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(
+            SERVICE_ACCOUNT_FILE, scope
+        )
 
-    sheet = client.open(sheet_name).worksheet(worksheet_name)
-    return sheet
+        return gspread.authorize(credentials)
+
+    def get_spreadsheet(self, sheet_name, worksheet_name):
+        return self.client.open(sheet_name).worksheet(worksheet_name)
+
+    def create_worksheet(self, sheet_name, worksheet_name, rows=100, cols=10):
+        return self.client.open(sheet_name).add_worksheet(worksheet_name, rows, cols)
 
 
 def round_to_closest_hour(dt):
