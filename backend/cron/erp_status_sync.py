@@ -1,5 +1,5 @@
 from ..services.minicrm import MiniCRMWrapper
-from ..models import Orders, Order, MiniCrmAdatlapok
+from ..models import Order, Systems
 from django.db.models import Q
 
 
@@ -8,14 +8,14 @@ class Main(MiniCRMWrapper):
 
     def main(self):
         self.log("MiniCRM ERP státusz szinkron megkezdődött", "INFO")
-        adatlapok = MiniCrmAdatlapok.objects.filter(
-            ~Q(StatusId=3009)
+        adatlapok = self.get_adatlapok(
+            ~Q(StatusIdStr="Sikeres")
             & ~Q(Enum1951="Lezárva")
             & ~Q(Enum1951="Szervezésre vár")
-            & ~Q(StatusId=3011),
-            CategoryId=29,
+            & ~Q(StatusId="Sikertelen"),
+            CategoryId="Megrendelés",
             Deleted=0,
-        ).values()
+        )
         if not adatlapok:
             self.log("Nincs új adatlap a MiniCRM-ben", "INFO")
             return
@@ -26,16 +26,19 @@ class Main(MiniCRMWrapper):
         for adatlap in adatlapok:
             try:
                 order = Order.objects.get(
-                    webshop_id=Orders.objects.get(adatlap_id=adatlap["Id"]).order_id
+                    webshop_id=self.get_orders(adatlap_id=adatlap.Id).order_id
                 )
             except Order.DoesNotExist:
                 self.log(
                     "Nem található megfelelő rendelés",
                     "WARNING",
-                    details=adatlap["Id"],
+                    details=adatlap.Id,
                 )
                 continue
-            if order.order_status == "Completed" and adatlap["StatusId"] == 3008:
+            if (
+                order.order_status == "Completed"
+                and adatlap.StatusIdStr == "Folyamatban"
+            ):
                 resp2 = self.minicrm_client.update_offer_order(
                     order.webshop_id, {"Enum1951": "Elszámolásra vár"}, type="Order"
                 )
@@ -67,4 +70,5 @@ class Main(MiniCRMWrapper):
             )
 
 
-Main().main()
+for system in Systems.objects.all():
+    Main(system=system).main()
