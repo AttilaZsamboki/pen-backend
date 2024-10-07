@@ -417,7 +417,11 @@ class MiniCrmClient:
                         <Enum1951>{adatlap_status if adatlap_status else ''}</Enum1951>
                         """
             + "\n".join(
-                [f"<{k}><![CDATA[{v}]]></{k}>" for k, v in project_data.items() if v]
+                [
+                    f"<{k}><![CDATA[{v}]]></{k}>"
+                    for k, v in self.map_fields(project_data).items()
+                    if v
+                ]
             )
             + """
                     </Project>
@@ -458,17 +462,20 @@ class MiniCrmClient:
                 json=fields,
             )
 
-    def update_adatlap_fields(self, id, fields: dict):
+    def map_fields(self, fields):
         from ..models import SystemSettings
 
-        mapped_fields = {
+        return {
             SystemSettings.objects.get(
                 label=k, system=self.system, type="Field"
             ).value: v
             for k, v in fields.items()
         }
 
-        return self.update_request(id=id, fields=mapped_fields, endpoint="Project")
+    def update_adatlap_fields(self, id, fields: dict):
+        return self.update_request(
+            id=id, fields=self.map_fields(fields), endpoint="Project"
+        )
 
     def create_to_do(self, adatlap_id, user, type, comment, deadline):
         from ..utils.logs import log_minicrm_request

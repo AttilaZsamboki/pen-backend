@@ -1,41 +1,40 @@
-from ..utils.logs import log
+from ..utils.logs import log as l
+import os
+import traceback
+from functools import partial
+
+import dotenv
+
+from ..models import Felmeresek, MiniCrmAdatlapok, Offers, Systems
 from ..utils.minicrm import MiniCrmClient
 from ..utils.minicrm_str_to_text import garancia_type_map
-
-from ..models import Offers, Felmeresek, MiniCrmAdatlapok, Logs
-
-import os
-import dotenv
-import traceback
-import datetime
 
 dotenv.load_dotenv()
 
 
-def fn(adatlap: MiniCrmAdatlapok):
+def fn(adatlap: MiniCrmAdatlapok, system: Systems):
+
     script_name = "pen_create_order"
+    log = partial(l, script_name=script_name, system_id=input.system.system_id)
     log(
         "Megrendelések létrehozása elkezdődött",
-        script_name=script_name,
         status="START",
         data={"adatlap": adatlap.Id},
     )
     minicrm_client = MiniCrmClient(
-        os.environ.get("PEN_MINICRM_SYSTEM_ID"),
-        os.environ.get("PEN_MINICRM_API_KEY"),
+        system.system_id,
+        system.api_key,
         script_name=script_name,
     )
 
     try:
         log(
             f"{adatlap.Name} megrendelés létrehozása",
-            script_name=script_name,
             status="INFO",
         )
     except Exception as e:
         log(
             f"Adatlap nevének lekérése sikertelen, Error: {e}",
-            script_name=script_name,
             status="ERROR",
             details=f"Adatlap: {adatlap}",
         )
@@ -46,7 +45,6 @@ def fn(adatlap: MiniCrmAdatlapok):
     else:
         log(
             f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
-            script_name=script_name,
             status="ERROR",
             details=f"Felmérés: {felmeres}",
         )
@@ -76,7 +74,6 @@ def fn(adatlap: MiniCrmAdatlapok):
             if order.lower() == "xml is not valid!":
                 log(
                     f"{adatlap.Name} megrendelés létrehozása sikertelen, XML nem valid",
-                    script_name=script_name,
                     status="ERROR",
                     details=order["xml"],
                 )
@@ -84,14 +81,12 @@ def fn(adatlap: MiniCrmAdatlapok):
             elif order.lower() == "input doesn't look like it's an xml":
                 log(
                     f"{adatlap.Name} megrendelés létrehozása sikertelen, input nem XML",
-                    script_name=script_name,
                     status="ERROR",
                     details=order["xml"],
                 )
                 return
             log(
                 f"{adatlap.Name} megrendelés létrehozása sikertelen",
-                script_name=script_name,
                 status="ERROR",
                 details=order,
             )
@@ -111,38 +106,32 @@ def fn(adatlap: MiniCrmAdatlapok):
             return
         log(
             f"{adatlap.Name} megrendelés létrehozása sikeres",
-            script_name=script_name,
             status="SUCCESS",
         )
         return
     log(
         f"{adatlap.Name} megrendelés létrehozása sikertelen, nem létezik felmérés",
-        script_name=script_name,
         status="ERROR",
         details=f"Offer: {offer}. Felmérés: {felmeres}",
     )
     log(
         "Megrendelések létrehozása sikeresen befejeződött",
-        script_name=script_name,
         status="SUCCESS",
     )
 
 
-def main():
+def main(system: Systems):
     try:
         adatlapok = MiniCrmAdatlapok.objects.filter(
-            CategoryId=21, StatusId=2896, Deleted=0
+            CategoryIdStr="Ajánlat",
+            StatusIdStr="Elfogadott ajánlat",
+            Deleted=0,
+            SystemId=system.system_id,
         )
         for adatlap in adatlapok:
-            if Logs.objects.filter(
-                status="START",
-                data__adatlap=adatlap.Id,
-                time__gte=datetime.datetime.now() - datetime.timedelta(minutes=5),
-            ).exists():
-                continue
             fn(adatlap)
     except Exception as e:
-        log(
+        l(
             "Megrendelések létrehozása sikertelen",
             script_name="pen_create_order",
             status="ERROR",
@@ -150,4 +139,6 @@ def main():
         )
 
 
-main()
+if __name__ == "__main__":
+    for system in Systems.objects.all():
+        main(system)

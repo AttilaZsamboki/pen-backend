@@ -1717,6 +1717,10 @@ class MiniCrmAdatlapok(models.Model):
     def FullAddress(self):
         return f"{self.Cim2} {self.Telepules}, {self.Iranyitoszam} {self.Orszag}"
 
+    @property
+    def CategoryIdStr(self):
+        return SystemSettings.objects.get(value=self.CategoryId).label
+
     def change_status(self, status_id):
         resp = MiniCrmClient(script_name="pen_change_status").update_adatlap_fields(
             self.Id, {"StatusId": status_id}
@@ -1766,6 +1770,7 @@ class FelmeresMunkadijak(models.Model):
 class Offers(models.Model):
     id = models.IntegerField(primary_key=True)
     adatlap: MiniCrmAdatlapok = models.ForeignKey("MinicrmAdatlapok", models.DO_NOTHING)
+    system = models.ForeignKey("Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id")
 
     class Meta:
         managed = False
