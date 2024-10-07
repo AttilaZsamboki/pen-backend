@@ -33,3 +33,5 @@ class MiniCRMWrapper:
         )
         self.get_orders = partial(Orders.objects.filter, system=system)
         self.get_setting = partial(SystemSettings.objects.get, system=system)
+
+        self.system = system
