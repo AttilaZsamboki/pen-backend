@@ -1,27 +1,31 @@
-from ..utils.minicrm import MiniCrmClient
-from ..models import MiniCrmAdatlapok
-from ..utils.logs import log
+from ..services.minicrm import MiniCRMWrapper, Systems
 
 
-def main():
-    log("Elkeződött a készpénzes adatlapok ellenőrzése", "INFO", "pen_kp_status_change")
+class Main(MiniCRMWrapper):
+    script_name = "pen_kp_status_change"
 
-    adatlapok = MiniCrmAdatlapok.objects.filter(
-        CategoryId=23,
-        StatusId=3082,
-        DijbekeroSzama2__isnull=True,
-        FizetesiMod2="Készpénz",
-    ).values("Id")
-    for adatlap in adatlapok:
-        MiniCrmClient().update_adatlap_fields(
-            adatlap["Id"], {"StatusId": "Felmérésre vár"}
+    def main(self):
+        self.log(
+            "Elkeződött a készpénzes adatlapok ellenőrzése",
+            "INFO",
         )
-    log(
-        "Készpénzes adatlapok átállítva 'Felmérésre vár' státuszra",
-        "INFO",
-        "pen_kp_status_change",
-    )
-    return
+
+        adatlapok = self.get_adatlapok(
+            CategoryIdStr="Felmérés",
+            StatusIdStr="Felmérés előkészítés",
+            DijbekeroSzama2__isnull=True,
+            FizetesiMod2="Készpénz",
+        ).values("Id")
+        for adatlap in adatlapok:
+            self.minicrm_client.update_adatlap_fields(
+                adatlap["Id"], {"StatusId": "Felmérésre vár"}
+            )
+        self.log(
+            "Készpénzes adatlapok átállítva 'Felmérésre vár' státuszra",
+            "INFO",
+        )
 
 
-main()
+if __name__ == "__main__":
+    for system in Systems.objects.all():
+        Main(system).main()
