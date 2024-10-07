@@ -24,6 +24,7 @@ class SystemSettings(models.Model):
         ("CategoryId", "CategoryId"),
         ("StatusId", "StatusId"),
         ("Field", "Field"),
+        ("TodoId", "TodoId"),
     ]
 
     label = models.TextField(blank=True, null=True)
@@ -1789,6 +1790,9 @@ class Offers(models.Model):
 
 class MiniCrmTodos(models.Model):
     todo_id = models.CharField(max_length=255)  # Field name made lowercase.
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id"
+    )
 
     class Meta:
         managed = False

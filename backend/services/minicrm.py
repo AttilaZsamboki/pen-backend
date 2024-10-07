@@ -5,7 +5,14 @@ from dotenv import load_dotenv
 
 from ..utils.logs import log
 from ..utils.minicrm import MiniCrmClient
-from ..models import Systems, MiniCrmAdatlapok, Orders, SystemSettings
+from ..models import (
+    Systems,
+    MiniCrmAdatlapok,
+    Orders,
+    SystemSettings,
+    MiniCrmTodos,
+    Felmeresek,
+)
 
 
 load_dotenv()
@@ -31,7 +38,15 @@ class MiniCRMWrapper:
         self.get_adatlapok = partial(
             MiniCrmAdatlapok.objects.filter, SystemId=system.system_id
         )
+        self.get_todos = partial(MiniCrmTodos.objects.filter, system=system)
+
         self.get_orders = partial(Orders.objects.filter, system=system)
         self.get_setting = partial(SystemSettings.objects.get, system=system)
 
         self.system = system
+        self.save_todo = partial(
+            MiniCrmTodos.objects.create,
+            system=system,
+        )
+
+        self.get_felmeres = partial(Felmeresek.objects.get, system=system)
