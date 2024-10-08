@@ -41,10 +41,11 @@ from rest_framework_xml.renderers import XMLRenderer
 from .utils.logs import log
 from . import models, serializers
 from .auth0backend import CustomJWTAuthentication
-from .scripts.api_scripts import mini_crm_proxy
-from .utils.calculate_distance import calculate_distance_fn
+from .utils.calculate_distance import CalculateDistance
 from .utils.minicrm import Address, Contact, MiniCrmClient
 from .utils.utils import replace_self_closing_tags
+from .services.minicrm import MiniCRMWrapper
+from functools import wraps
 
 
 def map_wh_fields(data: Dict, field_names: List[str]):
@@ -62,7 +63,31 @@ def map_wh_fields(data: Dict, field_names: List[str]):
     return data
 
 
-def save_webhook(adatlap, process_data=None, _="felmeres"):
+def set_system(func):
+    @wraps(func)
+    def wrapper(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            system_id = data.get("Data").get("SystemId")
+            if not system_id:
+                return JsonResponse({"error": "SystemId not provided"}, status=400)
+            system = models.Systems.objects.get(system_id=system_id)
+            minicrm_wrapper = MiniCRMWrapper(system=system)
+            for attr in dir(minicrm_wrapper):
+                if not attr.startswith("__") and not callable(
+                    getattr(minicrm_wrapper, attr)
+                ):
+                    setattr(self, attr, getattr(minicrm_wrapper, attr))
+        except models.Systems.DoesNotExist:
+            return JsonResponse({"error": "System not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        return func(self, request, *args, **kwargs)
+
+    return wrapper
+
+
+def save_webhook(adatlap, process_data=None, _="felmeres", system=None):
     if process_data:
         adatlap = process_data(adatlap)
     adatlap_db = models.MiniCrmAdatlapok.objects.filter(Id=adatlap["Id"])
@@ -77,9 +102,14 @@ def save_webhook(adatlap, process_data=None, _="felmeres"):
 
     valid_fields = {f.name for f in models.MiniCrmAdatlapok._meta.get_fields()}
     filtered_data = {k: v for k, v in adatlap.items() if k in valid_fields}
+    mapped_data = {
+        models.SystemSettings.objects.filter(label=k, system=system).first().value: v
+        for k, v in filtered_data.items()
+        if models.SystemSettings.objects.filter(label=k, system=system).exists()
+    }
 
     models.MiniCrmAdatlapok(
-        **filtered_data,
+        **mapped_data,
     ).save()
     return adatlap
 
@@ -106,18 +136,31 @@ class MiniCrmAPIView(BaseAPIView):
         )
 
 
-class CalculateDistance(APIView):
+class FelmeresWebhook(APIView):
+
+    @set_system
     def post(self, request):
         data = json.loads(request.body)
-        log("Felmérés webhook meghívva", "INFO", "pen_felmeres_webhook", data=data)
+        log(
+            "Felmérés webhook meghívva",
+            "INFO",
+            "pen_felmeres_webhook",
+            data=data,
+            system_id=self.system.system_id,
+        )
         data = map_wh_fields(
             data,
             ["Felmero2", "FizetesiMod2", "SzamlazasIngatlanCimre2"],
         )["Data"]
 
-        save_webhook(data)
+        save_webhook(data, self.system)
 
-        if data["StatusId"] == "2927" and data["UtvonalAKozponttol"] is None:
+        if (
+            data["StatusId"]
+            == models.SystemSettings.objects.get(label="Új érdeklődő").value
+            and data[models.Settings.objects.get(label="UtvonalAKozponttol").value]
+            is None
+        ):
 
             def update_data(duration, distance, fee, street_view_url, county, address):
                 return {
@@ -131,7 +174,7 @@ class CalculateDistance(APIView):
                     "Megye": county,
                 }
 
-            response = calculate_distance_fn(
+            response = CalculateDistance(self.system).fn(
                 data,
                 address=lambda x: x.FullAddress,
                 update_data=update_data,
@@ -147,6 +190,24 @@ class CalculateDistance(APIView):
             "pen_calculate_distance",
         )
         return Response({"status": "error"}, status=HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class FilterByQueryParamMixin:
+    filter_param = None
+    filter_field = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        filter_value = self.request.query_params.get(self.filter_param)
+        if filter_value is not None:
+            filter_kwargs = {self.filter_field: filter_value}
+            queryset = queryset.filter(**filter_kwargs)
+        return queryset
+
+
+class FilterBySystemIdMixin(FilterByQueryParamMixin):
+    filter_param = "system_id"
+    filter_field = "system__id"
 
 
 class FelmeresQuestionsList(generics.ListCreateAPIView):
@@ -166,6 +227,7 @@ class FelmeresQuestionDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class OrderWebhook(APIView):
+    @set_system
     def post(self, request):
         data = json.loads(request.body)
         log(
@@ -173,9 +235,11 @@ class OrderWebhook(APIView):
             "INFO",
             "pen_order_webhook",
             json.dumps(data),
+            system_id=self.system.system_id,
         )
         try:
-            name_mapping = data["Schema"]["Beepitok"]
+            beepitok = models.SystemSettings.objects.get(label="Beepitok").value
+            name_mapping = data["Schema"][beepitok]
 
             def get_names(value):
                 names = []
@@ -198,13 +262,13 @@ class OrderWebhook(APIView):
             )
 
             def process_data(data):
-                data["Beepitok"] = ", ".join(get_names(data["Beepitok"]))
+                data[beepitok] = ", ".join(get_names(data[beepitok]))
                 return data
 
             save_webhook(data["Data"], process_data=process_data)
 
             if not models.Orders.objects.filter(
-                adatlap_id=data["Id"], order_id=data["Head"]["Id"]
+                adatlap_id=data["Id"], order_id=data["Head"]["Id"], system=self.system
             ).exists():
                 models.Orders(
                     adatlap_id=data["Id"],
@@ -226,11 +290,13 @@ class OrderWebhook(APIView):
             return Response("Succesfully received data", status=HTTP_200_OK)
 
 
-class ProductsList(generics.ListCreateAPIView):
+class ProductsList(FilterByQueryParamMixin, generics.ListCreateAPIView):
     queryset = models.Products.objects.all()
     serializer_class = serializers.ProductsSerializer
     permission_classes = [AllowAny]
     pagination_class = PageNumberPagination
+    filter_field = "system_id"
+    filter_param = "system_id"
 
     def get(self, request, *args, **kwargs):
         all = request.query_params.get("all", "false")
@@ -242,7 +308,7 @@ class ProductsList(generics.ListCreateAPIView):
             return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = models.Products.objects.all()
+        queryset = super().get_queryset()  
         filter = self.request.query_params.get("filter", None)
 
         if filter is not None:
@@ -1353,7 +1419,29 @@ class SettingsList(generics.ListAPIView):
 
 class MiniCrmProxyId(APIView):
     def put(self, request, adatlap_id):
-        data = mini_crm_proxy(request.data, adatlap_id, True)
+        log(
+            "MiniCRM adatlap frissítése meghívva",
+            "INFO",
+            "pen_mini_crm_proxy",
+            request.data,
+        )
+        minicrm = MiniCrmClient()
+        data = minicrm.update_adatlap_fields(
+            id=adatlap_id,
+            fields=request.data,
+            script_name="pen_mini_crm_proxy",
+        )
+        if data["code"] == 200:
+            log("MiniCRM adatlap frissítése sikeres", "SUCCESS", "pen_mini_crm_proxy")
+        else:
+            log(
+                "MiniCRM adatlap frissítése sikertelen",
+                "ERROR",
+                "pen_mini_crm_proxy",
+                details=data["reason"],
+                data={"request_data": request.data, "adatlap_id": adatlap_id},
+            )
+
         if data["code"] == 200:
             return Response(data["data"])
         else:
@@ -1386,7 +1474,7 @@ class GaranciaWebhook(APIView):
                     "KarbantartasNettoDij": 20000,
                 }
 
-            response = calculate_distance_fn(
+            response = CalculateDistance().fn(
                 adatlap,
                 address=lambda x: x.FullAddress,
                 city_field="Telepules2",

@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("minicrm_webhook/", views.CalculateDistance.as_view()),
+    path("minicrm_webhook/", views.FelmeresWebhook.as_view()),
     path("felmeres_questions/", views.FelmeresQuestionsList.as_view()),
     path("felmeres_questions/<pk>/", views.FelmeresQuestionDetail.as_view()),
     path("order_webhook/", views.OrderWebhook.as_view()),

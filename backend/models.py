@@ -7,7 +7,7 @@ from .utils.gmail import gmail_authenticate, send_email
 class Systems(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
-    system_id = models.IntegerField(blank=True, null=True)
+    system_id = models.IntegerField(blank=True, null=True, unique=True)
     api_key = models.TextField(blank=True, null=True)
     email = models.TextField(blank=True, null=True)
     password = models.TextField(blank=True, null=True)
@@ -307,6 +307,7 @@ class Products(models.Model):
     warehouse_selejt_optimal_stock_quantity = models.FloatField(
         db_column="Warehouse___Selejt____Optimal_Stock_Quantity", blank=True, null=True
     )  # Field name made lowercase. Field renamed because it contained more than one '_' in a row.
+    system_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
