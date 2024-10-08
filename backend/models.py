@@ -37,9 +37,7 @@ class FelmeresQuestions(models.Model):
     question = models.ForeignKey("Questions", models.DO_NOTHING, db_column="question")
     value = models.TextField(blank=True, null=True)
     adatlap = models.ForeignKey("Felmeresek", models.CASCADE, blank=True, null=True)
-    product = models.ForeignKey(
-        "Products", models.DO_NOTHING, db_column="product", blank=True, null=True
-    )
+    product = models.IntegerField(db_column="product", blank=True, null=True)
     felmeres_item = models.ForeignKey(
         "FelmeresItems", models.CASCADE, blank=True, null=True
     )
@@ -280,7 +278,7 @@ class Products(models.Model):
 
 class ProductAttributes(models.Model):
     id = models.AutoField(primary_key=True)
-    product = models.ForeignKey("Products", models.DO_NOTHING)
+    product = models.IntegerField()
     place = models.BooleanField(blank=True, null=True)
     place_options = models.TextField(blank=True, null=True)
     archived = models.BooleanField(blank=True, null=True)
@@ -360,9 +358,7 @@ class FelmeresItems(models.Model):
     placeOptions = models.JSONField(
         db_column="place_options", blank=True, null=True
     )  # This field type is a guess.
-    product = models.ForeignKey(
-        "Products", models.DO_NOTHING, db_column="product_id", blank=True, null=True
-    )
+    product = models.IntegerField(db_column="product_id", blank=True, null=True)
     inputValues = models.JSONField(db_column="input_values", blank=True, null=True)
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
     adatlap = models.ForeignKey("Felmeresek", models.CASCADE, db_column="adatlap_id")
@@ -417,9 +413,7 @@ class Offers(models.Model):
 
 
 class QuestionProducts(models.Model):
-    product = models.ForeignKey(
-        "Products", models.DO_NOTHING
-    )  # The composite primary key (product_id, question_id) found, that is not supported. The first column is selected.
+    product = models.IntegerField()
     question = models.ForeignKey("Questions", models.CASCADE, primary_key=True)
 
     class Meta:
