@@ -278,7 +278,7 @@ class Products(models.Model):
 
 class ProductAttributes(models.Model):
     id = models.AutoField(primary_key=True)
-    product = models.IntegerField()
+    product = models.IntegerField(db_column="product_id", blank=True, null=True)
     place = models.BooleanField(blank=True, null=True)
     place_options = models.TextField(blank=True, null=True)
     archived = models.BooleanField(blank=True, null=True)
