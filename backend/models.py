@@ -275,6 +275,7 @@ class Products(models.Model):
     class Meta:
         managed = False
         db_table = "pen_products"
+        app_label = "orders"
 
 
 class ProductAttributes(models.Model):
@@ -669,7 +670,7 @@ class Order(models.Model):
     class Meta:
         managed = False
         db_table = "pen_order"
-        app_label = 'orders'
+        app_label = "orders"
 
 
 class PaymentMethods(models.Model):
@@ -1968,6 +1969,7 @@ class Results(models.Model):
         managed = False
         db_table = "results"
 
+
 class TspGeocoding(models.Model):
     zip = models.IntegerField(primary_key=True)
     lng = models.FloatField(blank=True, null=True)
@@ -1975,4 +1977,4 @@ class TspGeocoding(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'tsp_geocoding'
+        db_table = "tsp_geocoding"
