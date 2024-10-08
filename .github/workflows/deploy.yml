@@ -30,9 +30,9 @@ jobs:
         username: ${{ secrets.LIGHTSAIL_USER }}
         key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
         script: |
-          cd /path/to/your/project
+          cd /home/bitnami/pen-backend
           git pull origin main
-          source venv/bin/activate
+          source pen-env/bin/activate
           pip install -r requirements.txt
           python manage.py migrate
           python manage.py collectstatic --noinput
