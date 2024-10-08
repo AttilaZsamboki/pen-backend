@@ -164,3 +164,4 @@ FILE_UPLOAD_TEMP_DIR = (
 USE_TZ = False
 
 DATABASE_ROUTERS = ["backend.db_router.OrdersRouter"]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
