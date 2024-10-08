@@ -20,6 +20,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "pen-env.eba-nre4zayi.eu-central-1.elasticbeanstalk.com",
+    "staging-backend.dataupload.xyz",
     "pen.dataupload.xyz",
     "127.0.0.1",
     "52.57.115.115",
