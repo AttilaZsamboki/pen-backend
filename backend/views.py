@@ -14,7 +14,7 @@ from typing import Dict, List
 
 import boto3
 from django.db import connection, IntegrityError
-from django.db.models import CharField, F, Q, Value
+from django.db.models import CharField, F, Q, Value, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -486,14 +486,25 @@ class FelmeresItemsList(generics.ListCreateAPIView):
         )
 
     def get(self, request):
+        queryset = super().get_queryset()
         if request.query_params.get("adatlap_id"):
-            felmeres_items = models.FelmeresItems.objects.filter(
+            product_subquery = models.Products.objects.filter(
+                id=OuterRef("product")
+            ).values("name", "sku")[:1]
+
+            felmeres_items = queryset.filter(
                 adatlap_id=request.query_params.get("adatlap_id")
             ).annotate(
                 coalesced_name=Coalesce(
-                    "name", F("product_id__name"), output_field=CharField()
+                    "name",
+                    Subquery(product_subquery.values("name")),
+                    output_field=CharField(),
                 ),
-                sku=Coalesce("product_id__sku", Value(""), output_field=CharField()),
+                sku=Coalesce(
+                    Subquery(product_subquery.values("sku")),
+                    Value(""),
+                    output_field=CharField(),
+                ),
             )
             serializer = serializers.FelmeresItemsSerializer(felmeres_items, many=True)
             return Response(serializer.data)
