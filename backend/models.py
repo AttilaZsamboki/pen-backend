@@ -76,9 +76,7 @@ class FelmeresQuestions(models.Model):
     question = models.ForeignKey("Questions", models.DO_NOTHING, db_column="question")
     value = models.TextField(blank=True, null=True)
     adatlap = models.ForeignKey("Felmeresek", models.CASCADE, blank=True, null=True)
-    product = models.ForeignKey(
-        "Products", models.DO_NOTHING, db_column="product", blank=True, null=True
-    )
+    product = models.IntegerField(db_column="product_id", blank=True, null=True)
 
     class Meta:
         managed = False
@@ -93,6 +91,9 @@ class FelmeresekNotes(models.Model):
     type = models.CharField(max_length=50, blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
     seen = models.BooleanField(blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -312,14 +313,18 @@ class Products(models.Model):
     class Meta:
         managed = False
         db_table = "pen_products"
+        app_label = "orders"
 
 
 class ProductAttributes(models.Model):
     id = models.AutoField(primary_key=True)
-    product = models.ForeignKey("Products", models.DO_NOTHING)
+    product = models.IntegerField(db_column="product_id", blank=True, null=True)
     place = models.BooleanField(blank=True, null=True)
     place_options = models.TextField(blank=True, null=True)
     archived = models.BooleanField(blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -332,6 +337,9 @@ class Filters(models.Model):
     sort_by = models.TextField(blank=True, null=True)
     sort_order = models.CharField(blank=True, null=True)
     user = models.TextField(db_column="user_id", blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -345,6 +353,9 @@ class FilterItems(models.Model):
     filter = models.ForeignKey("Filters", models.CASCADE)
     label = models.TextField(blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -360,6 +371,9 @@ class Questions(models.Model):
     mandatory = models.BooleanField()
     description = models.TextField(blank=True, null=True)
     created_from = models.CharField(max_length=100, blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -371,6 +385,9 @@ class Templates(models.Model):
     name = models.TextField(blank=True, null=True)
     type = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -383,6 +400,9 @@ class ProductTemplate(models.Model):
         db_column="product_id"
     )  # The composite primary key (product_id, template_id) found, that is not supported. The first column is selected.
     type = models.CharField(max_length=100, default="Item")
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -396,9 +416,7 @@ class FelmeresItems(models.Model):
     placeOptions = models.JSONField(
         db_column="place_options", blank=True, null=True
     )  # This field type is a guess.
-    product = models.ForeignKey(
-        "Products", models.DO_NOTHING, db_column="product_id", blank=True, null=True
-    )
+    product_id = models.IntegerField(db_column="product_id", blank=True, null=True)
     inputValues = models.JSONField(db_column="input_values", blank=True, null=True)
     netPrice = models.IntegerField(db_column="net_price", blank=True, null=True)
     adatlap = models.ForeignKey("Felmeresek", models.CASCADE, db_column="adatlap_id")
@@ -407,6 +425,9 @@ class FelmeresItems(models.Model):
         max_length=255, blank=True, null=True, default="fixed", db_column="value_type"
     )
     source = models.CharField(max_length=100, blank=True, null=True, default="Manual")
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     @property
     def netTotal(self):
@@ -444,10 +465,11 @@ class Counties(models.Model):
 
 
 class QuestionProducts(models.Model):
-    product = models.ForeignKey(
-        "Products", models.DO_NOTHING
-    )  # The composite primary key (product_id, question_id) found, that is not supported. The first column is selected.
+    product = models.IntegerField(db_column="product_id", blank=True, null=True)
     question = models.ForeignKey("Questions", models.CASCADE, primary_key=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -705,7 +727,7 @@ class Order(models.Model):
     class Meta:
         managed = False
         db_table = "pen_order"
-        app_label = 'orders'
+        app_label = "orders"
 
 
 class PaymentMethods(models.Model):
@@ -719,6 +741,9 @@ class PaymentMethods(models.Model):
 class FelmeresPictures(models.Model):
     felmeres = models.ForeignKey("Felmeresek", models.CASCADE)
     src = models.TextField()
+    system: Systems = models.ForeignKey(
+        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+    )
 
     class Meta:
         managed = False
@@ -1761,6 +1786,9 @@ class Munkadij(models.Model):
     description = models.TextField(blank=True, null=True)
     value_type = models.CharField(max_length=100, choices=VALUE_TYPES, default="hour")
     num_people = models.IntegerField(blank=True, null=True)
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id"
+    )
 
     class Meta:
         managed = False
@@ -1772,6 +1800,9 @@ class FelmeresMunkadijak(models.Model):
     munkadij = models.ForeignKey("Munkadij", models.DO_NOTHING, blank=True, null=True)
     amount = models.IntegerField()
     value = models.FloatField()
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id"
+    )
 
     class Meta:
         managed = False
@@ -1988,6 +2019,7 @@ class MiniCrmAdatlapokV2(models.Model):
     Statusz = models.TextField(blank=True, null=True)
     FelmeresiDij = models.IntegerField(blank=True, null=True)
     FelmeresLink = models.TextField(blank=True, null=True)
+    SystemId = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

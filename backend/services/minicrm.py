@@ -12,6 +12,7 @@ from ..models import (
     SystemSettings,
     MiniCrmTodos,
     Felmeresek,
+    Offers,
 )
 
 
@@ -48,5 +49,6 @@ class MiniCRMWrapper:
             MiniCrmTodos.objects.create,
             system=system,
         )
+        self.save_offer = partial(Offers.objects.create, system=system)
 
         self.get_felmeres = partial(Felmeresek.objects.get, system=system)

@@ -15,7 +15,7 @@ from typing import Dict, List
 import boto3
 import requests
 from django.db import connection
-from django.db.models import CharField, F, Q, Value
+from django.db.models import CharField, Q, Value, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -205,9 +205,29 @@ class FilterByQueryParamMixin:
         return queryset
 
 
+class FilterByQueryParamsMixin:
+    filter_params = {}
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        for param, field in self.filter_params.items():
+            filter_value = self.request.query_params.get(param)
+            if filter_value is not None:
+                filter_kwargs = {field: filter_value}
+                queryset = queryset.filter(**filter_kwargs)
+        return queryset
+
+
 class FilterBySystemIdMixin(FilterByQueryParamMixin):
     filter_param = "system_id"
-    filter_field = "system__id"
+    filter_field = "system_id"
+
+
+class FilterBySystemAndFelmeresIdMixin(FilterByQueryParamsMixin):
+    filter_params = {
+        "system_id": "system_id",
+        "felmeres_id": "felmeres_id",
+    }
 
 
 class FelmeresQuestionsList(generics.ListCreateAPIView):
@@ -308,7 +328,7 @@ class ProductsList(FilterByQueryParamMixin, generics.ListCreateAPIView):
             return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset()  
+        queryset = super().get_queryset()
         filter = self.request.query_params.get("filter", None)
 
         if filter is not None:
@@ -345,7 +365,7 @@ class ProductsDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-class ProductAttributesList(generics.ListCreateAPIView):
+class ProductAttributesList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.ProductAttributes.objects.all()
     serializer_class = serializers.ProductAttributesSerializer
     permission_classes = [AllowAny]
@@ -364,12 +384,13 @@ class ProductAttributesDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 
-class FiltersList(generics.ListCreateAPIView):
+class FiltersList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.Filters.objects.all()
     serializer_class = serializers.FiltersSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         type_param = self.request.query_params.get("type")
         user_param = self.request.query_params.get("user")
 
@@ -379,9 +400,9 @@ class FiltersList(generics.ListCreateAPIView):
                 filters["type"] = type_param
             if user_param:
                 filters["user"] = user_param
-            return models.Filters.objects.filter(**filters)
+            return queryset.filter(**filters)
         else:
-            return models.Filters.objects.all()
+            return queryset.all()
 
 
 class FiltersDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -390,22 +411,23 @@ class FiltersDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-class QuestionsList(generics.ListCreateAPIView):
+class QuestionsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.Questions.objects.all()
     serializer_class = serializers.QuestionsSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if self.request.query_params.get("product"):
-            question_id = models.QuestionProducts.objects.filter(
+            question_id = queryset.filter(
                 product=self.request.query_params.get("product")
             ).values("question")[0]["question"]
-            return models.Questions.objects.filter(id=question_id)
+            return queryset.filter(id=question_id)
         elif self.request.query_params.get("connection"):
-            return models.Questions.objects.filter(
+            return queryset.filter(
                 connection=self.request.query_params.get("connection")
             )
-        return super().get_queryset()
+        return queryset
 
 
 class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -414,7 +436,7 @@ class QuestionsDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-class TemplateList(generics.ListCreateAPIView):
+class TemplateList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.Templates.objects.all()
     serializer_class = serializers.TemplatesSerializer
     permission_classes = [AllowAny]
@@ -426,14 +448,15 @@ class TemplateDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-class ProductTemplatesList(generics.ListCreateAPIView):
+class ProductTemplatesList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.ProductTemplate.objects.all()
     serializer_class = serializers.ProductTemplateSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
+        queryset = super().get_queryset()
         template_id = self.request.query_params.get("template_id")
-        products = models.ProductTemplate.objects.filter(template=template_id)
+        products = queryset.filter(template=template_id)
         products.delete()
         models.ProductTemplate.objects.bulk_create(
             [
@@ -458,7 +481,7 @@ class ProductTemplateDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 
-class FelmeresekList(generics.ListCreateAPIView):
+class FelmeresekList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.Felmeresek.objects.all()
     serializer_class = serializers.FelmeresekSerializer
     permission_classes = [AllowAny]
@@ -518,7 +541,7 @@ class FelmeresekDetail(generics.RetrieveUpdateDestroyAPIView):
             return Response("A felmérés nem létezik", status=HTTP_400_BAD_REQUEST)
 
 
-class FelmeresItemsList(generics.ListCreateAPIView):
+class FelmeresItemsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.FelmeresItems.objects.all()
     permission_classes = [AllowAny]
     serializer_class = serializers.FelmeresItemsSerializer
@@ -558,14 +581,25 @@ class FelmeresItemsList(generics.ListCreateAPIView):
         )
 
     def get(self, request):
+        queryset = super().get_queryset()
         if request.query_params.get("adatlap_id"):
-            felmeres_items = models.FelmeresItems.objects.filter(
+            product_subquery = models.Products.objects.filter(
+                id=OuterRef("product_id")
+            ).values("name", "sku")[:1]
+
+            felmeres_items = queryset.filter(
                 adatlap_id=request.query_params.get("adatlap_id")
             ).annotate(
                 coalesced_name=Coalesce(
-                    "name", F("product_id__name"), output_field=CharField()
+                    "name",
+                    Subquery(product_subquery.values("name")),
+                    output_field=CharField(),
                 ),
-                sku=Coalesce("product_id__sku", Value(""), output_field=CharField()),
+                sku=Coalesce(
+                    Subquery(product_subquery.values("sku")),
+                    Value(""),
+                    output_field=CharField(),
+                ),
             )
             serializer = serializers.FelmeresItemsSerializer(felmeres_items, many=True)
             return Response(serializer.data)
@@ -579,48 +613,51 @@ class FelmeresItemsDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class OfferWebhook(APIView):
+    @set_system
     def post(self, request):
         data = json.loads(request.body)
-        log(
+        self.log(
             "Penészmentesítés rendelés webhook meghívva",
             "INFO",
-            "pen_offer_webhook",
-            request.body,
+            script_name="pen_offer_webhook",
+            details=request.body,
         )
         try:
             if data["Data"]["Felmeresid"] is None:
                 return Response("Succesfully received data", status=HTTP_200_OK)
 
             save_webhook(data["Data"])
-            models.Offers(
+            self.save_offer(
                 adatlap=models.MiniCrmAdatlapok.objects.get(Id=data["Id"]),
                 id=data["Head"]["Id"],
-            ).save()
-            log(
+            )
+            self.log(
                 "Penészmentesítés rendelés webhook sikeresen lefutott",
                 "SUCCESS",
-                "pen_offer_webhook",
+                script_name="pen_offer_webhook",
             )
             return Response("Succesfully received data", status=HTTP_200_OK)
         except:
-            log(
+            self.log(
                 "Penészmentesítés ajánlat webhook sikertelen",
                 "ERROR",
-                "pen_offer_webhook",
+                script_name="pen_offer_webhook",
                 details=traceback.format_exc(),
             )
             return Response("Succesfully received data", status=HTTP_200_OK)
 
 
-class QuestionProductsList(generics.ListCreateAPIView):
+class QuestionProductsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.QuestionProducts.objects.all()
     serializer_class = serializers.QuestionProductsSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         if self.request.query_params.get("product"):
-            return models.QuestionProducts.objects.filter(
-                product=self.request.query_params.get("product")
+            return (
+                super()
+                .get_queryset()
+                .filter(product=self.request.query_params.get("product"))
             )
         return super().get_queryset()
 
@@ -1078,7 +1115,7 @@ class UnasSetProduct(APIView):
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
 
-class FilterItemsList(generics.ListCreateAPIView):
+class FilterItemsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     queryset = models.FilterItems.objects.all()
     serializer_class = serializers.FilterItemsSerializer
     permission_classes = [AllowAny]
@@ -1195,13 +1232,12 @@ def upload_file(request):
     return JsonResponse({"success": False}, status=400)
 
 
-class FelmeresPicturesList(generics.ListCreateAPIView):
+class FelmeresPicturesList(
+    FilterBySystemAndFelmeresIdMixin, generics.ListCreateAPIView
+):
     serializer_class = serializers.FelmeresPicturesSerializer
     queryset = models.FelmeresPictures.objects.all()
     permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        return get_queryset_from_felmeres(self, models.FelmeresPictures)
 
 
 class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -1224,13 +1260,10 @@ class FelmeresPicturesDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response("Sikeresen törlésre került", status=HTTP_200_OK)
 
 
-class FelmeresNotesList(generics.ListCreateAPIView):
+class FelmeresNotesList(FilterBySystemAndFelmeresIdMixin, generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresNotesSerializer
     queryset = models.FelmeresekNotes.objects.all()
     permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        return get_queryset_from_felmeres(self, models.FelmeresekNotes)
 
     def patch(self, request):
         data = request.data
@@ -1245,14 +1278,6 @@ class FelmeresNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-def get_queryset_from_felmeres(self, model):
-    if self.request.query_params.get("felmeres_id"):
-        return model.objects.filter(
-            felmeres_id=self.request.query_params.get("felmeres_id")
-        )
-    return model.objects.all()
-
-
 class UserRole(APIView):
     def get(self, _, user):
         try:
@@ -1263,7 +1288,7 @@ class UserRole(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MiniCrmAdatlapokV2(generics.ListAPIView):
+class MiniCrmAdatlapokV2(FilterByQueryParamMixin, generics.ListAPIView):
     pagination_class = PageNumberPagination
     serializer_class = serializers.MiniCrmAdatlapokV2Serializer
     queryset = models.MiniCrmAdatlapokV2.objects.all()
@@ -1297,6 +1322,8 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
         "Statusz",
     ]
     ordering_fields = "__all__"
+    filter_field = "SystemId"
+    filter_param = "system_id"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -1325,20 +1352,23 @@ class MiniCrmAdatlapokV2(generics.ListAPIView):
         return queryset
 
 
-class MiniCrmAdatlapok(generics.ListAPIView):
+class MiniCrmAdatlapok(FilterByQueryParamMixin, generics.ListAPIView):
     serializer_class = serializers.MiniCrmAdatlapokSerializer
     permission_classes = [AllowAny]
     queryset = models.MiniCrmAdatlapok.objects.all()
+    filter_field = "SystemId"
+    filter_param = "system_id"
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         id = self.request.query_params.get("Id")
         if id:
             id = id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(Id__in=id)
+            return queryset.filter(Id__in=id)
         status_id = self.request.query_params.get("StatusId")
         if status_id:
             status_id = status_id.split(",")
-            return models.MiniCrmAdatlapok.objects.filter(StatusId__in=status_id)
+            return queryset.filter(StatusId__in=status_id)
         return super().get_queryset()
 
 
@@ -1348,7 +1378,7 @@ class MiniCrmAdatlapokDetail(generics.RetrieveAPIView):
     permission_classes = [AllowAny]
 
 
-class MunkadijList(generics.ListCreateAPIView):
+class MunkadijList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     serializer_class = serializers.MunkadijSerializer
     queryset = models.Munkadij.objects.all()
     permission_classes = [AllowAny]
@@ -1369,7 +1399,7 @@ class MunkadijDetail(generics.RetrieveUpdateDestroyAPIView):
             return Response(status=HTTP_400_BAD_REQUEST)
 
 
-class FelmeresMunkadijList(generics.ListCreateAPIView):
+class FelmeresMunkadijList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresMunkadijakSerializer
     queryset = models.FelmeresMunkadijak.objects.all()
     permission_classes = [AllowAny]
@@ -1417,6 +1447,7 @@ class SettingsList(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
+# TODO
 class MiniCrmProxyId(APIView):
     def put(self, request, adatlap_id):
         log(
@@ -1449,16 +1480,22 @@ class MiniCrmProxyId(APIView):
 
 
 class GaranciaWebhook(APIView):
+    @set_system
     def post(self, request):
         adatlap = json.loads(request.body)
-        log("Garancia webhook meghívva", "INFO", "pen_garancia_webhook", data=adatlap)
+        self.log(
+            "Garancia webhook meghívva",
+            "INFO",
+            script_name="pen_garancia_webhook",
+            data=adatlap,
+        )
         adatlap = map_wh_fields(
             adatlap, {"BejelentesTipusa", "GaranciaFelmerestVegzi", "FizetesiMod4"}
         )["Data"]
         save_webhook(adatlap, name="garancia")
 
         if (
-            adatlap["StatusId"] == "3121"
+            adatlap["StatusId"] == self.get_setting(label="ÚJ BEJELENTÉS").value
             and adatlap["UtvonalAKozponttol2"] is None
             and adatlap["BejelentesTipusa"] != "Kapcsolat"
         ):
@@ -1474,7 +1511,7 @@ class GaranciaWebhook(APIView):
                     "KarbantartasNettoDij": 20000,
                 }
 
-            response = CalculateDistance().fn(
+            response = CalculateDistance(self.system).fn(
                 adatlap,
                 address=lambda x: x.FullAddress,
                 city_field="Telepules2",
@@ -1508,6 +1545,7 @@ class SchedulerSettings(generics.ListAPIView):
     filterset_fields = "__all__"
 
 
+# TODO
 class MiniCrmProxy(MiniCrmAPIView):
     script_name = "pen_minicrm_proxy"
 
