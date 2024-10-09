@@ -462,6 +462,8 @@ class FelmeresItemsList(generics.ListCreateAPIView):
             product_id = item.pop("product", None)
             if adatlap_id is not None:
                 item["adatlap"] = get_object_or_404(models.Felmeresek, id=adatlap_id)
+            if product_id is not None:
+                item["product"] = product_id
             item = filter_item_fields(item)
             instance, _ = models.FelmeresItems.objects.update_or_create(
                 id=item.get("id", None),
