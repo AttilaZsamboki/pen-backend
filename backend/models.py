@@ -413,7 +413,7 @@ class Offers(models.Model):
 
 
 class QuestionProducts(models.Model):
-    product = models.IntegerField()
+    product = models.IntegerField(db_column="product_id")
     question = models.ForeignKey("Questions", models.CASCADE, primary_key=True)
 
     class Meta:
