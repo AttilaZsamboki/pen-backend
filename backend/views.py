@@ -1115,7 +1115,7 @@ class UnasSetProduct(APIView):
         return Response("Hibás Token", status=HTTP_401_UNAUTHORIZED)
 
 
-class FilterItemsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
+class FilterItemsList(generics.ListCreateAPIView):
     queryset = models.FilterItems.objects.all()
     serializer_class = serializers.FilterItemsSerializer
     permission_classes = [AllowAny]
@@ -1232,9 +1232,7 @@ def upload_file(request):
     return JsonResponse({"success": False}, status=400)
 
 
-class FelmeresPicturesList(
-    FilterBySystemAndFelmeresIdMixin, generics.ListCreateAPIView
-):
+class FelmeresPicturesList(generics.ListCreateAPIView):
     serializer_class = serializers.FelmeresPicturesSerializer
     queryset = models.FelmeresPictures.objects.all()
     permission_classes = [AllowAny]
@@ -1266,9 +1264,10 @@ class FelmeresNotesList(FilterBySystemAndFelmeresIdMixin, generics.ListCreateAPI
     permission_classes = [AllowAny]
 
     def patch(self, request):
+        queryset = super().get_queryset()
         data = request.data
         felmeres_id = request.query_params.get("felmeres_id")
-        models.FelmeresekNotes.objects.filter(felmeres_id=felmeres_id).update(**data)
+        queryset.filter(felmeres_id=felmeres_id).update(**data)
         return Response(status=HTTP_200_OK)
 
 
@@ -1674,7 +1673,7 @@ class CopyFelmeres(APIView):
         )
 
 
-class SalesmenList(generics.ListCreateAPIView):
+class SalesmenList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     serializer_class = serializers.SalesmenSerializer
     queryset = models.Salesmen.objects.all()
     permission_classes = [AllowAny]

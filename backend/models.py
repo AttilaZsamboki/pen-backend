@@ -353,9 +353,6 @@ class FilterItems(models.Model):
     filter = models.ForeignKey("Filters", models.CASCADE)
     label = models.TextField(blank=True, null=True)
     options = models.JSONField(blank=True, null=True)
-    system: Systems = models.ForeignKey(
-        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
-    )
 
     class Meta:
         managed = False
@@ -741,9 +738,6 @@ class PaymentMethods(models.Model):
 class FelmeresPictures(models.Model):
     felmeres = models.ForeignKey("Felmeresek", models.CASCADE)
     src = models.TextField()
-    system: Systems = models.ForeignKey(
-        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
-    )
 
     class Meta:
         managed = False
@@ -1843,6 +1837,9 @@ class MiniCrmTodos(models.Model):
 class Salesmen(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
     zip = models.CharField(max_length=4)
+    system: Systems = models.ForeignKey(
+        "Systems", models.DO_NOTHING, blank=True, null=True, to_field="system_id"
+    )
 
     class Meta:
         managed = False
