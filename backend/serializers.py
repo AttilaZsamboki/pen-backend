@@ -110,9 +110,11 @@ class FelmeresPicturesSerializer(serializers.ModelSerializer):
 
 
 class UserRolesSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(required=False, allow_null=True, write_only=True)
+
     class Meta:
         model = models.UserRoles
-        fields = "__all__"
+        fields = ["user", "role", "system"]
 
 
 class RolesSerializer(serializers.ModelSerializer):

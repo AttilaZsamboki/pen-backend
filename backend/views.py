@@ -15,7 +15,7 @@ from typing import Dict, List
 import boto3
 import requests
 from django.db import connection
-from django.db.models import CharField, Q, Value, OuterRef, Subquery
+from django.db.models import CharField, Q, Value, OuterRef, Subquery, F
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -1278,11 +1278,16 @@ class FelmeresNotesDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
 
 
-class UserRole(APIView):
+class User(APIView):
     def get(self, _, user):
         try:
-            user_role = models.UserRoles.objects.get(user=user).role
-            return Response(serializers.RolesSerializer(user_role).data)
+            user_role = models.UserRoles.objects.get(user=user)
+            user_role_data = {
+                "user": user_role.user,
+                "role": user_role.role.name,
+                "system": user_role.system.system_id,
+            }
+            return Response(user_role_data)
         except models.UserRoles.DoesNotExist:
             log("Nem található felhasználó", "ERROR", "pen_user_role")
             return Response(status=HTTP_404_NOT_FOUND)

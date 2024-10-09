@@ -36,7 +36,7 @@ urlpatterns = [
     path("felmeres-pictures/<int:pk>/", views.FelmeresPicturesDetail.as_view()),
     path("felmeres-notes/", views.FelmeresNotesList.as_view()),
     path("felmeres-notes/<int:pk>/", views.FelmeresNotesDetail.as_view()),
-    path("user-role/<user>/", views.UserRole.as_view()),
+    path("user/<user>/", views.User.as_view()),
     path("minicrm-adatlapok/", views.MiniCrmAdatlapok.as_view()),
     path("minicrm-adatlapok/<int:pk>/", views.MiniCrmAdatlapokDetail.as_view()),
     path("minicrm-adatlapok/v2/", views.MiniCrmAdatlapokV2.as_view()),
