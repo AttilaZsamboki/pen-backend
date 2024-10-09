@@ -383,7 +383,12 @@ class Templates(models.Model):
     type = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     system: Systems = models.ForeignKey(
-        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+        "Systems",
+        models.CASCADE,
+        db_column="system_id",
+        blank=True,
+        null=True,
+        to_field="system_id",
     )
 
     class Meta:
