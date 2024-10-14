@@ -680,7 +680,7 @@ class QuestionProductsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
                 [
                     models.QuestionProducts(
                         question=models.Questions.objects.get(id=question_id),
-                        product=models.Products.objects.get(id=i),
+                        product=i,
                     )
                     for i in request.data
                 ]
@@ -693,7 +693,7 @@ class QuestionProductsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
                 [
                     models.QuestionProducts(
                         question=models.Questions.objects.get(id=i),
-                        product=models.Products.objects.get(id=product_id),
+                        product=product_id,
                     )
                     for i in request.data
                 ]
