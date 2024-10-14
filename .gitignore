@@ -11,4 +11,4 @@ static/images/google_street_view/street_view.jpg
 backend/utils/google_maps.py
 backend/__pycache__/
 __pycache__/
-*.pycc
+*.pyc
