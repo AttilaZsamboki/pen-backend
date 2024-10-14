@@ -369,7 +369,12 @@ class Questions(models.Model):
     description = models.TextField(blank=True, null=True)
     created_from = models.CharField(max_length=100, blank=True, null=True)
     system: Systems = models.ForeignKey(
-        "Systems", models.CASCADE, db_column="system_id", blank=True, null=True
+        "Systems",
+        models.CASCADE,
+        db_column="system_id",
+        blank=True,
+        null=True,
+        to_field="system_id",
     )
 
     class Meta:
