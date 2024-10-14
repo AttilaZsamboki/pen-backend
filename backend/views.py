@@ -664,10 +664,9 @@ class QuestionProductsList(FilterBySystemIdMixin, generics.ListCreateAPIView):
     def post(self, request):
         data = json.loads(request.body)
         question_instance = models.Questions.objects.get(id=data["question_id"])
-        product_instance = models.Products.objects.get(id=data["product_id"])
 
         models.QuestionProducts.objects.create(
-            question=question_instance, product=product_instance
+            question=question_instance, product=data["product_id"]
         )
         return Response(status=HTTP_200_OK)
 
