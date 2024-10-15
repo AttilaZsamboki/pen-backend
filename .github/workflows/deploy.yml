@@ -1,38 +1,38 @@
 name: Deploy to Lightsail
 
 on:
-  push:
-    branches:
-      - minicrm-refactor
+    push:
+        branches:
+            - minicrm-refactor
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    deploy:
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: "3.8"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
 
-    - name: Deploy to Lightsail
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.LIGHTSAIL_IP }}
-        username: ${{ secrets.LIGHTSAIL_USER }}
-        key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-        script: |
-          cd /home/bitnami/pen-backend
-          git pull origin main
-          source pen-env/bin/activate
-          pip install -r requirements.txt
-          sudo systemctl restart gunicorn
-          sudo systemctl restart nginx
+            - name: Deploy to Lightsail
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.LIGHTSAIL_IP }}
+                  username: ${{ secrets.LIGHTSAIL_USER }}
+                  key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+                  script: |
+                      cd /home/bitnami/pen-backend
+                      git pull origin minicrm-refactor
+                      source pen-env/bin/activate
+                      pip install -r requirements.txt
+                      sudo systemctl restart gunicorn
+                      sudo systemctl restart nginx

@@ -1291,7 +1291,7 @@ class User(APIView):
             return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MiniCrmAdatlapokV2(FilterByQueryParamMixin, generics.ListAPIView):
+class MiniCrmAdatlapokV2(generics.ListAPIView):
     pagination_class = PageNumberPagination
     serializer_class = serializers.MiniCrmAdatlapokV2Serializer
     queryset = models.MiniCrmAdatlapokV2.objects.all()
@@ -1303,6 +1303,7 @@ class MiniCrmAdatlapokV2(FilterByQueryParamMixin, generics.ListAPIView):
         "Telepules",
         "CategoryId",
         "Statusz",
+        "SystemId",
     ]
     search_fields = [
         "Name",
@@ -1325,8 +1326,6 @@ class MiniCrmAdatlapokV2(FilterByQueryParamMixin, generics.ListAPIView):
         "Statusz",
     ]
     ordering_fields = "__all__"
-    filter_field = "SystemId"
-    filter_param = "system_id"
 
     def get_queryset(self):
         queryset = super().get_queryset()
