@@ -765,6 +765,15 @@ def get_unas_order_data(type):
             }
 
         # Add the data to the datas list
+        items = []
+        for i in list(
+            models.FelmeresItems.objects.filter(
+                adatlap_id=felmeres.id if felmeres else 0
+            )
+        ):
+            if i.product is not None:
+                i.product = models.Products.objects.get(id=i.product)
+            items.append(i)
 
         datas.append(
             {
@@ -774,11 +783,7 @@ def get_unas_order_data(type):
                 "BusinessKapcsolat": business_kapcsolat,
                 "Cím": cim["response"],
                 "Kapcsolat": kapcsolat,
-                "Tételek": list(
-                    models.FelmeresItems.objects.filter(
-                        adatlap_id=felmeres.id if felmeres else 0
-                    )
-                ),
+                "Tételek": items,
                 "Munkadíj": sum(
                     [
                         i.value * i.amount
@@ -858,7 +863,7 @@ def get_unas_order_data(type):
                 + "\n".join(
                     [
                         f"""<Item>
-                    <Id>{i.product_id if i.product_id else "discount-amount"}</Id>
+                    <Id>{i.product.id if i.product else "discount-amount"}</Id>
                     <Sku>{i.product.sku if i.product else "discount-amount"}</Sku>
                     <Name>{i.name}</Name>
                     <Unit>darab</Unit>
