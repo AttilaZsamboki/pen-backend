@@ -39,7 +39,6 @@ def create_invoice_or_proform(
     ).strftime("%Y-%m-%d"),
     prefix="TMTSZ",
     items=None,
-    invoice_number_field="SzamlaSorszama",
 ):
     if proform:
         name = "díjbekérő"
@@ -131,15 +130,17 @@ def create_invoice_or_proform(
                         script_name,
                         f"adatlap: {adatlap.Id}, szamlaszam: {query_response.headers['szlahu_szamlaszam']}",
                     )
+
                     update_adatlap_fields(
                         adatlap.Id,
                         {
                             messages_field: f"{name.capitalize()} készítése sikertelen volt: Már létezik {name}",
-                            (
-                                proform_number_field
-                                if proform
-                                else invoice_number_field
-                            ): query_response.headers["szlahu_szamlaszam"],
+                            **update_data(
+                                proform,
+                                name,
+                                adatlap,
+                                query_response.headers["szlahu_szamlaszam"],
+                            ),
                         },
                     )
                     continue
@@ -338,33 +339,8 @@ def create_invoice_or_proform(
                 f.write(response.content)
                 f.close()
 
-            def access_file(url):
-                try:
-                    response = requests.get(url)
-                    response.raise_for_status()
-                    return response.content
-                except requests.exceptions.HTTPError as http_err:
-                    log(
-                        f"HTTP hiba akadt",
-                        "FAILED",
-                        script_name=script_name,
-                        details=f"adatlap: {adatlap.Id}, error: {http_err}",
-                        data=update_request_payload,
-                    )
-                except Exception as err:
-                    log(
-                        f"Más hiba akadt",
-                        "FAILED",
-                        script_name=script_name,
-                        details=f"adatlap: {adatlap.Id}, error: {err}",
-                        data=update_request_payload,
-                    )
-                return None
-
-            file_content = access_file(
-                f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
-            )
             update_request_payload = update_data(proform, name, adatlap, szamlaszam)
+
             update_resp = update_adatlap_fields(
                 adatlap.Id,
                 update_request_payload,
@@ -381,7 +357,7 @@ def create_invoice_or_proform(
             if ENVIRONMENT == "production":
                 time.sleep(60)
                 os.remove(pdf_path)
-        except KeyError as e:
+        except KeyError as _:
             log(
                 f"Hiba akadt a {name} készítésében",
                 "ERROR",
@@ -389,7 +365,7 @@ def create_invoice_or_proform(
                 details=traceback.format_exc(),
             )
             continue
-        except Exception as e:
+        except Exception as _:
             log(
                 f"Hiba akadt a {name} feltöltésében",
                 "ERROR",
@@ -473,7 +449,6 @@ data = {
     "calc_net_price": lambda adatlap: adatlap.FelmeresiDij,
     "proform_number_field": "DijbekeroSzama2",
     "type_name": "felmeres",
-    "invoice_number_field": "SzamlaSorszama2",
 }
 
 create_invoice_or_proform(
