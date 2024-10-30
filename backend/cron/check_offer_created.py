@@ -120,27 +120,3 @@ SCRIPT_NAME = "pen_check_offer_created"
 #         headers={"Content-Type": "application/xml"},
 #     )
 
-
-def main():
-    for system in Systems.objects.all():
-        felmeresek = Felmeresek.objects.filter(
-            ~Q(
-                id__in=list(
-                    MiniCrmAdatlapok.objects.values_list("Felmeresid", flat=True)
-                    .filter(Felmeresid__isnull=False, Deleted=0)
-                    .exclude(Felmeresid="None")
-                )
-            ),
-            status__in=["COMPLETED", "IN_PROGRESS"],
-            system=system,
-        )
-        for felmeres in felmeresek:
-            log(
-                "Nem jött létre az ajánlat a minicrm-ben",
-                "URGENT ERROR",
-                SCRIPT_NAME,
-                details=f"\nFelmérés: https://app.peneszmentesites.hu/{felmeres.id}.\nAdatalap: https://r3.minicrm.hu/119/#Project-23/{felmeres.adatlap_id.Id}",
-            )
-
-
-main()
