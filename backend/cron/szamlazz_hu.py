@@ -21,7 +21,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 def create_invoice_or_proform(
     messages_field="",
-    update_data=None,
+    update_data=lambda _:True,
     note_field="",
     payment_method_field="",
     proform_number_field="",
@@ -140,6 +140,7 @@ def create_invoice_or_proform(
                                 name,
                                 adatlap,
                                 query_response.headers["szlahu_szamlaszam"],
+                                pdf=None
                             ),
                         },
                     )
@@ -421,24 +422,35 @@ def proform_deadline(adatlap: MiniCrmAdatlapok):
     return date.strftime("%Y-%m-%d")
 
 
-def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam):
-    return {
-        (
-            "DijbekeroPdf2" if proform else "SzamlaPdf"
-        ): f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf",
-        "StatusId": "Utalásra vár" if proform else adatlap.StatusId,
-        "DijbekeroSzama2" if proform else "SzamlaSorszama2": szamlaszam,
-        f"KiallitasDatuma{'' if proform else '2'}": datetime.datetime.now().strftime(
-            "%Y-%m-%d"
-        ),
-        "FizetesiHatarido": (
-            proform_deadline(adatlap) if proform else adatlap.FizetesiHatarido
-        ),
-        (
-            "DijbekeroUzenetek" if proform else "SzamlaUzenetek"
-        ): f"{name.capitalize()} elkészült {datetime.datetime.now()}",
-    }
+def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam, pdf=True):
+    dic = {}
 
+    if proform:
+
+        if pdf:
+            dic["DijbekeroPdf2"] = f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
+
+        dic["StatusId"] = "Utalásra vár"
+        dic["DijbekeroSzama2"] = szamlaszam
+        dic["KiallitasDatuma"] = datetime.datetime.now().strftime(
+            "%Y-%m-%d"
+        )
+        dic["FizetesiHatarido"] = proform_deadline(adatlap)
+        dic["DijbekeroUzenetek"] = f"{name.capitalize()} elkészült {datetime.datetime.now()}"
+
+    else:
+
+        if pdf:
+            dic["SzamlaPdf"] = f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
+        dic["StatusId"] = adatlap.StatusId
+        dic["SzamlaSorszama2"] = szamlaszam
+        dic["KiallitasDatuma2"] = datetime.datetime.now().strftime(
+            "%Y-%m-%d"
+        )
+        dic["FizetesiHatarido"] = adatlap.FizetesiHatarido
+        dic["SzamlaUzenetek"] = f"{name.capitalize()} elkészült {datetime.datetime.now()}"
+
+    return dic
 
 data = {
     "city_field": "Telepules",
