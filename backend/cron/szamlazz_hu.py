@@ -21,7 +21,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT")
 
 def create_invoice_or_proform(
     messages_field="",
-    update_data=lambda _:True,
+    update_data=lambda _: True,
     note_field="",
     payment_method_field="",
     proform_number_field="",
@@ -140,7 +140,7 @@ def create_invoice_or_proform(
                                 name,
                                 adatlap,
                                 query_response.headers["szlahu_szamlaszam"],
-                                pdf=None
+                                pdf=None,
                             ),
                         },
                     )
@@ -168,8 +168,17 @@ def create_invoice_or_proform(
                 continue
             business_contact = business_contact["response"]
             if business_contact_id != adatlap.ContactId:
-                contact = contact_details(adatlap.ContactId)["response"]
+                contact = contact_details(adatlap.ContactId)
                 address = get_address(business_contact_id)
+                if contact["status"] == "Error":
+                    log(
+                        "Hiba akadt a számlázási adatok lekérdezésében",
+                        "ERROR",
+                        script_name,
+                        contact["response"],
+                    )
+                    continue
+                contact = contact["response"]
             if business_contact_id == adatlap.ContactId or not address:
                 contact = business_contact
                 contact["Name"] = (
@@ -358,6 +367,7 @@ def create_invoice_or_proform(
             if ENVIRONMENT == "production":
                 time.sleep(60)
                 os.remove(pdf_path)
+            log(f"{name.capitalize()} feltöltése sikeres", "SUCCESS", script_name, xml)
         except KeyError as _:
             log(
                 f"Hiba akadt a {name} készítésében",
@@ -422,7 +432,9 @@ def proform_deadline(adatlap: MiniCrmAdatlapok):
     return date.strftime("%Y-%m-%d")
 
 
-def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam, pdf=True):
+def update_data_felmeres(
+    proform, name: str, adatlap: MiniCrmAdatlapok, szamlaszam, pdf=True
+):
     dic = {}
 
     if proform:
@@ -432,11 +444,11 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
 
         dic["StatusId"] = "Utalásra vár"
         dic["DijbekeroSzama2"] = szamlaszam
-        dic["KiallitasDatuma"] = datetime.datetime.now().strftime(
-            "%Y-%m-%d"
-        )
+        dic["KiallitasDatuma"] = datetime.datetime.now().strftime("%Y-%m-%d")
         dic["FizetesiHatarido"] = proform_deadline(adatlap)
-        dic["DijbekeroUzenetek"] = f"{name.capitalize()} elkészült {datetime.datetime.now()}"
+        dic["DijbekeroUzenetek"] = (
+            f"{name.capitalize()} elkészült {datetime.datetime.now()}"
+        )
 
     else:
 
@@ -444,13 +456,14 @@ def update_data_felmeres(proform, name: str, adatlap: MiniCrmAdatlapok, szamlasz
             dic["SzamlaPdf"] = f"https://pen.dataupload.xyz/static/{szamlaszam}.pdf"
         dic["StatusId"] = adatlap.StatusId
         dic["SzamlaSorszama2"] = szamlaszam
-        dic["KiallitasDatuma2"] = datetime.datetime.now().strftime(
-            "%Y-%m-%d"
-        )
+        dic["KiallitasDatuma2"] = datetime.datetime.now().strftime("%Y-%m-%d")
         dic["FizetesiHatarido"] = adatlap.FizetesiHatarido
-        dic["SzamlaUzenetek"] = f"{name.capitalize()} elkészült {datetime.datetime.now()}"
+        dic["SzamlaUzenetek"] = (
+            f"{name.capitalize()} elkészült {datetime.datetime.now()}"
+        )
 
     return dic
+
 
 data = {
     "city_field": "Telepules",
