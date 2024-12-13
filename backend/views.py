@@ -679,6 +679,7 @@ def get_unas_order_data(type):
     adatlapok = models.MiniCrmAdatlapok.objects.filter(
         Q(Enum1951="Beépítésre vár" if type != "dev" else "Szervezésre vár")
         | Q(StatusId=3008),
+        Q(RendelesSzama="") | Q(RendelesSzama=None),
         CategoryId=29,
         Deleted="0",
     )
@@ -689,8 +690,6 @@ def get_unas_order_data(type):
 
     datas = []
     for adatlap in adatlapok:
-        if adatlap.RendelesSzama != "" and adatlap.RendelesSzama is not None:
-            continue
         order_data = models.Orders.objects.get(adatlap_id=adatlap.Id).__dict__
         script_name = "pen_unas_get_order"
         kapcsolat = contact_details(

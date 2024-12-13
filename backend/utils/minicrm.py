@@ -110,7 +110,7 @@ def contact_details(
     if adatlap_id and not contact_id:
         contact_id = get_adatlap_details(adatlap_id, script_name, description)
         if contact_id["status"] == "Error":
-            return "Error"
+            return {"status": "Error", "response": contact_id["response"]}
         contact_id = contact_id["response"]["ContactId"]
     return get_request(
         "Contact",
@@ -172,14 +172,15 @@ def address_list(contact_id, script_name=None, description=None):
     ]
 
 
-def get_address(contact_id, typeof="Számlázási cím"):
+def get_address(contact_id, typeof=None):
     addresses = address_list(contact_id=contact_id)
-    for address in addresses:
-        if type(address) == str:
-            return None
-        if address["Type"] == typeof:
-            return address
-    return None
+    if typeof:
+        for address in addresses:
+            if type(address) == str:
+                return None
+            if address["Type"] == typeof:
+                return address
+    return addresses[0] if addresses else None
 
 
 def create_to_do(adatlap_id, user, type, comment, deadline, script_name=None):

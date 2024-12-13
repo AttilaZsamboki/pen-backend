@@ -179,7 +179,7 @@ def create_invoice_or_proform(
                     )
                     continue
                 contact = contact["response"]
-            if business_contact_id == adatlap.ContactId or not address:
+            if business_contact_id == adatlap.ContactId:
                 contact = business_contact
                 contact["Name"] = (
                     contact["FirstName"] + " " + contact["LastName"]
@@ -205,7 +205,7 @@ def create_invoice_or_proform(
                 )
                 continue
 
-            if None in [
+            infos = [
                 business_contact.get("Name"),
                 address.get("PostalCode"),
                 address.get("City"),
@@ -213,7 +213,9 @@ def create_invoice_or_proform(
                 contact.get("Email"),
                 adatlap.__dict__.get("Id"),
                 contact.get("Phone"),
-            ]:
+            ]
+
+            if None in infos or "" in infos:
                 log(
                     "Nincsenek számlázási adatok",
                     "FAILED",

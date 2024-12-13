@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    profiles:
+      - prod
