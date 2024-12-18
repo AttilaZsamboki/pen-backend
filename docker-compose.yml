@@ -5,8 +5,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8002:8002"
+    volumes:
+      - /app/static:/app/static
 
   cron:
     build:
       context: .
       dockerfile: Dockerfile.cron
+    volumes:
+      - /app/static:/app/static
