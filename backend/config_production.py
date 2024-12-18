@@ -1,1 +1,1 @@
-base_path = '/var/app/current'
+base_path = "/app"
