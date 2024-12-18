@@ -28,7 +28,7 @@ def main(
         else os.environ.get("TESZT_SZAMLA_AGENT_KULCS")
     )
 
-    for adatlap in MiniCrmAdatlapok.objects.filter(StatusId=StatusId):
+    for adatlap in MiniCrmAdatlapok.objects.filter(StatusId=StatusId, Deleted=0):
         query_xml = f"""
                 <?xml version="1.0" encoding="UTF-8"?>
                 <xmlszamlaxml xmlns="http://www.szamlazz.hu/xmlszamlaxml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.szamlazz.hu/xmlszamlaxml https://www.szamlazz.hu/szamla/docs/xsds/agentxml/xmlszamlaxml.xsd">
