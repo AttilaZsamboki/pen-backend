@@ -117,9 +117,10 @@ def get_street_view(location):
     if response.status_code == 200:
         # The request was successful, return the response
         if response.content is not None:
-            with open(
-                base_path + "/static/images/google_street_view/street_view.jpg", "wb"
-            ) as img_file:
+            import os
+            directory = base_path + "/app/static/images/google_street_view"
+            os.makedirs(directory, exist_ok=True)
+            with open(directory + "/street_view.jpg", "wb") as img_file:
                 img_file.write(response.content)
         return response
     else:
