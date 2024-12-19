@@ -775,7 +775,7 @@ def get_unas_order_data(type):
                     i.product = models.Products.objects.get(id=i.product)
                 except models.Products.DoesNotExist:
                     log(f"Product with id {i.product} not found", "ERROR", script_name)
-                    return f"<Error>Product with id {i.product} not found</Error>"
+                    continue
             items.append(i)
 
         datas.append(
