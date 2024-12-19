@@ -764,6 +764,7 @@ def get_unas_order_data(type):
             }
 
         # Add the data to the datas list
+        err = False
         items = []
         for i in list(
             models.FelmeresItems.objects.filter(
@@ -775,8 +776,11 @@ def get_unas_order_data(type):
                     i.product = models.Products.objects.get(id=i.product)
                 except models.Products.DoesNotExist:
                     log(f"Product with id {i.product} not found", "ERROR", script_name)
+                    err = True
                     continue
             items.append(i)
+        if err:
+            continue
 
         datas.append(
             {
