@@ -771,7 +771,11 @@ def get_unas_order_data(type):
             )
         ):
             if i.product is not None:
-                i.product = models.Products.objects.get(id=i.product)
+                try:
+                    i.product = models.Products.objects.get(id=i.product)
+                except models.Products.DoesNotExist:
+                    log(f"Product with id {i.product} not found", "ERROR", script_name)
+                    return f"<Error>Product with id {i.product} not found</Error>"
             items.append(i)
 
         datas.append(
