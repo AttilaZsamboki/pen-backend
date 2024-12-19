@@ -118,7 +118,8 @@ def get_street_view(location):
         # The request was successful, return the response
         if response.content is not None:
             import os
-            directory = base_path + "/app/static/images/google_street_view"
+
+            directory = "/app/static/images/google_street_view"
             os.makedirs(directory, exist_ok=True)
             with open(directory + "/street_view.jpg", "wb") as img_file:
                 img_file.write(response.content)
