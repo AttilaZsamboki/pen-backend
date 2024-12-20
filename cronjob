@@ -3,3 +3,4 @@
 */15 * * * * /bin/sh /app/backend/crons/every_fifteen.sh >> /var/log/cron.log
 0 * * * * /bin/sh /app/backend/crons/every_hour.sh >> /var/log/cron.log
 0 0 * * * /bin/sh /app/backend/crons/every_day.sh >> /var/log/cron.log
+* * * * * echo "$(date +"%T") Hello from crontab" >> /var/log/cron.log
