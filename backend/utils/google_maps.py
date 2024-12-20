@@ -108,6 +108,8 @@ def calculate_distance(start, end, mode="driving", waypoints=None, priorty="dura
 
 
 def get_street_view(location):
+    import os
+
     size = "1920x1080"
     api_key = os.environ.get("GOOGLE_MAPS_API_KEY")
     base_url = "https://maps.googleapis.com/maps/api/streetview"
@@ -117,7 +119,6 @@ def get_street_view(location):
     if response.status_code == 200:
         # The request was successful, return the response
         if response.content is not None:
-            import os
 
             directory = "/app/static/images/google_street_view"
             os.makedirs(directory, exist_ok=True)
@@ -131,6 +132,8 @@ def get_street_view(location):
 def get_street_view_url(location):
     # Use the Geocoding API to get the latitude and longitude
     api_key = os.environ.get("GOOGLE_MAPS_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_MAPS_API_KEY environment variable is not set")
     geocoding_url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {"address": location, "key": api_key}
     response = requests.get(geocoding_url, params=params)

@@ -5,6 +5,7 @@ from ..utils.minicrm import update_adatlap_fields
 from ..models import Counties
 
 import math
+import traceback
 
 
 def calculate_distance_fn(
@@ -65,7 +66,12 @@ def calculate_distance_fn(
                 f"Adatlap id: {data['Id']}. URL: {resp.url}",
             )
     except Exception as e:
-        log("Penészmentesítés MiniCRM webhook hiba", "FAILED", e)
+        log(
+            "Penészmentesítés MiniCRM webhook hiba",
+            "FAILED",
+            script_name,
+            traceback.format_exc(),
+        )
     street_view_url = get_street_view_url(location=address)
     try:
         county = Counties.objects.get(telepules=data[city_field]).megye
