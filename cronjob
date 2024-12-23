@@ -1,6 +1,7 @@
-*/10 * * * * /bin/sh /app/backend/crons/every_ten.sh >> /var/log/cron.log
-*/5 * * * * /bin/sh /app/backend/crons/every_five.sh >> /var/log/cron.log
-*/15 * * * * /bin/sh /app/backend/crons/every_fifteen.sh >> /var/log/cron.log
-0 * * * * /bin/sh /app/backend/crons/every_hour.sh >> /var/log/cron.log
-0 0 * * * /bin/sh /app/backend/crons/every_day.sh >> /var/log/cron.log
-* * * * * echo "Hello from crontab" >> /var/log/cron.log
+*/10 * * * * . /etc/environment; /bin/sh /app/backend/crons/every_ten.sh >> /var/log/cron.log
+*/5 * * * * . /etc/environment; /bin/sh /app/backend/crons/every_five.sh >> /var/log/cron.log
+*/15 * * * * . /etc/environment; /bin/sh /app/backend/crons/every_fifteen.sh >> /var/log/cron.log
+0 * * * * . /etc/environment; /bin/sh /app/backend/crons/every_hour.sh >> /var/log/cron.log
+0 0 * * * . /etc/environment; /bin/sh /app/backend/crons/every_day.sh >> /var/log/cron.log
+* * * * * . /etc/environment && env >> /var/log/cron.log 2>&1
+* * * * * . /etc/environment && echo "DATABASE_URL=$DATABASE_URL" >> /var/log/cron.log 2>&1
