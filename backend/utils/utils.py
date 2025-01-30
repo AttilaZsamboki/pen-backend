@@ -1,16 +1,19 @@
+import base64
 from ..config_development import base_path as dev
 from ..config_production import base_path as prod
+from google.oauth2 import service_account
+import json
 import boto3
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import os
 import datetime
+from typing import List
 
 load_dotenv()
 
 base_path = dev if os.environ.get("ENVIRONMENT") == "development" else prod
-
 
 def delete_s3_file(file_path):
     s3_client = boto3.client(
@@ -43,16 +46,26 @@ def filter_fields(model, data):
     return {k: v for k, v in data.items() if k in model._meta.fields}
 
 
+def get_credentials(scopes: List[str]):
+    """Get credentials from environment variable"""
+    # Get base64 encoded credentials from environment
+    encoded_creds = os.environ.get("GOOGLE_CREDENTIALS")
+    if not encoded_creds:
+        raise ValueError("GOOGLE_CREDENTIALS environment variable not set")
+
+    # Decode and create temp file
+    creds_json = base64.b64decode(encoded_creds)
+    credentials = service_account.Credentials.from_service_account_info(
+        json.loads(creds_json), scopes=scopes
+    )
+    return credentials
+
 def get_spreadsheet(sheet_name, worksheet_name):
     scope = [
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive",
     ]
-    SERVICE_ACCOUNT_FILE = "gds-dataupload-444ed56fca7c.json"
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        SERVICE_ACCOUNT_FILE, scope
-    )
-
+    credentials = get_credentials(scope)
     client = gspread.authorize(credentials)
 
     sheet = client.open(sheet_name).worksheet(worksheet_name)
