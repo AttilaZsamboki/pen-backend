@@ -59,6 +59,7 @@ todo_map = {
         287: "Rendszerhiba E4",
         283: "Új jelentkező - BOSS!",
         284: "Felmérés - BOSS!",
+        288: "Rendszerhiba E5",
     },
 }
 

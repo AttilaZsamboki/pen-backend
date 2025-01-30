@@ -121,6 +121,10 @@ garancia_action_map = {
         "Rendszerhiba E4",
         lambda adatlap: MiniCrmTodos.objects.filter(todo_id=adatlap.Id).exists(),
     ),
+    (
+        "Rendszerhiba E5",
+        lambda adatlap: adatlap.StatusId not in [3127, 3126],
+    ),
 }
 
 
