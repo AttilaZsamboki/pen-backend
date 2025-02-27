@@ -318,7 +318,7 @@ def create_order(adatlap, offer_id, adatlap_status=None, project_data=None):
 <Projects>
     <Project Id="{randomId}">
         <StatusId>3099</StatusId>
-        <Name>{adatlap.Name}</Name>
+        <Name><![CDATA[{adatlap.Name}]]></Name>
         <ContactId>{adatlap.ContactId}</ContactId>
         <UserId>{adatlap.UserId}</UserId>
         <CategoryId>32</CategoryId>
@@ -333,7 +333,7 @@ def create_order(adatlap, offer_id, adatlap_status=None, project_data=None):
         </Contacts>
         <Orders>
             <Order Id="{randomId}">
-                <Number>{adatlap.Name}</Number>
+                <Number><![CDATA[{adatlap.Name}]]></Number>
                 <CurrencyCode>HUF</CurrencyCode>
                 <!-- Performace date of order [required date] -->
                 <Performance>2015-09-22 12:15:13</Performance>
