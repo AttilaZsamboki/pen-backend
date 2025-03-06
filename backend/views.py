@@ -816,38 +816,38 @@ def get_unas_order_data(type):
             <Lang>hu</Lang>
             <Customer>
                 <Id>{data["Kapcsolat"]["Id"]}</Id>
-                <Email>{data["Kapcsolat"]["Email"]}</Email>
-                <Username>{data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}</Username>
+                <Email><![CDATA[{data["Kapcsolat"]["Email"]}]]></Email>
+                <Username><![CDATA[{data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}]]></Username>
                 <Contact>
-                    <Name>{data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}</Name>
+                    <Name><![CDATA[{data["Kapcsolat"]["LastName"] + " " + data["Kapcsolat"]["FirstName"]}]]></Name>
                     <Phone>{data["Kapcsolat"]["Phone"]}</Phone>
                     <Mobile>{data["Kapcsolat"]["Phone"]}</Mobile>
                     <Lang>hu</Lang>
                 </Contact>
                 <Addresses>
                     <Invoice>
-                        <Name>{data["BusinessKapcsolat"]["Name"]}</Name>
+                        <Name><![CDATA[{data["BusinessKapcsolat"]["Name"]}]]></Name>
                         <ZIP>{data["Cím"]["PostalCode"]}</ZIP>
-                        <City>{data["Cím"]["City"]}</City>
-                        <Street>{data["Cím"]["Address"]}</Street>
+                        <City><![CDATA[{data["Cím"]["City"]}]]></City>
+                        <Street><![CDATA[{data["Cím"]["Address"]}]]></Street>
                         <County>{data["Cím"]["County"]}</County>
-                        <Country>{data["Cím"]["CountryId"]}</Country>
+                        <Country><![CDATA[{data["Cím"]["CountryId"]}]]></Country>
                         <CountryCode>hu</CountryCode>
                         <TaxNumber>{data["BusinessKapcsolat"]["VatNumber"]}</TaxNumber>
                         <EUTaxNumber>{data['BusinessKapcsolat']["EUVatNumber"] if data['BusinessKapcsolat']["EUVatNumber"] else ""}</EUTaxNumber>
                         <CustomerType>private</CustomerType>
                     </Invoice>
                     <Shipping>
-                        <Name>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</Name>
+                        <Name><![CDATA[{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}]]></Name>
                         <ZIP>{data["FelmeresAdatlapDetails"].adatlap_id.Iranyitoszam}</ZIP>
-                        <City>{data["FelmeresAdatlapDetails"].adatlap_id.Telepules}</City>
-                        <Street>{data["FelmeresAdatlapDetails"].adatlap_id.Cim2}</Street>
-                        <County>{data["FelmeresAdatlapDetails"].adatlap_id.Megye}</County>
-                        <Country>{data["FelmeresAdatlapDetails"].adatlap_id.Orszag}</Country>
-                    <CountryCode>hu</CountryCode>
+                        <City><![CDATA[{data["FelmeresAdatlapDetails"].adatlap_id.Telepules}]]></City>
+                        <Street><![CDATA[{data["FelmeresAdatlapDetails"].adatlap_id.Cim2}]]></Street>
+                        <County><![CDATA[{data["FelmeresAdatlapDetails"].adatlap_id.Megye}]]></County>
+                        <Country><![CDATA[{data["FelmeresAdatlapDetails"].adatlap_id.Orszag}]]></Country>
+                        <CountryCode>hu</CountryCode>
                         <DeliveryPointID>6087-NOGROUPGRP</DeliveryPointID>
                         <DeliveryPointGroup>gls_hu_dropoffpoints</DeliveryPointGroup>
-                        <RecipientName>{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}</RecipientName>
+                        <RecipientName><![CDATA[{data["Kapcsolat"]["LastName"]} {data["Kapcsolat"]["FirstName"]}]]></RecipientName>
                     </Shipping>
                 </Addresses>
             </Customer>
